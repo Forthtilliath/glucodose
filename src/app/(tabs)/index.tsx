@@ -54,7 +54,11 @@ export default function WeighScreen() {
   const selectedFood = (foodList ?? []).find((f) => f.id === selectedFoodId) ?? null;
   const selectedRatio = (ratioList ?? []).find((r) => r.id === selectedRatioId) ?? null;
 
-  const tareWeightG = selectedContainer ? selectedContainer.tareWeightG : parseFloat(manualTare) || 0;
+  const manualTareNumber = parseFloat(manualTare);
+  const manualTareValid = !Number.isNaN(manualTareNumber) && manualTareNumber >= 0;
+  const tareWeightG = selectedContainer
+    ? selectedContainer.tareWeightG
+    : Math.max(0, manualTareValid ? manualTareNumber : 0);
   const grossWeightNumber = parseFloat(grossWeight);
   const netWeightG = Number.isNaN(grossWeightNumber) ? 0 : computeNetWeight(grossWeightNumber, tareWeightG);
   const carbsG = selectedFood ? computeCarbsGrams(netWeightG, selectedFood.carbsPer100g) : 0;
@@ -97,7 +101,11 @@ export default function WeighScreen() {
   );
 
   const canSave =
-    !Number.isNaN(grossWeightNumber) && grossWeightNumber > 0 && selectedFood != null && selectedRatio != null;
+    !Number.isNaN(grossWeightNumber) &&
+    grossWeightNumber > 0 &&
+    (selectedContainer != null || manualTareValid) &&
+    selectedFood != null &&
+    selectedRatio != null;
 
   async function handleSave() {
     if (!selectedFood || !selectedRatio) return;
@@ -151,6 +159,9 @@ export default function WeighScreen() {
             onChangeText={setManualTare}
           />
         </View>
+      )}
+      {!selectedContainer && !manualTareValid && (
+        <Text style={styles.errorText}>La tare doit être un nombre positif ou nul.</Text>
       )}
 
       <Text style={styles.sectionTitle}>2. Poids brut</Text>
@@ -279,6 +290,7 @@ const styles = StyleSheet.create({
   },
   selectorLabel: { fontSize: 16, color: colors.text, fontWeight: "600" },
   clearLink: { color: colors.primary, fontSize: 13, marginTop: 6 },
+  errorText: { fontSize: 12, color: colors.danger, marginTop: 4 },
   inlineField: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginTop: 8 },
   inlineFieldLabel: { fontSize: 14, color: colors.textMuted },
   inlineInput: {

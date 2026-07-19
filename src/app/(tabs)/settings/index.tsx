@@ -31,7 +31,19 @@ export default function SettingsScreen() {
     }
   }, [currentSettings]);
 
+  // Champs optionnels (vide = correction désactivée), mais s'ils sont
+  // renseignés ils doivent avoir un sens physique : une glycémie cible ne
+  // peut pas être négative, et un facteur de sensibilité nul ou négatif
+  // rendrait la formule de correction incohérente (division par zéro/signe).
+  const targetGlycemiaValid =
+    targetGlycemia.trim() === "" || (!Number.isNaN(parseFloat(targetGlycemia)) && parseFloat(targetGlycemia) >= 0);
+  const sensitivityFactorValid =
+    sensitivityFactor.trim() === "" ||
+    (!Number.isNaN(parseFloat(sensitivityFactor)) && parseFloat(sensitivityFactor) > 0);
+  const canSaveSettings = targetGlycemiaValid && sensitivityFactorValid;
+
   async function handleSaveSettings() {
+    if (!canSaveSettings) return;
     await updateSettings({
       glycemiaUnit,
       targetGlycemia: targetGlycemia.trim() ? parseFloat(targetGlycemia) : null,
@@ -75,6 +87,7 @@ export default function SettingsScreen() {
         value={targetGlycemia}
         onChangeText={setTargetGlycemia}
       />
+      {!targetGlycemiaValid && <Text style={styles.errorText}>La glycémie cible doit être positive.</Text>}
 
       <Text style={styles.label}>Facteur de sensibilité</Text>
       <Text style={styles.helpText}>
@@ -87,8 +100,15 @@ export default function SettingsScreen() {
         value={sensitivityFactor}
         onChangeText={setSensitivityFactor}
       />
+      {!sensitivityFactorValid && (
+        <Text style={styles.errorText}>Le facteur de sensibilité doit être strictement positif.</Text>
+      )}
 
-      <Pressable style={styles.saveButton} onPress={handleSaveSettings}>
+      <Pressable
+        style={[styles.saveButton, !canSaveSettings && styles.saveButtonDisabled]}
+        disabled={!canSaveSettings}
+        onPress={handleSaveSettings}
+      >
         <Text style={styles.saveButtonText}>Enregistrer les réglages</Text>
       </Pressable>
 
@@ -156,7 +176,9 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginTop: 20,
   },
+  saveButtonDisabled: { opacity: 0.5 },
   saveButtonText: { color: colors.primaryText, fontSize: 16, fontWeight: "700" },
+  errorText: { fontSize: 12, color: colors.danger, marginTop: 4 },
   empty: { textAlign: "center", color: colors.textMuted, marginTop: 12 },
   ratioRow: {
     flexDirection: "row",

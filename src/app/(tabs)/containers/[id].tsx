@@ -9,7 +9,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { db } from "@/db/client";
 import { deleteContainer, createContainer, updateContainer } from "@/db/repository";
 import { containers } from "@/db/schema";
-import { saveContainerPhoto } from "@/lib/photos";
+import { deleteContainerPhoto, saveContainerPhoto } from "@/lib/photos";
 import { colors } from "@/theme/colors";
 
 export default function ContainerFormScreen() {
@@ -37,7 +37,8 @@ export default function ContainerFormScreen() {
     }
   }, [existing]);
 
-  const canSave = name.trim().length > 0 && !Number.isNaN(parseFloat(tareWeight));
+  const parsedTareWeight = parseFloat(tareWeight);
+  const canSave = name.trim().length > 0 && !Number.isNaN(parsedTareWeight) && parsedTareWeight >= 0;
 
   async function pickFromCamera() {
     const permission = await ImagePicker.requestCameraPermissionsAsync();
@@ -84,13 +85,22 @@ export default function ContainerFormScreen() {
   }
 
   async function handleSave() {
-    const tareWeightG = parseFloat(tareWeight);
+    // Nettoie l'ancienne photo sur disque si elle a été remplacée ou retirée,
+    // pour ne pas accumuler des fichiers orphelins au fil des éditions.
+    if (existing?.photoUri && existing.photoUri !== photoUri) {
+      deleteContainerPhoto(existing.photoUri);
+    }
     if (isNew) {
-      await createContainer({ name: name.trim(), tareWeightG, photoUri, notes: notes.trim() || undefined });
+      await createContainer({
+        name: name.trim(),
+        tareWeightG: parsedTareWeight,
+        photoUri,
+        notes: notes.trim() || undefined,
+      });
     } else {
       await updateContainer(containerId as number, {
         name: name.trim(),
-        tareWeightG,
+        tareWeightG: parsedTareWeight,
         photoUri,
         notes: notes.trim() || undefined,
       });
