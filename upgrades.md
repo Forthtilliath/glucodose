@@ -12,6 +12,7 @@ Liste de ce qui pourrait être fait ensuite, classé par thème. Rien ici n'est 
 - **Mode sombre ajouté** : palette claire/sombre (`src/theme/colors.ts`) suivant le thème système via `useColorScheme()`, y compris pour la navigation (headers, tab bar) et les badges Recette/Ingrédient (contraste adapté séparément du texte général).
 - **Accessibilité renforcée** : `accessibilityLabel`/`accessibilityRole` sur tous les boutons icône, lignes de liste, sélecteurs et champs de saisie de l'app (auparavant seuls le texte visible portait l'information).
 - **Export / import JSON ajouté** (`src/lib/backup.ts`, écran Réglages → Sauvegarde) : export complet de toutes les tables vers un fichier JSON partageable, import avec remplacement total après confirmation explicite (pas de fusion). Les identifiants d'origine sont préservés à l'import pour garder les relations (composants de recette, historique) cohérentes.
+- **Raccourcis d'icône ajoutés** (`expo-quick-actions`) : appui long sur l'icône de l'app → Peser / Nouveau récipient / Nouvel aliment. Un vrai widget d'écran d'accueil (Android) reste une piste plus lourde, volontairement écartée pour l'instant (voir Fonctionnalités).
 
 ## 🔒 Sécurité — pas de faille identifiée, mais à garder en tête
 
@@ -26,7 +27,7 @@ Liste de ce qui pourrait être fait ensuite, classé par thème. Rien ici n'est 
 - **Historique filtrable/recherchable** (par aliment, par période, par type repas/correction).
 - **Alerte anti-empilement d'insuline** (déjà évoquée puis explicitement écartée — laissée ici pour mémoire si le besoin change) : avertir si une correction est saisie moins de 3h après la précédente.
 - **Sélection automatique du ratio** selon l'heure de la journée (matin/midi/soir), plutôt que le dernier ratio utilisé mémorisé manuellement.
-- **Widget/raccourci** poids→dose pour aller encore plus vite que d'ouvrir l'app.
+- **Vrai widget d'écran d'accueil Android** avec accès à la pesée sans ouvrir l'app (ex. via `react-native-android-widget`). Effort nettement plus lourd qu'un raccourci d'icône (module natif dédié, pas d'équivalent simple sur iOS en Expo managed) — explicitement mis de côté pour l'instant, les raccourcis d'icône couvrent le besoin immédiat.
 
 ## 🎨 UX / Ergonomie
 
