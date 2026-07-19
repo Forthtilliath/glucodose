@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Alert, Pressable, ScrollView, StyleSheet, Text, TextInput } from "react-native";
 import { eq } from "drizzle-orm";
 import { useLiveQuery } from "drizzle-orm/expo-sqlite";
@@ -14,9 +14,11 @@ import {
 } from "@/db/repository";
 import { foods } from "@/db/schema";
 import { MAX_CARBS_PER_100G } from "@/lib/insulin";
-import { colors } from "@/theme/colors";
+import { type ThemeColors, useColors } from "@/theme/colors";
 
 export default function IngredientFormScreen() {
+  const colors = useColors();
+  const styles = useMemo(() => createStyles(colors), [colors]);
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const isNew = id === "new";
@@ -100,7 +102,13 @@ export default function IngredientFormScreen() {
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
       <Text style={styles.label}>Nom</Text>
-      <TextInput style={styles.input} placeholder="ex: Nutella" value={name} onChangeText={setName} />
+      <TextInput
+        style={styles.input}
+        placeholder="ex: Nutella"
+        value={name}
+        onChangeText={setName}
+        accessibilityLabel="Nom de l'ingrédient"
+      />
 
       <Text style={styles.label}>Glucides pour 100g (g)</Text>
       <TextInput
@@ -109,6 +117,7 @@ export default function IngredientFormScreen() {
         keyboardType="decimal-pad"
         value={carbsPer100g}
         onChangeText={setCarbsPer100g}
+        accessibilityLabel="Glucides pour 100 grammes"
       />
       {!Number.isNaN(parsedCarbsPer100g) && parsedCarbsPer100g > MAX_CARBS_PER_100G && (
         <Text style={styles.errorText}>100g d'aliment ne peuvent pas contenir plus de 100g de glucides.</Text>
@@ -120,6 +129,7 @@ export default function IngredientFormScreen() {
         placeholder="ex: nom de l'appli/table consultée"
         value={source}
         onChangeText={setSource}
+        accessibilityLabel="Source de l'information nutritionnelle"
       />
 
       <Text style={styles.label}>Notes (optionnel)</Text>
@@ -128,18 +138,27 @@ export default function IngredientFormScreen() {
         value={notes}
         onChangeText={setNotes}
         multiline
+        accessibilityLabel="Notes"
       />
 
       <Pressable
         style={[styles.saveButton, !canSave && styles.saveButtonDisabled]}
         disabled={!canSave}
         onPress={handleSave}
+        accessibilityRole="button"
+        accessibilityState={{ disabled: !canSave }}
+        accessibilityLabel="Enregistrer l'ingrédient"
       >
         <Text style={styles.saveButtonText}>Enregistrer</Text>
       </Pressable>
 
       {!isNew && (
-        <Pressable style={styles.deleteButton} onPress={handleDelete}>
+        <Pressable
+          style={styles.deleteButton}
+          onPress={handleDelete}
+          accessibilityRole="button"
+          accessibilityLabel="Supprimer l'ingrédient"
+        >
           <Text style={styles.deleteButtonText}>Supprimer l'ingrédient</Text>
         </Pressable>
       )}
@@ -147,31 +166,33 @@ export default function IngredientFormScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.background },
-  content: { padding: 16, gap: 8 },
-  label: { fontSize: 13, fontWeight: "600", color: colors.textMuted, marginTop: 12 },
-  input: {
-    backgroundColor: colors.surface,
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: 10,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-    fontSize: 16,
-    color: colors.text,
-  },
-  notesInput: { minHeight: 80, textAlignVertical: "top" },
-  errorText: { fontSize: 12, color: colors.danger, marginTop: 4 },
-  saveButton: {
-    backgroundColor: colors.primary,
-    borderRadius: 10,
-    paddingVertical: 14,
-    alignItems: "center",
-    marginTop: 24,
-  },
-  saveButtonDisabled: { opacity: 0.5 },
-  saveButtonText: { color: colors.primaryText, fontSize: 16, fontWeight: "700" },
-  deleteButton: { paddingVertical: 14, alignItems: "center", marginTop: 8 },
-  deleteButtonText: { color: colors.danger, fontSize: 15, fontWeight: "600" },
-});
+function createStyles(colors: ThemeColors) {
+  return StyleSheet.create({
+    container: { flex: 1, backgroundColor: colors.background },
+    content: { padding: 16, gap: 8 },
+    label: { fontSize: 13, fontWeight: "600", color: colors.textMuted, marginTop: 12 },
+    input: {
+      backgroundColor: colors.surface,
+      borderWidth: 1,
+      borderColor: colors.border,
+      borderRadius: 10,
+      paddingHorizontal: 12,
+      paddingVertical: 10,
+      fontSize: 16,
+      color: colors.text,
+    },
+    notesInput: { minHeight: 80, textAlignVertical: "top" },
+    errorText: { fontSize: 12, color: colors.danger, marginTop: 4 },
+    saveButton: {
+      backgroundColor: colors.primary,
+      borderRadius: 10,
+      paddingVertical: 14,
+      alignItems: "center",
+      marginTop: 24,
+    },
+    saveButtonDisabled: { opacity: 0.5 },
+    saveButtonText: { color: colors.primaryText, fontSize: 16, fontWeight: "700" },
+    deleteButton: { paddingVertical: 14, alignItems: "center", marginTop: 8 },
+    deleteButtonText: { color: colors.danger, fontSize: 15, fontWeight: "600" },
+  });
+}
