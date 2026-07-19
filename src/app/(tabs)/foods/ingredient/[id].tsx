@@ -38,21 +38,21 @@ export default function IngredientFormScreen() {
     }
   }, [existing]);
 
-  const canSave = name.trim().length > 0 && !Number.isNaN(parseFloat(carbsPer100g));
+  const parsedCarbsPer100g = parseFloat(carbsPer100g);
+  const canSave = name.trim().length > 0 && !Number.isNaN(parsedCarbsPer100g) && parsedCarbsPer100g >= 0;
 
   async function handleSave() {
-    const value = parseFloat(carbsPer100g);
     if (isNew) {
       await createIngredient({
         name: name.trim(),
-        carbsPer100g: value,
+        carbsPer100g: parsedCarbsPer100g,
         source: source.trim() || undefined,
         notes: notes.trim() || undefined,
       });
     } else {
       await updateIngredient(foodId as number, {
         name: name.trim(),
-        carbsPer100g: value,
+        carbsPer100g: parsedCarbsPer100g,
         source: source.trim() || undefined,
         notes: notes.trim() || undefined,
       });
