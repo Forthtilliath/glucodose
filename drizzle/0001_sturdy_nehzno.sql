@@ -1,0 +1,1 @@
+ALTER TABLE `containers` ADD `photo_uri` text;
