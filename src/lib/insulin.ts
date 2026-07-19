@@ -3,6 +3,12 @@
 // partout. Modèle basé sur la méthode avancée du calcul des glucides :
 // aliment → glucides → dose repas (ratio) → + dose de correction (glycémie).
 
+// Bornes de saisie partagées par tous les formulaires, pour attraper les
+// erreurs de frappe (ex. un zéro en trop) avant qu'elles ne faussent une
+// dose calculée.
+export const MAX_CARBS_PER_100G = 100; // borne physique : 100g d'aliment ne peuvent pas contenir plus de 100g de glucides
+export const MAX_WEIGHT_G = 20000; // 20kg : large marge pour ne jamais bloquer un usage légitime
+
 export function computeNetWeight(grossWeightG: number, tareWeightG: number): number {
   return Math.max(0, grossWeightG - tareWeightG);
 }

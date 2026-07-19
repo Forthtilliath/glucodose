@@ -13,6 +13,7 @@ import {
   updateIngredient,
 } from "@/db/repository";
 import { foods } from "@/db/schema";
+import { MAX_CARBS_PER_100G } from "@/lib/insulin";
 import { colors } from "@/theme/colors";
 
 export default function IngredientFormScreen() {
@@ -39,7 +40,11 @@ export default function IngredientFormScreen() {
   }, [existing]);
 
   const parsedCarbsPer100g = parseFloat(carbsPer100g);
-  const canSave = name.trim().length > 0 && !Number.isNaN(parsedCarbsPer100g) && parsedCarbsPer100g >= 0;
+  const canSave =
+    name.trim().length > 0 &&
+    !Number.isNaN(parsedCarbsPer100g) &&
+    parsedCarbsPer100g >= 0 &&
+    parsedCarbsPer100g <= MAX_CARBS_PER_100G;
 
   async function handleSave() {
     if (isNew) {
@@ -105,6 +110,9 @@ export default function IngredientFormScreen() {
         value={carbsPer100g}
         onChangeText={setCarbsPer100g}
       />
+      {!Number.isNaN(parsedCarbsPer100g) && parsedCarbsPer100g > MAX_CARBS_PER_100G && (
+        <Text style={styles.errorText}>100g d'aliment ne peuvent pas contenir plus de 100g de glucides.</Text>
+      )}
 
       <Text style={styles.label}>Source (optionnel)</Text>
       <TextInput
@@ -154,6 +162,7 @@ const styles = StyleSheet.create({
     color: colors.text,
   },
   notesInput: { minHeight: 80, textAlignVertical: "top" },
+  errorText: { fontSize: 12, color: colors.danger, marginTop: 4 },
   saveButton: {
     backgroundColor: colors.primary,
     borderRadius: 10,

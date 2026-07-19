@@ -14,7 +14,7 @@ import {
   saveRecipe,
 } from "@/db/repository";
 import { foods, recipeComponents } from "@/db/schema";
-import { computeCarbsGrams, computeRecipeCarbsPer100g, formatCarbs } from "@/lib/insulin";
+import { computeCarbsGrams, computeRecipeCarbsPer100g, formatCarbs, MAX_WEIGHT_G } from "@/lib/insulin";
 import { colors } from "@/theme/colors";
 
 type Row = { key: string; foodId: number; weightG: string };
@@ -123,7 +123,10 @@ export default function RecipeFormScreen() {
   const canSave =
     name.trim().length > 0 &&
     rows.length > 0 &&
-    rows.every((r) => !Number.isNaN(parseFloat(r.weightG)) && parseFloat(r.weightG) > 0);
+    rows.every((r) => {
+      const w = parseFloat(r.weightG);
+      return !Number.isNaN(w) && w > 0 && w <= MAX_WEIGHT_G;
+    });
 
   async function handleSave() {
     await saveRecipe(recipeFoodId, {
@@ -194,7 +197,7 @@ export default function RecipeFormScreen() {
               </Text>
             </View>
             <TextInput
-              style={styles.componentWeightInput}
+              style={[styles.componentWeightInput, weight > MAX_WEIGHT_G && styles.componentWeightInputError]}
               placeholder="g"
               keyboardType="decimal-pad"
               value={row.weightG}
@@ -300,6 +303,7 @@ const styles = StyleSheet.create({
     fontSize: 15,
     textAlign: "right",
   },
+  componentWeightInputError: { borderColor: colors.danger },
   addRowButton: {
     flexDirection: "row",
     alignItems: "center",
