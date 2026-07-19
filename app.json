@@ -41,7 +41,8 @@
           "cameraPermission": "L'app utilise l'appareil photo pour prendre en photo tes récipients."
         }
       ],
-      "expo-sharing"
+      "expo-sharing",
+      "expo-quick-actions"
     ],
     "experiments": {
       "reactCompiler": true

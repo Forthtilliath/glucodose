@@ -14,6 +14,7 @@
     "expo-glass-effect": "~57.0.1",
     "expo-image-picker": "~57.0.5",
     "expo-linking": "~57.0.3",
+    "expo-quick-actions": "^6.0.2",
     "expo-router": "~57.0.7",
     "expo-sharing": "~57.0.6",
     "expo-splash-screen": "~57.0.4",
