@@ -9,6 +9,8 @@ Liste de ce qui pourrait être fait ensuite, classé par thème. Rien ici n'est 
 - **Contraintes de clé étrangère jamais appliquées** : SQLite n'active pas `PRAGMA foreign_keys` par défaut, donc les règles `onDelete: cascade/restrict/set null` déclarées dans le schéma Drizzle n'étaient que documentaires — supprimer une recette pouvait laisser ses composants orphelins en base. Le pragma est maintenant activé à l'ouverture de la connexion (`src/db/client.ts`).
 - **Pas de bornes maximales** sur les champs numériques (poids, glucides/100g) — une faute de frappe (ex. un zéro en trop) pouvait fausser une dose sans avertissement. Ajout d'une borne physique stricte (glucides/100g ≤ 100, impossible autrement) et d'une borne haute large sur les poids (20kg, pour ne jamais gêner un usage réel).
 - **Dépendances inutilisées retirées** : `expo-device`, `expo-document-picker`, `expo-image`, `expo-sharing`, `expo-web-browser` (et le plugin `expo-sharing` dans `app.json`) — résidus du template de départ et d'une fonctionnalité de sauvegarde jamais implémentée. `@expo/ui`, `expo-glass-effect`, `expo-symbols`, `expo-linking`, `expo-constants` sont conservés : ce sont des dépendances peer requises par `expo-router`/`expo`, pas du code mort.
+- **Mode sombre ajouté** : palette claire/sombre (`src/theme/colors.ts`) suivant le thème système via `useColorScheme()`, y compris pour la navigation (headers, tab bar) et les badges Recette/Ingrédient (contraste adapté séparément du texte général).
+- **Accessibilité renforcée** : `accessibilityLabel`/`accessibilityRole` sur tous les boutons icône, lignes de liste, sélecteurs et champs de saisie de l'app (auparavant seuls le texte visible portait l'information).
 
 ## 🔒 Sécurité — pas de faille identifiée, mais à garder en tête
 
@@ -31,7 +33,6 @@ Liste de ce qui pourrait être fait ensuite, classé par thème. Rien ici n'est 
 - **Confirmation visuelle plus longue** après une pesée enregistrée (actuellement 4 secondes, disparaît vite si on est en train de manipuler la balance).
 - **Annuler la dernière pesée** directement depuis l'écran Peser (pas seulement via Historique).
 - **Recherche dans l'historique** et regroupement par jour.
-- **Mode sombre** : l'app force actuellement une palette claire fixe (`src/theme/colors.ts`), pas de variante sombre alors que `userInterfaceStyle: "automatic"` est activé dans `app.json`.
 
 ## 🧱 Qualité de code / architecture
 
@@ -47,5 +48,4 @@ Liste de ce qui pourrait être fait ensuite, classé par thème. Rien ici n'est 
 
 ## ♿ Accessibilité
 
-- Pas de `accessibilityLabel` explicites sur les boutons icônes (ex. la corbeille dans l'historique, le "+" flottant) — un lecteur d'écran lira probablement le nom de l'icône ou rien du tout.
-- Contraste à vérifier sur les badges "Recette"/"Ingrédient" (fond pastel clair + texte sombre, probablement correct mais non audité formellement).
+- Labels et rôles ajoutés partout (voir section corrections ci-dessus). Ce qui resterait à faire pour aller plus loin : tester réellement avec VoiceOver/TalkBack activés (l'ajout des labels a été fait par lecture du code, pas par un test avec lecteur d'écran en conditions réelles), et vérifier les tailles de police dynamiques du système (`allowFontScaling`, non testé).
