@@ -5,6 +5,7 @@ export default function SettingsLayout() {
     <Stack screenOptions={{ headerTitleAlign: "center" }}>
       <Stack.Screen name="index" options={{ title: "Réglages" }} />
       <Stack.Screen name="ratio/[id]" options={{ title: "Ratio insuline/glucides" }} />
+      <Stack.Screen name="backup" options={{ title: "Sauvegarde" }} />
     </Stack>
   );
 }
