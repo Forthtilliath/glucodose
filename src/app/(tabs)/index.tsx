@@ -16,6 +16,7 @@ import {
   formatCarbs,
   formatInsulinUnits,
   formatWeight,
+  MAX_WEIGHT_G,
 } from "@/lib/insulin";
 import { colors } from "@/theme/colors";
 
@@ -55,11 +56,13 @@ export default function WeighScreen() {
   const selectedRatio = (ratioList ?? []).find((r) => r.id === selectedRatioId) ?? null;
 
   const manualTareNumber = parseFloat(manualTare);
-  const manualTareValid = !Number.isNaN(manualTareNumber) && manualTareNumber >= 0;
+  const manualTareValid =
+    !Number.isNaN(manualTareNumber) && manualTareNumber >= 0 && manualTareNumber <= MAX_WEIGHT_G;
   const tareWeightG = selectedContainer
     ? selectedContainer.tareWeightG
     : Math.max(0, manualTareValid ? manualTareNumber : 0);
   const grossWeightNumber = parseFloat(grossWeight);
+  const grossWeightValid = !Number.isNaN(grossWeightNumber) && grossWeightNumber <= MAX_WEIGHT_G;
   const netWeightG = Number.isNaN(grossWeightNumber) ? 0 : computeNetWeight(grossWeightNumber, tareWeightG);
   const carbsG = selectedFood ? computeCarbsGrams(netWeightG, selectedFood.carbsPer100g) : 0;
   const mealInsulinUnits = selectedRatio ? computeMealInsulinUnits(carbsG, selectedRatio.carbsGramsPerUnit) : 0;
@@ -101,7 +104,7 @@ export default function WeighScreen() {
   );
 
   const canSave =
-    !Number.isNaN(grossWeightNumber) &&
+    grossWeightValid &&
     grossWeightNumber > 0 &&
     (selectedContainer != null || manualTareValid) &&
     selectedFood != null &&
@@ -161,7 +164,7 @@ export default function WeighScreen() {
         </View>
       )}
       {!selectedContainer && !manualTareValid && (
-        <Text style={styles.errorText}>La tare doit être un nombre positif ou nul.</Text>
+        <Text style={styles.errorText}>La tare doit être comprise entre 0 et {MAX_WEIGHT_G} g.</Text>
       )}
 
       <Text style={styles.sectionTitle}>2. Poids brut</Text>
@@ -173,6 +176,9 @@ export default function WeighScreen() {
         onChangeText={setGrossWeight}
         autoFocus
       />
+      {!grossWeightValid && (
+        <Text style={styles.errorText}>Poids invraisemblable (max {MAX_WEIGHT_G} g).</Text>
+      )}
       <Text style={styles.netWeightHint}>Poids net : {netWeightG.toFixed(0)} g</Text>
 
       <Text style={styles.sectionTitle}>3. Aliment</Text>

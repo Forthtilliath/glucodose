@@ -9,6 +9,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { db } from "@/db/client";
 import { deleteContainer, createContainer, updateContainer } from "@/db/repository";
 import { containers } from "@/db/schema";
+import { MAX_WEIGHT_G } from "@/lib/insulin";
 import { deleteContainerPhoto, saveContainerPhoto } from "@/lib/photos";
 import { colors } from "@/theme/colors";
 
@@ -38,7 +39,11 @@ export default function ContainerFormScreen() {
   }, [existing]);
 
   const parsedTareWeight = parseFloat(tareWeight);
-  const canSave = name.trim().length > 0 && !Number.isNaN(parsedTareWeight) && parsedTareWeight >= 0;
+  const canSave =
+    name.trim().length > 0 &&
+    !Number.isNaN(parsedTareWeight) &&
+    parsedTareWeight >= 0 &&
+    parsedTareWeight <= MAX_WEIGHT_G;
 
   async function pickFromCamera() {
     const permission = await ImagePicker.requestCameraPermissionsAsync();
@@ -156,6 +161,9 @@ export default function ContainerFormScreen() {
         value={tareWeight}
         onChangeText={setTareWeight}
       />
+      {!Number.isNaN(parsedTareWeight) && parsedTareWeight > MAX_WEIGHT_G && (
+        <Text style={styles.errorText}>Poids invraisemblable pour un récipient (max {MAX_WEIGHT_G} g).</Text>
+      )}
 
       <Text style={styles.label}>Notes (optionnel)</Text>
       <TextInput
@@ -214,6 +222,7 @@ const styles = StyleSheet.create({
     color: colors.text,
   },
   notesInput: { minHeight: 80, textAlignVertical: "top" },
+  errorText: { fontSize: 12, color: colors.danger, marginTop: 4 },
   saveButton: {
     backgroundColor: colors.primary,
     borderRadius: 10,
