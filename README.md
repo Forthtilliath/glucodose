@@ -39,6 +39,8 @@ Cette app remplace la calculette : elle mémorise les poids de récipients, les 
 | **⚙️ Réglages** | Ratios insuline/glucides (un ou plusieurs, ex. un par repas), glycémie cible et facteur de sensibilité pour la dose de correction, unité (mmol/L ou g/L), export/import JSON complet de la base |
 | **🕘 Historique** | Journal des pesées enregistrées, avec le détail dose repas / dose de correction |
 
+Un appui long sur l'icône de l'app propose aussi des **raccourcis directs** : Peser, Nouveau récipient, Nouvel aliment.
+
 ### La méthode de calcul
 
 ```
@@ -164,7 +166,7 @@ npx expo start
 Scanner le QR code affiché avec Expo Go, ou lancer un simulateur iOS (`i`) / émulateur Android (`a`) depuis le terminal.
 
 > [!IMPORTANT]
-> La fonctionnalité photo des récipients utilise un module natif (`expo-image-picker`) avec des permissions caméra/galerie configurées via un plugin Expo. **Expo Go seul ne suffit pas** pour tester cette fonctionnalité — il faut un build de développement (`npx expo run:android`, ou `eas build --profile development`). Le reste de l'app fonctionne normalement dans Expo Go.
+> Certaines fonctionnalités utilisent des modules natifs avec plugin de config : la photo des récipients (`expo-image-picker`) et les raccourcis d'icône (`expo-quick-actions`, appui long sur l'icône de l'app pour accéder directement à Peser / Nouveau récipient / Nouvel aliment). **Expo Go seul ne suffit pas** pour tester ces fonctionnalités — il faut un build de développement (`npx expo run:android`, ou `eas build --profile development`). Le reste de l'app fonctionne normalement dans Expo Go.
 
 ### Scripts disponibles
 
