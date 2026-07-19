@@ -2,17 +2,18 @@
 
 Liste de ce qui pourrait être fait ensuite, classé par thème. Rien ici n'est urgent — l'app est fonctionnelle en l'état — mais ça vaut la peine d'être noté pour plus tard.
 
-## ✅ Corrigé lors du dernier passage (sécurité/robustesse)
-
-Ces points ont été trouvés pendant la revue de sécurité et corrigés directement :
+## ✅ Corrigé lors des derniers passages (sécurité/robustesse)
 
 - **Valeurs négatives non bloquées** : le poids à vide d'un récipient, les glucides/100g d'un ingrédient, la glycémie cible et le facteur de sensibilité pouvaient être enregistrés négatifs (aucune validation). Le cas le plus dangereux : une **tare manuelle négative** sur l'écran Peser gonflait silencieusement le poids net calculé, donc la dose. Tous ces champs bloquent maintenant la sauvegarde si la valeur n'a pas de sens physique.
 - **Photos orphelines** : remplacer ou retirer la photo d'un récipient ne supprimait jamais l'ancien fichier du stockage — il restait indéfiniment sur le téléphone. La photo précédente est maintenant supprimée quand elle est remplacée.
+- **Contraintes de clé étrangère jamais appliquées** : SQLite n'active pas `PRAGMA foreign_keys` par défaut, donc les règles `onDelete: cascade/restrict/set null` déclarées dans le schéma Drizzle n'étaient que documentaires — supprimer une recette pouvait laisser ses composants orphelins en base. Le pragma est maintenant activé à l'ouverture de la connexion (`src/db/client.ts`).
+- **Pas de bornes maximales** sur les champs numériques (poids, glucides/100g) — une faute de frappe (ex. un zéro en trop) pouvait fausser une dose sans avertissement. Ajout d'une borne physique stricte (glucides/100g ≤ 100, impossible autrement) et d'une borne haute large sur les poids (20kg, pour ne jamais gêner un usage réel).
+- **Dépendances inutilisées retirées** : `expo-device`, `expo-document-picker`, `expo-image`, `expo-sharing`, `expo-web-browser` (et le plugin `expo-sharing` dans `app.json`) — résidus du template de départ et d'une fonctionnalité de sauvegarde jamais implémentée. `@expo/ui`, `expo-glass-effect`, `expo-symbols`, `expo-linking`, `expo-constants` sont conservés : ce sont des dépendances peer requises par `expo-router`/`expo`, pas du code mort.
 
 ## 🔒 Sécurité — pas de faille identifiée, mais à garder en tête
 
-- **Pas de chiffrement au repos** : la base SQLite (glycémies, doses, habitudes alimentaires) est stockée en clair dans le stockage de l'app. Sur un téléphone avec chiffrement disque activé (par défaut sur Android/iOS modernes), c'est déjà couvert au niveau OS. Si tu veux un niveau supplémentaire, `expo-sqlite` supporte SQLCipher moyennant une config native (nécessite un build de développement, pas Expo Go).
-- **`npm audit` remonte 16 vulnérabilités "moderate"** : toutes viennent d'outils de build transitifs (`esbuild` via `drizzle-kit`, `xcode` via `@expo/config-plugins`), jamais exécutés dans l'app installée sur le téléphone — uniquement pendant `npx expo start`/`drizzle-kit generate` sur ta machine de dev. `npm audit fix` proposerait de rétrograder Expo vers la version 46 (cassant tout) : **ne pas l'appliquer**. À surveiller lors des futures mises à jour de `drizzle-kit`/`expo`.
+- **Pas de chiffrement au repos** (décision assumée) : la base SQLite est stockée en clair dans le stockage de l'app. Sur un téléphone avec chiffrement disque activé (par défaut sur Android/iOS modernes), c'est déjà couvert au niveau OS.
+- **`npm audit` remonte des vulnérabilités "moderate"** : toutes viennent d'outils de build transitifs (`esbuild` via `drizzle-kit`, `xcode` via `@expo/config-plugins`), jamais exécutés dans l'app installée sur le téléphone — uniquement pendant `npx expo start`/`drizzle-kit generate` sur ta machine de dev. `npm audit fix` proposerait de rétrograder Expo vers la version 46 (cassant tout) : **ne pas l'appliquer**. À surveiller lors des futures mises à jour de `drizzle-kit`/`expo`.
 - **Pas d'injection SQL possible** : toutes les requêtes passent par le query builder Drizzle (paramétrées) — aucune concaténation de chaîne SQL avec une valeur utilisateur nulle part dans le code.
 - **Pas de secret ni clé d'API dans le repo** : normal, l'app n'a aucun backend.
 
@@ -34,9 +35,7 @@ Ces points ont été trouvés pendant la revue de sécurité et corrigés direct
 
 ## 🧱 Qualité de code / architecture
 
-- **Dépendances installées mais jamais utilisées dans `src/`** : `@expo/ui`, `expo-device`, `expo-document-picker`, `expo-glass-effect`, `expo-image`, `expo-sharing`, `expo-symbols`, `expo-web-browser` (résidus du template de départ et d'une fonctionnalité de sauvegarde jamais implémentée). À vérifier une par une avant suppression — certaines peuvent être des dépendances transitives attendues par `expo-router`/`expo` — mais ça vaut le nettoyage.
 - **`saveRecipe` (dans `src/db/repository.ts`)** fait un `delete` + `insert` complet des composants à chaque sauvegarde plutôt qu'un diff — largement suffisant à cette échelle (quelques composants par recette), mais à garder en tête si les recettes grossissent beaucoup.
-- **Pas de bornes maximales** sur les champs numériques (ex. poids de 999999 g) — actuellement seule la positivité est vérifiée. Une borne haute raisonnable éviterait les fautes de frappe grossières (ex. oublier de repasser en grammes).
 
 ## 🧪 Tests
 
