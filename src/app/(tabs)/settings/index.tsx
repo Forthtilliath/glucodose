@@ -158,6 +158,17 @@ export default function SettingsScreen() {
         <Ionicons name="add-circle-outline" size={20} color={colors.primary} />
         <Text style={styles.addRatioButtonText}>Ajouter un ratio</Text>
       </Pressable>
+
+      <Pressable
+        style={[styles.ratioRow, styles.backupRow]}
+        onPress={() => router.push("/settings/backup")}
+        accessibilityRole="button"
+        accessibilityLabel="Sauvegarde et restauration des données"
+      >
+        <Ionicons name="cloud-upload-outline" size={20} color={colors.text} />
+        <Text style={styles.backupRowText}>Sauvegarde et restauration</Text>
+        <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />
+      </Pressable>
     </ScrollView>
   );
 }
@@ -219,5 +230,7 @@ function createStyles(colors: ThemeColors) {
     ratioValue: { fontSize: 14, fontWeight: "600", color: colors.primary },
     addRatioButton: { flexDirection: "row", alignItems: "center", gap: 8, paddingVertical: 12, marginTop: 4 },
     addRatioButtonText: { color: colors.primary, fontSize: 15, fontWeight: "600" },
+    backupRow: { marginTop: 28, gap: 10 },
+    backupRowText: { flex: 1, fontSize: 15, fontWeight: "600", color: colors.text },
   });
 }
