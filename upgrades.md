@@ -8,9 +8,10 @@ Liste de ce qui pourrait être fait ensuite, classé par thème. Rien ici n'est 
 - **Photos orphelines** : remplacer ou retirer la photo d'un récipient ne supprimait jamais l'ancien fichier du stockage — il restait indéfiniment sur le téléphone. La photo précédente est maintenant supprimée quand elle est remplacée.
 - **Contraintes de clé étrangère jamais appliquées** : SQLite n'active pas `PRAGMA foreign_keys` par défaut, donc les règles `onDelete: cascade/restrict/set null` déclarées dans le schéma Drizzle n'étaient que documentaires — supprimer une recette pouvait laisser ses composants orphelins en base. Le pragma est maintenant activé à l'ouverture de la connexion (`src/db/client.ts`).
 - **Pas de bornes maximales** sur les champs numériques (poids, glucides/100g) — une faute de frappe (ex. un zéro en trop) pouvait fausser une dose sans avertissement. Ajout d'une borne physique stricte (glucides/100g ≤ 100, impossible autrement) et d'une borne haute large sur les poids (20kg, pour ne jamais gêner un usage réel).
-- **Dépendances inutilisées retirées** : `expo-device`, `expo-document-picker`, `expo-image`, `expo-sharing`, `expo-web-browser` (et le plugin `expo-sharing` dans `app.json`) — résidus du template de départ et d'une fonctionnalité de sauvegarde jamais implémentée. `@expo/ui`, `expo-glass-effect`, `expo-symbols`, `expo-linking`, `expo-constants` sont conservés : ce sont des dépendances peer requises par `expo-router`/`expo`, pas du code mort.
+- **Dépendances inutilisées retirées** : `expo-device`, `expo-image`, `expo-web-browser` — résidus du template de départ. `@expo/ui`, `expo-glass-effect`, `expo-symbols`, `expo-linking`, `expo-constants` sont conservés : ce sont des dépendances peer requises par `expo-router`/`expo`, pas du code mort. (`expo-document-picker` et `expo-sharing` avaient aussi été retirés à ce moment-là, puis réinstallés juste après pour la fonctionnalité d'export/import ci-dessous.)
 - **Mode sombre ajouté** : palette claire/sombre (`src/theme/colors.ts`) suivant le thème système via `useColorScheme()`, y compris pour la navigation (headers, tab bar) et les badges Recette/Ingrédient (contraste adapté séparément du texte général).
 - **Accessibilité renforcée** : `accessibilityLabel`/`accessibilityRole` sur tous les boutons icône, lignes de liste, sélecteurs et champs de saisie de l'app (auparavant seuls le texte visible portait l'information).
+- **Export / import JSON ajouté** (`src/lib/backup.ts`, écran Réglages → Sauvegarde) : export complet de toutes les tables vers un fichier JSON partageable, import avec remplacement total après confirmation explicite (pas de fusion). Les identifiants d'origine sont préservés à l'import pour garder les relations (composants de recette, historique) cohérentes.
 
 ## 🔒 Sécurité — pas de faille identifiée, mais à garder en tête
 
@@ -21,7 +22,6 @@ Liste de ce qui pourrait être fait ensuite, classé par thème. Rien ici n'est 
 
 ## 🚀 Fonctionnalités
 
-- **Export / import JSON** : sauvegarder ou transférer sa base vers un autre téléphone (mentionné dans le README comme non fait). Utile en cas de changement de téléphone ou de perte.
 - **Photos sur les aliments/recettes**, pas seulement les récipients — même bénéfice de reconnaissance visuelle rapide.
 - **Historique filtrable/recherchable** (par aliment, par période, par type repas/correction).
 - **Alerte anti-empilement d'insuline** (déjà évoquée puis explicitement écartée — laissée ici pour mémoire si le besoin change) : avertir si une correction est saisie moins de 3h après la précédente.

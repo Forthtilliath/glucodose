@@ -36,7 +36,7 @@ Cette app remplace la calculette : elle mémorise les poids de récipients, les 
 | **⚖️ Peser** | Flux principal : choisir un récipient (ou une tare manuelle) → peser → poids net automatique → choisir l'aliment → choisir le ratio → dose repas + correction optionnelle affichées en direct, avant enregistrement dans l'historique |
 | **🍽️ Aliments** | CRUD des ingrédients simples (glucides/100g) et des recettes composées. Une recette calcule ses glucides/100g à partir de ses composants pesés, puis devient réutilisable **exactement comme un ingrédient** dans l'écran Peser |
 | **📦 Récipients** | CRUD des récipients avec leur poids à vide, et une **photo** (prise ou choisie en galerie) pour les repérer d'un coup d'œil dans le sélecteur |
-| **⚙️ Réglages** | Ratios insuline/glucides (un ou plusieurs, ex. un par repas), glycémie cible et facteur de sensibilité pour la dose de correction, unité (mmol/L ou g/L) |
+| **⚙️ Réglages** | Ratios insuline/glucides (un ou plusieurs, ex. un par repas), glycémie cible et facteur de sensibilité pour la dose de correction, unité (mmol/L ou g/L), export/import JSON complet de la base |
 | **🕘 Historique** | Journal des pesées enregistrées, avec le détail dose repas / dose de correction |
 
 ### La méthode de calcul
@@ -188,7 +188,6 @@ génère un fichier SQL dans `drizzle/`, appliqué automatiquement au démarrage
 
 ## Idées pour la suite
 
-- Export / import JSON pour sauvegarder ou transférer sa base entre téléphones
 - Photos également sur les aliments/recettes
 - Historique filtrable par aliment ou par période
 
