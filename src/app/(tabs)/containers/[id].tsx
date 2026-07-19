@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Alert, Image, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
 import { eq } from "drizzle-orm";
 import { useLiveQuery } from "drizzle-orm/expo-sqlite";
@@ -11,9 +11,11 @@ import { deleteContainer, createContainer, updateContainer } from "@/db/reposito
 import { containers } from "@/db/schema";
 import { MAX_WEIGHT_G } from "@/lib/insulin";
 import { deleteContainerPhoto, saveContainerPhoto } from "@/lib/photos";
-import { colors } from "@/theme/colors";
+import { type ThemeColors, useColors } from "@/theme/colors";
 
 export default function ContainerFormScreen() {
+  const colors = useColors();
+  const styles = useMemo(() => createStyles(colors), [colors]);
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const isNew = id === "new";
@@ -129,9 +131,14 @@ export default function ContainerFormScreen() {
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-      <Pressable style={styles.photoPicker} onPress={handlePickPhoto}>
+      <Pressable
+        style={styles.photoPicker}
+        onPress={handlePickPhoto}
+        accessibilityRole="button"
+        accessibilityLabel={photoUri ? "Photo du récipient. Modifier." : "Ajouter une photo du récipient"}
+      >
         {photoUri ? (
-          <Image source={{ uri: photoUri }} style={styles.photoPreview} />
+          <Image source={{ uri: photoUri }} style={styles.photoPreview} accessibilityIgnoresInvertColors />
         ) : (
           <View style={styles.photoPlaceholder}>
             <Ionicons name="camera-outline" size={28} color={colors.textMuted} />
@@ -140,7 +147,11 @@ export default function ContainerFormScreen() {
         )}
       </Pressable>
       {photoUri ? (
-        <Pressable onPress={() => setPhotoUri(null)}>
+        <Pressable
+          onPress={() => setPhotoUri(null)}
+          accessibilityRole="button"
+          accessibilityLabel="Retirer la photo"
+        >
           <Text style={styles.clearLink}>Retirer la photo</Text>
         </Pressable>
       ) : null}
@@ -151,6 +162,7 @@ export default function ContainerFormScreen() {
         placeholder="ex: Bol bleu"
         value={name}
         onChangeText={setName}
+        accessibilityLabel="Nom du récipient"
       />
 
       <Text style={styles.label}>Poids à vide (g)</Text>
@@ -160,6 +172,7 @@ export default function ContainerFormScreen() {
         keyboardType="decimal-pad"
         value={tareWeight}
         onChangeText={setTareWeight}
+        accessibilityLabel="Poids à vide en grammes"
       />
       {!Number.isNaN(parsedTareWeight) && parsedTareWeight > MAX_WEIGHT_G && (
         <Text style={styles.errorText}>Poids invraisemblable pour un récipient (max {MAX_WEIGHT_G} g).</Text>
@@ -172,18 +185,27 @@ export default function ContainerFormScreen() {
         value={notes}
         onChangeText={setNotes}
         multiline
+        accessibilityLabel="Notes"
       />
 
       <Pressable
         style={[styles.saveButton, !canSave && styles.saveButtonDisabled]}
         disabled={!canSave}
         onPress={handleSave}
+        accessibilityRole="button"
+        accessibilityState={{ disabled: !canSave }}
+        accessibilityLabel="Enregistrer le récipient"
       >
         <Text style={styles.saveButtonText}>Enregistrer</Text>
       </Pressable>
 
       {!isNew && (
-        <Pressable style={styles.deleteButton} onPress={handleDelete}>
+        <Pressable
+          style={styles.deleteButton}
+          onPress={handleDelete}
+          accessibilityRole="button"
+          accessibilityLabel="Supprimer le récipient"
+        >
           <Text style={styles.deleteButtonText}>Supprimer le récipient</Text>
         </Pressable>
       )}
@@ -191,47 +213,49 @@ export default function ContainerFormScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.background },
-  content: { padding: 16, gap: 8 },
-  photoPicker: { alignSelf: "center", marginTop: 8 },
-  photoPreview: { width: 140, height: 140, borderRadius: 16, backgroundColor: colors.surface },
-  photoPlaceholder: {
-    width: 140,
-    height: 140,
-    borderRadius: 16,
-    borderWidth: 1,
-    borderStyle: "dashed",
-    borderColor: colors.border,
-    backgroundColor: colors.surface,
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 6,
-  },
-  photoPlaceholderText: { fontSize: 12, color: colors.textMuted },
-  clearLink: { color: colors.primary, fontSize: 13, textAlign: "center", marginTop: 8 },
-  label: { fontSize: 13, fontWeight: "600", color: colors.textMuted, marginTop: 12 },
-  input: {
-    backgroundColor: colors.surface,
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: 10,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-    fontSize: 16,
-    color: colors.text,
-  },
-  notesInput: { minHeight: 80, textAlignVertical: "top" },
-  errorText: { fontSize: 12, color: colors.danger, marginTop: 4 },
-  saveButton: {
-    backgroundColor: colors.primary,
-    borderRadius: 10,
-    paddingVertical: 14,
-    alignItems: "center",
-    marginTop: 24,
-  },
-  saveButtonDisabled: { opacity: 0.5 },
-  saveButtonText: { color: colors.primaryText, fontSize: 16, fontWeight: "700" },
-  deleteButton: { paddingVertical: 14, alignItems: "center", marginTop: 8 },
-  deleteButtonText: { color: colors.danger, fontSize: 15, fontWeight: "600" },
-});
+function createStyles(colors: ThemeColors) {
+  return StyleSheet.create({
+    container: { flex: 1, backgroundColor: colors.background },
+    content: { padding: 16, gap: 8 },
+    photoPicker: { alignSelf: "center", marginTop: 8 },
+    photoPreview: { width: 140, height: 140, borderRadius: 16, backgroundColor: colors.surface },
+    photoPlaceholder: {
+      width: 140,
+      height: 140,
+      borderRadius: 16,
+      borderWidth: 1,
+      borderStyle: "dashed",
+      borderColor: colors.border,
+      backgroundColor: colors.surface,
+      alignItems: "center",
+      justifyContent: "center",
+      gap: 6,
+    },
+    photoPlaceholderText: { fontSize: 12, color: colors.textMuted },
+    clearLink: { color: colors.primary, fontSize: 13, textAlign: "center", marginTop: 8 },
+    label: { fontSize: 13, fontWeight: "600", color: colors.textMuted, marginTop: 12 },
+    input: {
+      backgroundColor: colors.surface,
+      borderWidth: 1,
+      borderColor: colors.border,
+      borderRadius: 10,
+      paddingHorizontal: 12,
+      paddingVertical: 10,
+      fontSize: 16,
+      color: colors.text,
+    },
+    notesInput: { minHeight: 80, textAlignVertical: "top" },
+    errorText: { fontSize: 12, color: colors.danger, marginTop: 4 },
+    saveButton: {
+      backgroundColor: colors.primary,
+      borderRadius: 10,
+      paddingVertical: 14,
+      alignItems: "center",
+      marginTop: 24,
+    },
+    saveButtonDisabled: { opacity: 0.5 },
+    saveButtonText: { color: colors.primaryText, fontSize: 16, fontWeight: "700" },
+    deleteButton: { paddingVertical: 14, alignItems: "center", marginTop: 8 },
+    deleteButtonText: { color: colors.danger, fontSize: 15, fontWeight: "600" },
+  });
+}

@@ -15,11 +15,13 @@ import {
 } from "@/db/repository";
 import { foods, recipeComponents } from "@/db/schema";
 import { computeCarbsGrams, computeRecipeCarbsPer100g, formatCarbs, MAX_WEIGHT_G } from "@/lib/insulin";
-import { colors } from "@/theme/colors";
+import { type ThemeColors, useColors } from "@/theme/colors";
 
 type Row = { key: string; foodId: number; weightG: string };
 
 export default function RecipeFormScreen() {
+  const colors = useColors();
+  const styles = useMemo(() => createStyles(colors), [colors]);
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const isNew = id === "new";
@@ -181,6 +183,7 @@ export default function RecipeFormScreen() {
         placeholder="ex: Salade composée"
         value={name}
         onChangeText={setName}
+        accessibilityLabel="Nom de la recette"
       />
 
       <Text style={styles.label}>Composants</Text>
@@ -202,15 +205,26 @@ export default function RecipeFormScreen() {
               keyboardType="decimal-pad"
               value={row.weightG}
               onChangeText={(v) => updateRowWeight(row.key, v)}
+              accessibilityLabel={`Poids de ${food?.name ?? "cet aliment"} en grammes`}
             />
-            <Pressable onPress={() => removeRow(row.key)} hitSlop={10}>
+            <Pressable
+              onPress={() => removeRow(row.key)}
+              hitSlop={10}
+              accessibilityRole="button"
+              accessibilityLabel={`Retirer ${food?.name ?? "cet aliment"} de la recette`}
+            >
               <Ionicons name="trash-outline" size={20} color={colors.danger} />
             </Pressable>
           </View>
         );
       })}
 
-      <Pressable style={styles.addRowButton} onPress={() => setPickerVisible(true)}>
+      <Pressable
+        style={styles.addRowButton}
+        onPress={() => setPickerVisible(true)}
+        accessibilityRole="button"
+        accessibilityLabel="Ajouter un aliment pesé"
+      >
         <Ionicons name="add-circle-outline" size={20} color={colors.primary} />
         <Text style={styles.addRowButtonText}>Ajouter un aliment pesé</Text>
       </Pressable>
@@ -236,18 +250,27 @@ export default function RecipeFormScreen() {
         value={notes}
         onChangeText={setNotes}
         multiline
+        accessibilityLabel="Notes"
       />
 
       <Pressable
         style={[styles.saveButton, !canSave && styles.saveButtonDisabled]}
         disabled={!canSave}
         onPress={handleSave}
+        accessibilityRole="button"
+        accessibilityState={{ disabled: !canSave }}
+        accessibilityLabel="Enregistrer la recette"
       >
         <Text style={styles.saveButtonText}>Enregistrer la recette</Text>
       </Pressable>
 
       {!isNew && (
-        <Pressable style={styles.deleteButton} onPress={handleDelete}>
+        <Pressable
+          style={styles.deleteButton}
+          onPress={handleDelete}
+          accessibilityRole="button"
+          accessibilityLabel="Supprimer la recette"
+        >
           <Text style={styles.deleteButtonText}>Supprimer la recette</Text>
         </Pressable>
       )}
@@ -264,77 +287,80 @@ export default function RecipeFormScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.background },
-  content: { padding: 16, gap: 8, paddingBottom: 48 },
-  label: { fontSize: 13, fontWeight: "600", color: colors.textMuted, marginTop: 12 },
-  input: {
-    backgroundColor: colors.surface,
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: 10,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-    fontSize: 16,
-    color: colors.text,
-  },
-  notesInput: { minHeight: 80, textAlignVertical: "top" },
-  componentRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 10,
-    backgroundColor: colors.surface,
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: 10,
-    padding: 12,
-    marginTop: 8,
-  },
-  componentInfo: { flex: 1 },
-  componentName: { fontSize: 15, fontWeight: "600", color: colors.text },
-  componentSubtitle: { fontSize: 12, color: colors.textMuted, marginTop: 2 },
-  componentWeightInput: {
-    width: 70,
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: 8,
-    paddingHorizontal: 8,
-    paddingVertical: 6,
-    fontSize: 15,
-    textAlign: "right",
-  },
-  componentWeightInputError: { borderColor: colors.danger },
-  addRowButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-    paddingVertical: 12,
-    marginTop: 4,
-  },
-  addRowButtonText: { color: colors.primary, fontSize: 15, fontWeight: "600" },
-  totalsBox: {
-    backgroundColor: colors.surface,
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: 10,
-    padding: 14,
-    marginTop: 16,
-    gap: 6,
-  },
-  totalsRow: { flexDirection: "row", justifyContent: "space-between" },
-  totalsLabel: { fontSize: 14, color: colors.textMuted },
-  totalsValue: { fontSize: 14, fontWeight: "600", color: colors.text },
-  totalsLabelStrong: { fontSize: 15, fontWeight: "700", color: colors.text },
-  totalsValueStrong: { fontSize: 15, fontWeight: "700", color: colors.primary },
-  saveButton: {
-    backgroundColor: colors.primary,
-    borderRadius: 10,
-    paddingVertical: 14,
-    alignItems: "center",
-    marginTop: 24,
-  },
-  saveButtonDisabled: { opacity: 0.5 },
-  saveButtonText: { color: colors.primaryText, fontSize: 16, fontWeight: "700" },
-  deleteButton: { paddingVertical: 14, alignItems: "center", marginTop: 8 },
-  deleteButtonText: { color: colors.danger, fontSize: 15, fontWeight: "600" },
-});
+function createStyles(colors: ThemeColors) {
+  return StyleSheet.create({
+    container: { flex: 1, backgroundColor: colors.background },
+    content: { padding: 16, gap: 8, paddingBottom: 48 },
+    label: { fontSize: 13, fontWeight: "600", color: colors.textMuted, marginTop: 12 },
+    input: {
+      backgroundColor: colors.surface,
+      borderWidth: 1,
+      borderColor: colors.border,
+      borderRadius: 10,
+      paddingHorizontal: 12,
+      paddingVertical: 10,
+      fontSize: 16,
+      color: colors.text,
+    },
+    notesInput: { minHeight: 80, textAlignVertical: "top" },
+    componentRow: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 10,
+      backgroundColor: colors.surface,
+      borderWidth: 1,
+      borderColor: colors.border,
+      borderRadius: 10,
+      padding: 12,
+      marginTop: 8,
+    },
+    componentInfo: { flex: 1 },
+    componentName: { fontSize: 15, fontWeight: "600", color: colors.text },
+    componentSubtitle: { fontSize: 12, color: colors.textMuted, marginTop: 2 },
+    componentWeightInput: {
+      width: 70,
+      borderWidth: 1,
+      borderColor: colors.border,
+      borderRadius: 8,
+      paddingHorizontal: 8,
+      paddingVertical: 6,
+      fontSize: 15,
+      textAlign: "right",
+      color: colors.text,
+    },
+    componentWeightInputError: { borderColor: colors.danger },
+    addRowButton: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 8,
+      paddingVertical: 12,
+      marginTop: 4,
+    },
+    addRowButtonText: { color: colors.primary, fontSize: 15, fontWeight: "600" },
+    totalsBox: {
+      backgroundColor: colors.surface,
+      borderWidth: 1,
+      borderColor: colors.border,
+      borderRadius: 10,
+      padding: 14,
+      marginTop: 16,
+      gap: 6,
+    },
+    totalsRow: { flexDirection: "row", justifyContent: "space-between" },
+    totalsLabel: { fontSize: 14, color: colors.textMuted },
+    totalsValue: { fontSize: 14, fontWeight: "600", color: colors.text },
+    totalsLabelStrong: { fontSize: 15, fontWeight: "700", color: colors.text },
+    totalsValueStrong: { fontSize: 15, fontWeight: "700", color: colors.primary },
+    saveButton: {
+      backgroundColor: colors.primary,
+      borderRadius: 10,
+      paddingVertical: 14,
+      alignItems: "center",
+      marginTop: 24,
+    },
+    saveButtonDisabled: { opacity: 0.5 },
+    saveButtonText: { color: colors.primaryText, fontSize: 16, fontWeight: "700" },
+    deleteButton: { paddingVertical: 14, alignItems: "center", marginTop: 8 },
+    deleteButtonText: { color: colors.danger, fontSize: 15, fontWeight: "600" },
+  });
+}

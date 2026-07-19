@@ -18,9 +18,12 @@ import {
   formatWeight,
   MAX_WEIGHT_G,
 } from "@/lib/insulin";
-import { colors } from "@/theme/colors";
+import { type ThemeColors, useColors } from "@/theme/colors";
 
 export default function WeighScreen() {
+  const colors = useColors();
+  const styles = useMemo(() => createStyles(colors), [colors]);
+
   const { data: containerList } = useLiveQuery(db.select().from(containers));
   const { data: foodList } = useLiveQuery(db.select().from(foods).where(eq(foods.isArchived, false)));
   const { data: ratioList } = useLiveQuery(db.select().from(insulinRatios).orderBy(insulinRatios.position));
@@ -142,14 +145,27 @@ export default function WeighScreen() {
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
       <Text style={styles.sectionTitle}>1. Tare</Text>
-      <Pressable style={styles.selector} onPress={() => setContainerPickerVisible(true)}>
+      <Pressable
+        style={styles.selector}
+        onPress={() => setContainerPickerVisible(true)}
+        accessibilityRole="button"
+        accessibilityLabel={
+          selectedContainer
+            ? `Récipient : ${selectedContainer.name}. Modifier.`
+            : "Choisir un récipient, ou saisir une tare manuelle"
+        }
+      >
         <Text style={styles.selectorLabel}>
           {selectedContainer ? selectedContainer.name : "Aucun récipient (tare manuelle)"}
         </Text>
         <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />
       </Pressable>
       {selectedContainer ? (
-        <Pressable onPress={() => setSelectedContainerId(null)}>
+        <Pressable
+          onPress={() => setSelectedContainerId(null)}
+          accessibilityRole="button"
+          accessibilityLabel="Retirer le récipient et saisir une tare manuelle"
+        >
           <Text style={styles.clearLink}>Retirer le récipient / saisir une tare manuelle</Text>
         </Pressable>
       ) : (
@@ -160,6 +176,7 @@ export default function WeighScreen() {
             keyboardType="decimal-pad"
             value={manualTare}
             onChangeText={setManualTare}
+            accessibilityLabel="Tare manuelle en grammes"
           />
         </View>
       )}
@@ -175,6 +192,7 @@ export default function WeighScreen() {
         value={grossWeight}
         onChangeText={setGrossWeight}
         autoFocus
+        accessibilityLabel="Poids brut en grammes"
       />
       {!grossWeightValid && (
         <Text style={styles.errorText}>Poids invraisemblable (max {MAX_WEIGHT_G} g).</Text>
@@ -182,7 +200,12 @@ export default function WeighScreen() {
       <Text style={styles.netWeightHint}>Poids net : {netWeightG.toFixed(0)} g</Text>
 
       <Text style={styles.sectionTitle}>3. Aliment</Text>
-      <Pressable style={styles.selector} onPress={() => setFoodPickerVisible(true)}>
+      <Pressable
+        style={styles.selector}
+        onPress={() => setFoodPickerVisible(true)}
+        accessibilityRole="button"
+        accessibilityLabel={selectedFood ? `Aliment : ${selectedFood.name}. Modifier.` : "Choisir un aliment"}
+      >
         <Text style={styles.selectorLabel}>{selectedFood ? selectedFood.name : "Choisir un aliment"}</Text>
         <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />
       </Pressable>
@@ -195,6 +218,12 @@ export default function WeighScreen() {
         style={styles.selector}
         onPress={() => setRatioPickerVisible(true)}
         disabled={(ratioList ?? []).length === 0}
+        accessibilityRole="button"
+        accessibilityLabel={
+          selectedRatio
+            ? `Ratio : ${selectedRatio.label}, 1 unité pour ${formatCarbs(selectedRatio.carbsGramsPerUnit)}. Modifier.`
+            : "Aucun ratio configuré, va dans Réglages"
+        }
       >
         <Text style={styles.selectorLabel}>
           {selectedRatio
@@ -216,6 +245,7 @@ export default function WeighScreen() {
             keyboardType="decimal-pad"
             value={currentGlycemia}
             onChangeText={setCurrentGlycemia}
+            accessibilityLabel={`Glycémie actuelle en ${glycemiaUnit}`}
           />
           {correctionInsulinUnits > 0 && (
             <Text style={styles.netWeightHint}>
@@ -225,7 +255,11 @@ export default function WeighScreen() {
         </>
       )}
 
-      <View style={styles.resultBox}>
+      <View
+        style={styles.resultBox}
+        accessible
+        accessibilityLabel={`Dose d'insuline totale : ${formatInsulinUnits(totalInsulinUnits)} unités`}
+      >
         <Text style={styles.resultLabel}>Dose d'insuline totale</Text>
         <Text style={styles.resultValue}>{formatInsulinUnits(totalInsulinUnits)} U</Text>
         {correctionInsulinUnits > 0 && (
@@ -236,9 +270,20 @@ export default function WeighScreen() {
         )}
       </View>
 
-      {savedMessage ? <Text style={styles.savedMessage}>{savedMessage}</Text> : null}
+      {savedMessage ? (
+        <Text style={styles.savedMessage} accessibilityLiveRegion="polite">
+          {savedMessage}
+        </Text>
+      ) : null}
 
-      <Pressable style={[styles.saveButton, !canSave && styles.saveButtonDisabled]} disabled={!canSave} onPress={handleSave}>
+      <Pressable
+        style={[styles.saveButton, !canSave && styles.saveButtonDisabled]}
+        disabled={!canSave}
+        onPress={handleSave}
+        accessibilityRole="button"
+        accessibilityState={{ disabled: !canSave }}
+        accessibilityLabel="Enregistrer la pesée"
+      >
         <Text style={styles.saveButtonText}>Enregistrer la pesée</Text>
       </Pressable>
 
@@ -279,81 +324,84 @@ export default function WeighScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.background },
-  content: { padding: 16, paddingBottom: 48 },
-  sectionTitle: { fontSize: 13, fontWeight: "700", color: colors.textMuted, marginTop: 20, marginBottom: 8 },
-  selector: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    backgroundColor: colors.surface,
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: 10,
-    paddingHorizontal: 14,
-    paddingVertical: 14,
-  },
-  selectorLabel: { fontSize: 16, color: colors.text, fontWeight: "600" },
-  clearLink: { color: colors.primary, fontSize: 13, marginTop: 6 },
-  errorText: { fontSize: 12, color: colors.danger, marginTop: 4 },
-  inlineField: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginTop: 8 },
-  inlineFieldLabel: { fontSize: 14, color: colors.textMuted },
-  inlineInput: {
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: 8,
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-    fontSize: 15,
-    width: 90,
-    textAlign: "right",
-    backgroundColor: colors.surface,
-  },
-  input: {
-    backgroundColor: colors.surface,
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: 10,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-    fontSize: 16,
-    color: colors.text,
-    marginTop: 6,
-  },
-  grossInput: {
-    backgroundColor: colors.surface,
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: 10,
-    paddingHorizontal: 14,
-    paddingVertical: 16,
-    fontSize: 28,
-    fontWeight: "700",
-    color: colors.text,
-    textAlign: "center",
-  },
-  netWeightHint: { textAlign: "center", color: colors.textMuted, marginTop: 6, fontSize: 14 },
-  resultBox: {
-    marginTop: 24,
-    backgroundColor: colors.surface,
-    borderWidth: 2,
-    borderColor: colors.primary,
-    borderRadius: 14,
-    paddingVertical: 20,
-    alignItems: "center",
-  },
-  resultLabel: { fontSize: 14, color: colors.textMuted, fontWeight: "600" },
-  resultValue: { fontSize: 40, fontWeight: "800", color: colors.primary, marginTop: 4 },
-  resultBreakdown: { fontSize: 12, color: colors.textMuted, marginTop: 6 },
-  savedMessage: { textAlign: "center", color: colors.success, marginTop: 12, fontSize: 14, fontWeight: "600" },
-  saveButton: {
-    backgroundColor: colors.primary,
-    borderRadius: 10,
-    paddingVertical: 16,
-    alignItems: "center",
-    marginTop: 20,
-  },
-  saveButtonDisabled: { opacity: 0.5 },
-  saveButtonText: { color: colors.primaryText, fontSize: 17, fontWeight: "700" },
-});
+function createStyles(colors: ThemeColors) {
+  return StyleSheet.create({
+    container: { flex: 1, backgroundColor: colors.background },
+    content: { padding: 16, paddingBottom: 48 },
+    sectionTitle: { fontSize: 13, fontWeight: "700", color: colors.textMuted, marginTop: 20, marginBottom: 8 },
+    selector: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "center",
+      backgroundColor: colors.surface,
+      borderWidth: 1,
+      borderColor: colors.border,
+      borderRadius: 10,
+      paddingHorizontal: 14,
+      paddingVertical: 14,
+    },
+    selectorLabel: { fontSize: 16, color: colors.text, fontWeight: "600" },
+    clearLink: { color: colors.primary, fontSize: 13, marginTop: 6 },
+    errorText: { fontSize: 12, color: colors.danger, marginTop: 4 },
+    inlineField: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginTop: 8 },
+    inlineFieldLabel: { fontSize: 14, color: colors.textMuted },
+    inlineInput: {
+      borderWidth: 1,
+      borderColor: colors.border,
+      borderRadius: 8,
+      paddingHorizontal: 10,
+      paddingVertical: 6,
+      fontSize: 15,
+      width: 90,
+      textAlign: "right",
+      backgroundColor: colors.surface,
+      color: colors.text,
+    },
+    input: {
+      backgroundColor: colors.surface,
+      borderWidth: 1,
+      borderColor: colors.border,
+      borderRadius: 10,
+      paddingHorizontal: 12,
+      paddingVertical: 10,
+      fontSize: 16,
+      color: colors.text,
+      marginTop: 6,
+    },
+    grossInput: {
+      backgroundColor: colors.surface,
+      borderWidth: 1,
+      borderColor: colors.border,
+      borderRadius: 10,
+      paddingHorizontal: 14,
+      paddingVertical: 16,
+      fontSize: 28,
+      fontWeight: "700",
+      color: colors.text,
+      textAlign: "center",
+    },
+    netWeightHint: { textAlign: "center", color: colors.textMuted, marginTop: 6, fontSize: 14 },
+    resultBox: {
+      marginTop: 24,
+      backgroundColor: colors.surface,
+      borderWidth: 2,
+      borderColor: colors.primary,
+      borderRadius: 14,
+      paddingVertical: 20,
+      alignItems: "center",
+    },
+    resultLabel: { fontSize: 14, color: colors.textMuted, fontWeight: "600" },
+    resultValue: { fontSize: 40, fontWeight: "800", color: colors.primary, marginTop: 4 },
+    resultBreakdown: { fontSize: 12, color: colors.textMuted, marginTop: 6 },
+    savedMessage: { textAlign: "center", color: colors.success, marginTop: 12, fontSize: 14, fontWeight: "600" },
+    saveButton: {
+      backgroundColor: colors.primary,
+      borderRadius: 10,
+      paddingVertical: 16,
+      alignItems: "center",
+      marginTop: 20,
+    },
+    saveButtonDisabled: { opacity: 0.5 },
+    saveButtonText: { color: colors.primaryText, fontSize: 17, fontWeight: "700" },
+  });
+}

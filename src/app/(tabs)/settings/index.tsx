@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { FlatList, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
 import { eq } from "drizzle-orm";
 import { useLiveQuery } from "drizzle-orm/expo-sqlite";
@@ -9,9 +9,11 @@ import { db } from "@/db/client";
 import { updateSettings } from "@/db/repository";
 import { insulinRatios, settings } from "@/db/schema";
 import { formatCarbs } from "@/lib/insulin";
-import { colors } from "@/theme/colors";
+import { type ThemeColors, useColors } from "@/theme/colors";
 
 export default function SettingsScreen() {
+  const colors = useColors();
+  const styles = useMemo(() => createStyles(colors), [colors]);
   const router = useRouter();
   const { data: settingsRows } = useLiveQuery(db.select().from(settings).where(eq(settings.id, 1)));
   const currentSettings = settingsRows?.[0];
@@ -64,6 +66,9 @@ export default function SettingsScreen() {
         <Pressable
           style={[styles.unitOption, glycemiaUnit === "mmol/L" && styles.unitOptionActive]}
           onPress={() => setGlycemiaUnit("mmol/L")}
+          accessibilityRole="button"
+          accessibilityState={{ selected: glycemiaUnit === "mmol/L" }}
+          accessibilityLabel="Unité mmol par litre"
         >
           <Text style={[styles.unitOptionText, glycemiaUnit === "mmol/L" && styles.unitOptionTextActive]}>
             mmol/L
@@ -72,6 +77,9 @@ export default function SettingsScreen() {
         <Pressable
           style={[styles.unitOption, glycemiaUnit === "g/L" && styles.unitOptionActive]}
           onPress={() => setGlycemiaUnit("g/L")}
+          accessibilityRole="button"
+          accessibilityState={{ selected: glycemiaUnit === "g/L" }}
+          accessibilityLabel="Unité gramme par litre"
         >
           <Text style={[styles.unitOptionText, glycemiaUnit === "g/L" && styles.unitOptionTextActive]}>
             g/L
@@ -86,6 +94,7 @@ export default function SettingsScreen() {
         keyboardType="decimal-pad"
         value={targetGlycemia}
         onChangeText={setTargetGlycemia}
+        accessibilityLabel={`Glycémie cible en ${glycemiaUnit}`}
       />
       {!targetGlycemiaValid && <Text style={styles.errorText}>La glycémie cible doit être positive.</Text>}
 
@@ -99,6 +108,7 @@ export default function SettingsScreen() {
         keyboardType="decimal-pad"
         value={sensitivityFactor}
         onChangeText={setSensitivityFactor}
+        accessibilityLabel="Facteur de sensibilité"
       />
       {!sensitivityFactorValid && (
         <Text style={styles.errorText}>Le facteur de sensibilité doit être strictement positif.</Text>
@@ -108,6 +118,9 @@ export default function SettingsScreen() {
         style={[styles.saveButton, !canSaveSettings && styles.saveButtonDisabled]}
         disabled={!canSaveSettings}
         onPress={handleSaveSettings}
+        accessibilityRole="button"
+        accessibilityState={{ disabled: !canSaveSettings }}
+        accessibilityLabel="Enregistrer les réglages"
       >
         <Text style={styles.saveButtonText}>Enregistrer les réglages</Text>
       </Pressable>
@@ -124,14 +137,24 @@ export default function SettingsScreen() {
         scrollEnabled={false}
         ListEmptyComponent={<Text style={styles.empty}>Aucun ratio enregistré pour l'instant.</Text>}
         renderItem={({ item }) => (
-          <Pressable style={styles.ratioRow} onPress={() => router.push(`/settings/ratio/${item.id}`)}>
+          <Pressable
+            style={styles.ratioRow}
+            onPress={() => router.push(`/settings/ratio/${item.id}`)}
+            accessibilityRole="button"
+            accessibilityLabel={`Ratio ${item.label}, 1 unité pour ${formatCarbs(item.carbsGramsPerUnit)}. Modifier.`}
+          >
             <Text style={styles.ratioLabel}>{item.label}</Text>
             <Text style={styles.ratioValue}>1 U / {formatCarbs(item.carbsGramsPerUnit)}</Text>
           </Pressable>
         )}
       />
 
-      <Pressable style={styles.addRatioButton} onPress={() => router.push("/settings/ratio/new")}>
+      <Pressable
+        style={styles.addRatioButton}
+        onPress={() => router.push("/settings/ratio/new")}
+        accessibilityRole="button"
+        accessibilityLabel="Ajouter un ratio"
+      >
         <Ionicons name="add-circle-outline" size={20} color={colors.primary} />
         <Text style={styles.addRatioButtonText}>Ajouter un ratio</Text>
       </Pressable>
@@ -139,60 +162,62 @@ export default function SettingsScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.background },
-  content: { padding: 16, paddingBottom: 48, gap: 4 },
-  sectionTitle: { fontSize: 15, fontWeight: "700", color: colors.text, marginTop: 8 },
-  ratiosTitle: { marginTop: 28 },
-  helpText: { fontSize: 12, color: colors.textMuted, marginTop: 4, marginBottom: 4 },
-  label: { fontSize: 13, fontWeight: "600", color: colors.textMuted, marginTop: 12 },
-  input: {
-    backgroundColor: colors.surface,
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: 10,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-    fontSize: 16,
-    color: colors.text,
-  },
-  unitToggle: { flexDirection: "row", gap: 8, marginTop: 6 },
-  unitOption: {
-    flex: 1,
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: 10,
-    paddingVertical: 10,
-    alignItems: "center",
-    backgroundColor: colors.surface,
-  },
-  unitOptionActive: { backgroundColor: colors.primary, borderColor: colors.primary },
-  unitOptionText: { fontSize: 15, fontWeight: "600", color: colors.text },
-  unitOptionTextActive: { color: colors.primaryText },
-  saveButton: {
-    backgroundColor: colors.primary,
-    borderRadius: 10,
-    paddingVertical: 14,
-    alignItems: "center",
-    marginTop: 20,
-  },
-  saveButtonDisabled: { opacity: 0.5 },
-  saveButtonText: { color: colors.primaryText, fontSize: 16, fontWeight: "700" },
-  errorText: { fontSize: 12, color: colors.danger, marginTop: 4 },
-  empty: { textAlign: "center", color: colors.textMuted, marginTop: 12 },
-  ratioRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    backgroundColor: colors.surface,
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: 10,
-    padding: 14,
-    marginTop: 8,
-  },
-  ratioLabel: { fontSize: 15, fontWeight: "600", color: colors.text },
-  ratioValue: { fontSize: 14, fontWeight: "600", color: colors.primary },
-  addRatioButton: { flexDirection: "row", alignItems: "center", gap: 8, paddingVertical: 12, marginTop: 4 },
-  addRatioButtonText: { color: colors.primary, fontSize: 15, fontWeight: "600" },
-});
+function createStyles(colors: ThemeColors) {
+  return StyleSheet.create({
+    container: { flex: 1, backgroundColor: colors.background },
+    content: { padding: 16, paddingBottom: 48, gap: 4 },
+    sectionTitle: { fontSize: 15, fontWeight: "700", color: colors.text, marginTop: 8 },
+    ratiosTitle: { marginTop: 28 },
+    helpText: { fontSize: 12, color: colors.textMuted, marginTop: 4, marginBottom: 4 },
+    label: { fontSize: 13, fontWeight: "600", color: colors.textMuted, marginTop: 12 },
+    input: {
+      backgroundColor: colors.surface,
+      borderWidth: 1,
+      borderColor: colors.border,
+      borderRadius: 10,
+      paddingHorizontal: 12,
+      paddingVertical: 10,
+      fontSize: 16,
+      color: colors.text,
+    },
+    unitToggle: { flexDirection: "row", gap: 8, marginTop: 6 },
+    unitOption: {
+      flex: 1,
+      borderWidth: 1,
+      borderColor: colors.border,
+      borderRadius: 10,
+      paddingVertical: 10,
+      alignItems: "center",
+      backgroundColor: colors.surface,
+    },
+    unitOptionActive: { backgroundColor: colors.primary, borderColor: colors.primary },
+    unitOptionText: { fontSize: 15, fontWeight: "600", color: colors.text },
+    unitOptionTextActive: { color: colors.primaryText },
+    saveButton: {
+      backgroundColor: colors.primary,
+      borderRadius: 10,
+      paddingVertical: 14,
+      alignItems: "center",
+      marginTop: 20,
+    },
+    saveButtonDisabled: { opacity: 0.5 },
+    saveButtonText: { color: colors.primaryText, fontSize: 16, fontWeight: "700" },
+    errorText: { fontSize: 12, color: colors.danger, marginTop: 4 },
+    empty: { textAlign: "center", color: colors.textMuted, marginTop: 12 },
+    ratioRow: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "center",
+      backgroundColor: colors.surface,
+      borderWidth: 1,
+      borderColor: colors.border,
+      borderRadius: 10,
+      padding: 14,
+      marginTop: 8,
+    },
+    ratioLabel: { fontSize: 15, fontWeight: "600", color: colors.text },
+    ratioValue: { fontSize: 14, fontWeight: "600", color: colors.primary },
+    addRatioButton: { flexDirection: "row", alignItems: "center", gap: 8, paddingVertical: 12, marginTop: 4 },
+    addRatioButtonText: { color: colors.primary, fontSize: 15, fontWeight: "600" },
+  });
+}

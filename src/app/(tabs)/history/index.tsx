@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import { Alert, FlatList, Pressable, StyleSheet, Text, View } from "react-native";
 import { desc } from "drizzle-orm";
 import { useLiveQuery } from "drizzle-orm/expo-sqlite";
@@ -7,9 +8,11 @@ import { db } from "@/db/client";
 import { deleteWeighing } from "@/db/repository";
 import { weighings } from "@/db/schema";
 import { formatInsulinUnits } from "@/lib/insulin";
-import { colors } from "@/theme/colors";
+import { type ThemeColors, useColors } from "@/theme/colors";
 
 export default function HistoryScreen() {
+  const colors = useColors();
+  const styles = useMemo(() => createStyles(colors), [colors]);
   const { data } = useLiveQuery(db.select().from(weighings).orderBy(desc(weighings.weighedAt)));
 
   function handleDelete(id: number) {
@@ -27,7 +30,11 @@ export default function HistoryScreen() {
         contentContainerStyle={styles.list}
         ListEmptyComponent={<Text style={styles.empty}>Aucune pesée enregistrée pour l'instant.</Text>}
         renderItem={({ item }) => (
-          <View style={styles.row}>
+          <View
+            style={styles.row}
+            accessible
+            accessibilityLabel={`${item.foodNameSnapshot}, le ${new Date(item.weighedAt).toLocaleString("fr-FR")}, dose totale ${formatInsulinUnits(item.totalInsulinUnits)} unités`}
+          >
             <View style={styles.rowMain}>
               <Text style={styles.rowLabel}>{item.foodNameSnapshot}</Text>
               <Text style={styles.rowSubtitle}>
@@ -43,7 +50,13 @@ export default function HistoryScreen() {
               )}
             </View>
             <Text style={styles.rowValue}>{formatInsulinUnits(item.totalInsulinUnits)} U</Text>
-            <Pressable onPress={() => handleDelete(item.id)} hitSlop={10} style={styles.deleteIcon}>
+            <Pressable
+              onPress={() => handleDelete(item.id)}
+              hitSlop={10}
+              style={styles.deleteIcon}
+              accessibilityRole="button"
+              accessibilityLabel={`Supprimer la pesée ${item.foodNameSnapshot}`}
+            >
               <Ionicons name="trash-outline" size={18} color={colors.danger} />
             </Pressable>
           </View>
@@ -53,23 +66,25 @@ export default function HistoryScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.background },
-  list: { padding: 16 },
-  empty: { textAlign: "center", color: colors.textMuted, marginTop: 40 },
-  row: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: colors.surface,
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: 12,
-    padding: 14,
-    marginBottom: 10,
-  },
-  rowMain: { flex: 1 },
-  rowLabel: { fontSize: 15, fontWeight: "600", color: colors.text },
-  rowSubtitle: { fontSize: 12, color: colors.textMuted, marginTop: 2 },
-  rowValue: { fontSize: 16, fontWeight: "700", color: colors.primary, marginRight: 12 },
-  deleteIcon: { padding: 4 },
-});
+function createStyles(colors: ThemeColors) {
+  return StyleSheet.create({
+    container: { flex: 1, backgroundColor: colors.background },
+    list: { padding: 16 },
+    empty: { textAlign: "center", color: colors.textMuted, marginTop: 40 },
+    row: {
+      flexDirection: "row",
+      alignItems: "center",
+      backgroundColor: colors.surface,
+      borderWidth: 1,
+      borderColor: colors.border,
+      borderRadius: 12,
+      padding: 14,
+      marginBottom: 10,
+    },
+    rowMain: { flex: 1 },
+    rowLabel: { fontSize: 15, fontWeight: "600", color: colors.text },
+    rowSubtitle: { fontSize: 12, color: colors.textMuted, marginTop: 2 },
+    rowValue: { fontSize: 16, fontWeight: "700", color: colors.primary, marginRight: 12 },
+    deleteIcon: { padding: 4 },
+  });
+}
