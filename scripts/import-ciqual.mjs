@@ -3,9 +3,15 @@
 // utilisé comme aide à la saisie dans le formulaire d'ajout d'ingrédient.
 // À relancer si Ciqual publie une nouvelle version (nouveau fichier XLS dans
 // scripts/ciqual-source/).
+import * as fs from "node:fs";
 import { existsSync, mkdirSync, readdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import XLSX from "xlsx";
+
+// Le build ESM de xlsx ne requiert plus `fs` automatiquement (contrairement à
+// l'ancien build CJS) : il faut le lui fournir explicitement pour que
+// XLSX.readFile fonctionne côté Node.
+XLSX.set_fs(fs);
 
 const SOURCE_DIR = "scripts/ciqual-source";
 const OUTPUT_PATH = "assets/data/ciqual.json";
