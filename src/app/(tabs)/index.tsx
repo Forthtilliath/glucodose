@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
 import { eq } from "drizzle-orm";
 import { useLiveQuery } from "drizzle-orm/expo-sqlite";
+import { useLocalSearchParams } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 
 import { PickerModal, type PickerItem } from "@/components/PickerModal";
@@ -23,6 +24,7 @@ import { type ThemeColors, useColors } from "@/theme/colors";
 export default function WeighScreen() {
   const colors = useColors();
   const styles = useMemo(() => createStyles(colors), [colors]);
+  const { autoFocusWeight } = useLocalSearchParams<{ autoFocusWeight?: string }>();
 
   const { data: containerList } = useLiveQuery(db.select().from(containers));
   const { data: foodList } = useLiveQuery(db.select().from(foods).where(eq(foods.isArchived, false)));
@@ -166,7 +168,7 @@ export default function WeighScreen() {
           accessibilityRole="button"
           accessibilityLabel="Retirer le récipient et saisir une tare manuelle"
         >
-          <Text style={styles.clearLink}>Retirer le récipient / saisir une tare manuelle</Text>
+          <Text style={styles.clearLink}>Retirer le récipient / Saisir une tare manuelle</Text>
         </Pressable>
       ) : (
         <View style={styles.inlineField}>
@@ -191,7 +193,7 @@ export default function WeighScreen() {
         keyboardType="decimal-pad"
         value={grossWeight}
         onChangeText={setGrossWeight}
-        autoFocus
+        autoFocus={autoFocusWeight === "1"}
         accessibilityLabel="Poids brut en grammes"
       />
       {!grossWeightValid && (
