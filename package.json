@@ -39,7 +39,8 @@
     "drizzle-kit": "^0.31.10",
     "jest": "~29.7.0",
     "jest-expo": "~57.0.2",
-    "typescript": "~6.0.3"
+    "typescript": "~6.0.3",
+    "xlsx": "^0.18.5"
   },
   "scripts": {
     "start": "expo start",
@@ -47,7 +48,8 @@
     "ios": "expo start --ios",
     "web": "expo start --web",
     "lint": "expo lint",
-    "test": "jest"
+    "test": "jest",
+    "import-ciqual": "node scripts/import-ciqual.mjs"
   },
   "private": true,
   "jest": {
