@@ -102,6 +102,12 @@ describe("formatWeight", () => {
   it("arrondit à l'entier par défaut et ajoute l'unité", () => {
     expect(formatWeight(199.6)).toBe("200 g");
   });
+
+  it("bascule en kilogrammes à partir de 1000 g", () => {
+    expect(formatWeight(1000)).toBe("1 kg");
+    expect(formatWeight(1500)).toBe("1.5 kg");
+    expect(formatWeight(2550)).toBe("2.55 kg");
+  });
 });
 
 describe("formatCarbs", () => {

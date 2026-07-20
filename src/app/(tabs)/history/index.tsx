@@ -7,7 +7,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { db } from "@/db/client";
 import { deleteWeighing } from "@/db/repository";
 import { weighings } from "@/db/schema";
-import { formatInsulinUnits } from "@/lib/insulin";
+import { formatInsulinUnits, formatWeight } from "@/lib/insulin";
 import { type ThemeColors, useColors } from "@/theme/colors";
 
 export default function HistoryScreen() {
@@ -38,7 +38,7 @@ export default function HistoryScreen() {
             <View style={styles.rowMain}>
               <Text style={styles.rowLabel}>{item.foodNameSnapshot}</Text>
               <Text style={styles.rowSubtitle}>
-                {new Date(item.weighedAt).toLocaleString("fr-FR")} · {item.netWeightG.toFixed(0)} g net ·{" "}
+                {new Date(item.weighedAt).toLocaleString("fr-FR")} · {formatWeight(item.netWeightG)} net ·{" "}
                 {item.carbsG.toFixed(1)} g glucides
                 {item.ratioLabelSnapshot ? ` · ${item.ratioLabelSnapshot}` : ""}
               </Text>

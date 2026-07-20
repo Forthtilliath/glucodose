@@ -9,7 +9,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { db } from "@/db/client";
 import { deleteContainer, createContainer, updateContainer } from "@/db/repository";
 import { containers } from "@/db/schema";
-import { MAX_WEIGHT_G } from "@/lib/insulin";
+import { formatWeight, MAX_WEIGHT_G } from "@/lib/insulin";
 import { deleteContainerPhoto, saveContainerPhoto } from "@/lib/photos";
 import { type ThemeColors, useColors } from "@/theme/colors";
 
@@ -175,7 +175,7 @@ export default function ContainerFormScreen() {
         accessibilityLabel="Poids à vide en grammes"
       />
       {!Number.isNaN(parsedTareWeight) && parsedTareWeight > MAX_WEIGHT_G && (
-        <Text style={styles.errorText}>Poids invraisemblable pour un récipient (max {MAX_WEIGHT_G} g).</Text>
+        <Text style={styles.errorText}>Poids invraisemblable pour un récipient (max {formatWeight(MAX_WEIGHT_G)}).</Text>
       )}
 
       <Text style={styles.label}>Notes (optionnel)</Text>
