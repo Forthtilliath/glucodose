@@ -26,8 +26,10 @@ export default function WeighScreen() {
   const styles = useMemo(() => createStyles(colors), [colors]);
   const { autoFocusWeight } = useLocalSearchParams<{ autoFocusWeight?: string }>();
 
-  const { data: containerList } = useLiveQuery(db.select().from(containers));
-  const { data: foodList } = useLiveQuery(db.select().from(foods).where(eq(foods.isArchived, false)));
+  const { data: containerList } = useLiveQuery(db.select().from(containers).orderBy(containers.name));
+  const { data: foodList } = useLiveQuery(
+    db.select().from(foods).where(eq(foods.isArchived, false)).orderBy(foods.name)
+  );
   const { data: ratioList } = useLiveQuery(db.select().from(insulinRatios).orderBy(insulinRatios.position));
   const { data: settingsRows } = useLiveQuery(db.select().from(settings).where(eq(settings.id, 1)));
   const appSettings = settingsRows?.[0];
@@ -63,11 +65,16 @@ export default function WeighScreen() {
   const manualTareNumber = parseFloat(manualTare);
   const manualTareValid =
     !Number.isNaN(manualTareNumber) && manualTareNumber >= 0 && manualTareNumber <= MAX_WEIGHT_G;
+  // NaN > ou < un nombre vaut toujours false, donc ces conditions ignorent
+  // naturellement un champ vide : l'erreur ne doit s'afficher que face à une
+  // vraie valeur hors bornes, pas à un champ pas encore rempli.
+  const manualTareOutOfRange = manualTareNumber < 0 || manualTareNumber > MAX_WEIGHT_G;
   const tareWeightG = selectedContainer
     ? selectedContainer.tareWeightG
     : Math.max(0, manualTareValid ? manualTareNumber : 0);
   const grossWeightNumber = parseFloat(grossWeight);
   const grossWeightValid = !Number.isNaN(grossWeightNumber) && grossWeightNumber <= MAX_WEIGHT_G;
+  const grossWeightOutOfRange = grossWeightNumber > MAX_WEIGHT_G;
   const netWeightG = Number.isNaN(grossWeightNumber) ? 0 : computeNetWeight(grossWeightNumber, tareWeightG);
   const carbsG = selectedFood ? computeCarbsGrams(netWeightG, selectedFood.carbsPer100g) : 0;
   const mealInsulinUnits = selectedRatio ? computeMealInsulinUnits(carbsG, selectedRatio.carbsGramsPerUnit) : 0;
@@ -182,24 +189,25 @@ export default function WeighScreen() {
           />
         </View>
       )}
-      {!selectedContainer && !manualTareValid && (
-        <Text style={styles.errorText}>La tare doit être comprise entre 0 et {MAX_WEIGHT_G} g.</Text>
+      {!selectedContainer && manualTareOutOfRange && (
+        <Text style={styles.errorText}>La tare doit être comprise entre 0 et {formatWeight(MAX_WEIGHT_G)}.</Text>
       )}
 
       <Text style={styles.sectionTitle}>2. Poids brut</Text>
       <TextInput
         style={styles.grossInput}
         placeholder="0"
+        placeholderTextColor={colors.textMuted}
         keyboardType="decimal-pad"
         value={grossWeight}
         onChangeText={setGrossWeight}
         autoFocus={autoFocusWeight === "1"}
         accessibilityLabel="Poids brut en grammes"
       />
-      {!grossWeightValid && (
-        <Text style={styles.errorText}>Poids invraisemblable (max {MAX_WEIGHT_G} g).</Text>
+      {grossWeightOutOfRange && (
+        <Text style={styles.errorText}>Poids invraisemblable (max {formatWeight(MAX_WEIGHT_G)}).</Text>
       )}
-      <Text style={styles.netWeightHint}>Poids net : {netWeightG.toFixed(0)} g</Text>
+      <Text style={styles.netWeightHint}>Poids net : {formatWeight(netWeightG)}</Text>
 
       <Text style={styles.sectionTitle}>3. Aliment</Text>
       <Pressable
@@ -244,6 +252,7 @@ export default function WeighScreen() {
           <TextInput
             style={styles.input}
             placeholder="ex: 12"
+            placeholderTextColor={colors.textMuted}
             keyboardType="decimal-pad"
             value={currentGlycemia}
             onChangeText={setCurrentGlycemia}

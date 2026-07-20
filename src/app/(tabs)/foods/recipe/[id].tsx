@@ -14,7 +14,7 @@ import {
   saveRecipe,
 } from "@/db/repository";
 import { foods, recipeComponents } from "@/db/schema";
-import { computeCarbsGrams, computeRecipeCarbsPer100g, formatCarbs, MAX_WEIGHT_G } from "@/lib/insulin";
+import { computeCarbsGrams, computeRecipeCarbsPer100g, formatCarbs, formatWeight, MAX_WEIGHT_G } from "@/lib/insulin";
 import { type ThemeColors, useColors } from "@/theme/colors";
 
 type Row = { key: string; foodId: number; weightG: string };
@@ -232,7 +232,7 @@ export default function RecipeFormScreen() {
       <View style={styles.totalsBox}>
         <View style={styles.totalsRow}>
           <Text style={styles.totalsLabel}>Poids total</Text>
-          <Text style={styles.totalsValue}>{totals.totalWeightG.toFixed(0)} g</Text>
+          <Text style={styles.totalsValue}>{formatWeight(totals.totalWeightG)}</Text>
         </View>
         <View style={styles.totalsRow}>
           <Text style={styles.totalsLabel}>Glucides totaux</Text>

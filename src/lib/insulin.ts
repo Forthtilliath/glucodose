@@ -7,7 +7,7 @@
 // erreurs de frappe (ex. un zéro en trop) avant qu'elles ne faussent une
 // dose calculée.
 export const MAX_CARBS_PER_100G = 100; // borne physique : 100g d'aliment ne peuvent pas contenir plus de 100g de glucides
-export const MAX_WEIGHT_G = 20000; // 20kg : large marge pour ne jamais bloquer un usage légitime
+export const MAX_WEIGHT_G = 1000; // 1000g : limité pour ne jamais bloquer un usage légitime
 
 export function computeNetWeight(grossWeightG: number, tareWeightG: number): number {
   return Math.max(0, grossWeightG - tareWeightG);
@@ -48,7 +48,12 @@ export function formatInsulinUnits(units: number, decimals = 1): string {
 }
 
 export function formatWeight(grams: number, decimals = 0): string {
-  return `${grams.toFixed(decimals)} g`;
+  if (Math.abs(grams) < 1000) {
+    return `${grams.toFixed(decimals)} g`;
+  }
+  // Jusqu'à 2 décimales en kg, sans zéros inutiles (1 kg plutôt que 1.00 kg).
+  const kgText = (grams / 1000).toFixed(2).replace(/0+$/, "").replace(/\.$/, "");
+  return `${kgText} kg`;
 }
 
 export function formatCarbs(grams: number, decimals = 1): string {
