@@ -17,7 +17,8 @@
         "backgroundImage": "./assets/images/android-icon-background.png",
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "package": "com.forth.reactnativediabete"
     },
     "web": {
       "output": "static",
@@ -38,7 +39,8 @@
         "expo-image-picker",
         {
           "photosPermission": "L'app utilise tes photos pour illustrer tes récipients.",
-          "cameraPermission": "L'app utilise l'appareil photo pour prendre en photo tes récipients."
+          "cameraPermission": "L'app utilise l'appareil photo pour prendre en photo tes récipients.",
+          "microphonePermission": false
         }
       ],
       "expo-sharing",
