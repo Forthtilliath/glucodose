@@ -6,6 +6,10 @@ export default function SettingsLayout() {
       <Stack.Screen name="index" options={{ title: "Réglages" }} />
       <Stack.Screen name="ratio/[id]" options={{ title: "Ratio insuline/glucides" }} />
       <Stack.Screen name="backup" options={{ title: "Sauvegarde" }} />
+      <Stack.Screen name="help" options={{ title: "Aide" }} />
+      <Stack.Screen name="contact" options={{ title: "Contact" }} />
+      <Stack.Screen name="about" options={{ title: "À propos" }} />
+      <Stack.Screen name="legal" options={{ title: "Mentions légales" }} />
     </Stack>
   );
 }
