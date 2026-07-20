@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { FlatList, Image, Modal, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 
@@ -18,18 +18,38 @@ type Props = {
   onSelect: (item: PickerItem) => void;
   onClose: () => void;
   emptyMessage?: string;
+  // Recherche initiale à l'ouverture (ex: reprendre ce que l'utilisateur a
+  // déjà tapé ailleurs). Par défaut, la recherche démarre vide.
+  initialQuery?: string;
+  // Filtre personnalisé (ex: classement par pertinence) ; par défaut, simple
+  // sous-chaîne insensible à la casse, comme avant.
+  filterItems?: (items: PickerItem[], query: string) => PickerItem[];
 };
 
-export function PickerModal({ visible, title, items, onSelect, onClose, emptyMessage }: Props) {
+export function PickerModal({
+  visible,
+  title,
+  items,
+  onSelect,
+  onClose,
+  emptyMessage,
+  initialQuery,
+  filterItems,
+}: Props) {
   const colors = useColors();
   const styles = useMemo(() => createStyles(colors), [colors]);
-  const [query, setQuery] = useState("");
+  const [query, setQuery] = useState(initialQuery ?? "");
+
+  useEffect(() => {
+    if (visible) setQuery(initialQuery ?? "");
+  }, [visible, initialQuery]);
 
   const filtered = useMemo(() => {
     if (!query.trim()) return items;
+    if (filterItems) return filterItems(items, query);
     const q = query.trim().toLowerCase();
     return items.filter((item) => item.label.toLowerCase().includes(q));
-  }, [items, query]);
+  }, [items, query, filterItems]);
 
   return (
     <Modal visible={visible} animationType="slide" onRequestClose={onClose}>
