@@ -169,6 +169,52 @@ export default function SettingsScreen() {
         <Text style={styles.backupRowText}>Sauvegarde et restauration</Text>
         <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />
       </Pressable>
+
+      <Text style={[styles.sectionTitle, styles.ratiosTitle]}>À propos de l'app</Text>
+
+      <Pressable
+        style={[styles.ratioRow, styles.menuRow]}
+        onPress={() => router.push("/settings/help")}
+        accessibilityRole="button"
+        accessibilityLabel="Aide, présentation de l'app"
+      >
+        <Ionicons name="help-circle-outline" size={20} color={colors.text} />
+        <Text style={styles.backupRowText}>Aide</Text>
+        <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />
+      </Pressable>
+
+      <Pressable
+        style={[styles.ratioRow, styles.menuRow]}
+        onPress={() => router.push("/settings/contact")}
+        accessibilityRole="button"
+        accessibilityLabel="Contact"
+      >
+        <Ionicons name="chatbubble-ellipses-outline" size={20} color={colors.text} />
+        <Text style={styles.backupRowText}>Contact</Text>
+        <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />
+      </Pressable>
+
+      <Pressable
+        style={[styles.ratioRow, styles.menuRow]}
+        onPress={() => router.push("/settings/about")}
+        accessibilityRole="button"
+        accessibilityLabel="À propos de l'app"
+      >
+        <Ionicons name="information-circle-outline" size={20} color={colors.text} />
+        <Text style={styles.backupRowText}>À propos</Text>
+        <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />
+      </Pressable>
+
+      <Pressable
+        style={[styles.ratioRow, styles.menuRow]}
+        onPress={() => router.push("/settings/legal")}
+        accessibilityRole="button"
+        accessibilityLabel="Mentions légales"
+      >
+        <Ionicons name="document-text-outline" size={20} color={colors.text} />
+        <Text style={styles.backupRowText}>Mentions légales</Text>
+        <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />
+      </Pressable>
     </ScrollView>
   );
 }
@@ -232,5 +278,6 @@ function createStyles(colors: ThemeColors) {
     addRatioButtonText: { color: colors.primary, fontSize: 15, fontWeight: "600" },
     backupRow: { marginTop: 28, gap: 10 },
     backupRowText: { flex: 1, fontSize: 15, fontWeight: "600", color: colors.text },
+    menuRow: { gap: 10 },
   });
 }
