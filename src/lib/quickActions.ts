@@ -10,7 +10,10 @@ export const QUICK_ACTIONS: Action[] = [
 ];
 
 const ROUTE_BY_ACTION_ID: Record<string, Href> = {
-  weigh: "/",
+  // Le focus auto du poids brut n'a de sens que pour ce raccourci (peser
+  // tout de suite) — pas au lancement normal de l'app, d'où le paramètre
+  // plutôt qu'un autoFocus inconditionnel sur l'écran.
+  weigh: { pathname: "/", params: { autoFocusWeight: "1" } },
   "add-container": "/containers/new",
   "add-food": "/foods/new",
 };
