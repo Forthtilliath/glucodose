@@ -16,7 +16,7 @@ export default function HelpScreen() {
         éventuellement ajouter une correction si la glycémie est trop haute.
       </Text>
       <Text style={styles.paragraph}>
-        Dose Insuline remplace la calculette : elle mémorise les poids de récipients, les valeurs
+        GlucoDose remplace la calculette : elle mémorise les poids de récipients, les valeurs
         glucidiques des aliments et recettes déjà utilisés, et fait tous les calculs à la volée pendant la
         pesée.
       </Text>

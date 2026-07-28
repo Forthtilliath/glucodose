@@ -11,11 +11,11 @@ export default function AboutScreen() {
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-      <Text style={styles.appName}>Dose Insuline</Text>
+      <Text style={styles.appName}>GlucoDose</Text>
       <Text style={styles.version}>Version {version}</Text>
 
       <Text style={styles.paragraph}>
-        Dose Insuline est un outil personnel d'aide au calcul de dose d'insuline au repas : pesée,
+        GlucoDose est un outil personnel d'aide au calcul de dose d'insuline au repas : pesée,
         aliments, recettes et correction, sans calculette.
       </Text>
       <Text style={styles.paragraph}>

@@ -11,7 +11,7 @@ export default function LegalScreen() {
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
       <Text style={styles.sectionTitle}>Avertissement médical</Text>
       <Text style={styles.paragraph}>
-        Dose Insuline n'est pas un dispositif médical. C'est un outil personnel d'aide au calcul, construit
+        GlucoDose n'est pas un dispositif médical. C'est un outil personnel d'aide au calcul, construit
         pour un usage individuel. Les ratios insuline/glucides, le facteur de sensibilité et les valeurs
         glucidiques saisies doivent provenir de ton équipe soignante (diététicien·ne, diabétologue).
         Vérifie toujours une dose avant de l'injecter. En cas de doute, fie-toi à ton jugement clinique et

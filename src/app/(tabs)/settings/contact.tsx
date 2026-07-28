@@ -11,7 +11,7 @@ export default function ContactScreen() {
   const styles = useMemo(() => createStyles(colors), [colors]);
 
   async function handleEmail() {
-    const url = `mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent("Dose Insuline")}`;
+    const url = `mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent("GlucoDose")}`;
     const canOpen = await Linking.canOpenURL(url);
     if (canOpen) {
       await Linking.openURL(url);
@@ -23,7 +23,7 @@ export default function ContactScreen() {
   async function handleShare() {
     try {
       await Share.share({
-        message: "Dose Insuline, une app pour calculer sa dose d'insuline au repas sans calculette.",
+        message: "GlucoDose, une app pour calculer sa dose d'insuline au repas sans calculette.",
       });
     } catch {
       // L'utilisateur a annulé le partage, rien à faire.
