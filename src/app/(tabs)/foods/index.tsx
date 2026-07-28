@@ -2,10 +2,12 @@ import { useMemo } from "react";
 import { Link, useRouter } from "expo-router";
 import { desc, eq } from "drizzle-orm";
 import { useLiveQuery } from "drizzle-orm/expo-sqlite";
-import { FlatList, Pressable, StyleSheet, Text, View } from "react-native";
+import { Alert, FlatList, Pressable, StyleSheet, Text, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 
+import { SwipeableRow } from "@/components/SwipeableRow";
 import { db } from "@/db/client";
+import { archiveFood, deleteFood, isFoodUsedInRecipes } from "@/db/repository";
 import { foods } from "@/db/schema";
 import { formatCarbs } from "@/lib/insulin";
 import { type ThemeColors, useColors } from "@/theme/colors";
@@ -18,6 +20,25 @@ export default function FoodsScreen() {
     db.select().from(foods).where(eq(foods.isArchived, false)).orderBy(desc(foods.updatedAt))
   );
 
+  async function handleDelete(food: { id: number; name: string }) {
+    const inUse = await isFoodUsedInRecipes(food.id);
+    if (inUse) {
+      Alert.alert(
+        `"${food.name}" est utilisé dans une recette`,
+        "Impossible de le supprimer. Tu peux l'archiver à la place : il n'apparaîtra plus dans les listes mais restera valide dans les recettes existantes.",
+        [
+          { text: "Annuler", style: "cancel" },
+          { text: "Archiver", onPress: () => archiveFood(food.id) },
+        ]
+      );
+      return;
+    }
+    Alert.alert(`Supprimer "${food.name}" ?`, "Cette action est définitive.", [
+      { text: "Annuler", style: "cancel" },
+      { text: "Supprimer", style: "destructive", onPress: () => deleteFood(food.id) },
+    ]);
+  }
+
   return (
     <View style={styles.container}>
       <FlatList
@@ -28,24 +49,26 @@ export default function FoodsScreen() {
           <Text style={styles.empty}>Aucun aliment enregistré pour l'instant.</Text>
         }
         renderItem={({ item }) => (
-          <Pressable
-            style={styles.row}
-            onPress={() =>
-              router.push(
-                item.type === "recipe" ? `/foods/recipe/${item.id}` : `/foods/ingredient/${item.id}`
-              )
-            }
-            accessibilityRole="button"
-            accessibilityLabel={`${item.type === "recipe" ? "Recette" : "Ingrédient"} ${item.name}, ${formatCarbs(item.carbsPer100g)} pour 100g. Modifier.`}
-          >
-            <View style={styles.rowMain}>
-              <View style={[styles.badge, item.type === "recipe" ? styles.badgeRecipe : styles.badgeIngredient]}>
-                <Text style={styles.badgeText}>{item.type === "recipe" ? "Recette" : "Ingrédient"}</Text>
+          <SwipeableRow onDelete={() => handleDelete(item)} deleteLabel={`Supprimer l'aliment ${item.name}`}>
+            <Pressable
+              style={styles.row}
+              onPress={() =>
+                router.push(
+                  item.type === "recipe" ? `/foods/recipe/${item.id}` : `/foods/ingredient/${item.id}`
+                )
+              }
+              accessibilityRole="button"
+              accessibilityLabel={`${item.type === "recipe" ? "Recette" : "Ingrédient"} ${item.name}, ${formatCarbs(item.carbsPer100g)} pour 100g. Modifier.`}
+            >
+              <View style={styles.rowMain}>
+                <View style={[styles.badge, item.type === "recipe" ? styles.badgeRecipe : styles.badgeIngredient]}>
+                  <Text style={styles.badgeText}>{item.type === "recipe" ? "Recette" : "Ingrédient"}</Text>
+                </View>
+                <Text style={styles.rowLabel}>{item.name}</Text>
               </View>
-              <Text style={styles.rowLabel}>{item.name}</Text>
-            </View>
-            <Text style={styles.rowValue}>{formatCarbs(item.carbsPer100g)}/100g</Text>
-          </Pressable>
+              <Text style={styles.rowValue}>{formatCarbs(item.carbsPer100g)}/100g</Text>
+            </Pressable>
+          </SwipeableRow>
         )}
       />
       <Link href="/foods/new" asChild>

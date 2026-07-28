@@ -2,10 +2,12 @@ import { useMemo } from "react";
 import { Link, useRouter } from "expo-router";
 import { desc } from "drizzle-orm";
 import { useLiveQuery } from "drizzle-orm/expo-sqlite";
-import { FlatList, Image, Pressable, StyleSheet, Text, View } from "react-native";
+import { Alert, FlatList, Image, Pressable, StyleSheet, Text, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 
+import { SwipeableRow } from "@/components/SwipeableRow";
 import { db } from "@/db/client";
+import { deleteContainer } from "@/db/repository";
 import { containers } from "@/db/schema";
 import { formatWeight } from "@/lib/insulin";
 import { type ThemeColors, useColors } from "@/theme/colors";
@@ -15,6 +17,17 @@ export default function ContainersScreen() {
   const styles = useMemo(() => createStyles(colors), [colors]);
   const router = useRouter();
   const { data } = useLiveQuery(db.select().from(containers).orderBy(desc(containers.updatedAt)));
+
+  function handleDelete(container: { id: number; name: string; photoUri: string | null }) {
+    Alert.alert(`Supprimer "${container.name}" ?`, "Cette action est définitive.", [
+      { text: "Annuler", style: "cancel" },
+      {
+        text: "Supprimer",
+        style: "destructive",
+        onPress: () => deleteContainer(container.id, container.photoUri),
+      },
+    ]);
+  }
 
   return (
     <View style={styles.container}>
@@ -26,25 +39,27 @@ export default function ContainersScreen() {
           <Text style={styles.empty}>Aucun récipient enregistré pour l'instant.</Text>
         }
         renderItem={({ item }) => (
-          <Pressable
-            style={styles.row}
-            onPress={() => router.push(`/containers/${item.id}`)}
-            accessibilityRole="button"
-            accessibilityLabel={`Récipient ${item.name}, tare ${formatWeight(item.tareWeightG)}. Modifier.`}
-          >
-            {item.photoUri ? (
-              <Image source={{ uri: item.photoUri }} style={styles.thumbnail} accessibilityIgnoresInvertColors />
-            ) : (
-              <View style={styles.thumbnailPlaceholder}>
-                <Ionicons name="cube-outline" size={22} color={colors.textMuted} />
+          <SwipeableRow onDelete={() => handleDelete(item)} deleteLabel={`Supprimer le récipient ${item.name}`}>
+            <Pressable
+              style={styles.row}
+              onPress={() => router.push(`/containers/${item.id}`)}
+              accessibilityRole="button"
+              accessibilityLabel={`Récipient ${item.name}, tare ${formatWeight(item.tareWeightG)}. Modifier.`}
+            >
+              {item.photoUri ? (
+                <Image source={{ uri: item.photoUri }} style={styles.thumbnail} accessibilityIgnoresInvertColors />
+              ) : (
+                <View style={styles.thumbnailPlaceholder}>
+                  <Ionicons name="cube-outline" size={22} color={colors.textMuted} />
+                </View>
+              )}
+              <View style={styles.rowMain}>
+                <Text style={styles.rowLabel}>{item.name}</Text>
+                {item.notes ? <Text style={styles.rowSubtitle}>{item.notes}</Text> : null}
               </View>
-            )}
-            <View style={styles.rowMain}>
-              <Text style={styles.rowLabel}>{item.name}</Text>
-              {item.notes ? <Text style={styles.rowSubtitle}>{item.notes}</Text> : null}
-            </View>
-            <Text style={styles.rowWeight}>{formatWeight(item.tareWeightG)}</Text>
-          </Pressable>
+              <Text style={styles.rowWeight}>{formatWeight(item.tareWeightG)}</Text>
+            </Pressable>
+          </SwipeableRow>
         )}
       />
       <Link href="/containers/new" asChild>
