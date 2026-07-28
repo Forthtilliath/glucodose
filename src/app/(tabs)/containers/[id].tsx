@@ -30,6 +30,7 @@ export default function ContainerFormScreen() {
   const [tareWeight, setTareWeight] = useState("");
   const [notes, setNotes] = useState("");
   const [photoUri, setPhotoUri] = useState<string | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
     if (existing) {
@@ -92,27 +93,36 @@ export default function ContainerFormScreen() {
   }
 
   async function handleSave() {
-    // Nettoie l'ancienne photo sur disque si elle a été remplacée ou retirée,
-    // pour ne pas accumuler des fichiers orphelins au fil des éditions.
-    if (existing?.photoUri && existing.photoUri !== photoUri) {
-      deleteContainerPhoto(existing.photoUri);
+    // Garde contre le double tap : sans ça, plusieurs taps rapides avant que
+    // la navigation retour ne se produise créaient plusieurs récipients
+    // identiques (chaque tap relançait handleSave en parallèle).
+    if (isSaving) return;
+    setIsSaving(true);
+    try {
+      // Nettoie l'ancienne photo sur disque si elle a été remplacée ou retirée,
+      // pour ne pas accumuler des fichiers orphelins au fil des éditions.
+      if (existing?.photoUri && existing.photoUri !== photoUri) {
+        deleteContainerPhoto(existing.photoUri);
+      }
+      if (isNew) {
+        await createContainer({
+          name: name.trim(),
+          tareWeightG: parsedTareWeight,
+          photoUri,
+          notes: notes.trim() || undefined,
+        });
+      } else {
+        await updateContainer(containerId as number, {
+          name: name.trim(),
+          tareWeightG: parsedTareWeight,
+          photoUri,
+          notes: notes.trim() || undefined,
+        });
+      }
+      router.back();
+    } finally {
+      setIsSaving(false);
     }
-    if (isNew) {
-      await createContainer({
-        name: name.trim(),
-        tareWeightG: parsedTareWeight,
-        photoUri,
-        notes: notes.trim() || undefined,
-      });
-    } else {
-      await updateContainer(containerId as number, {
-        name: name.trim(),
-        tareWeightG: parsedTareWeight,
-        photoUri,
-        notes: notes.trim() || undefined,
-      });
-    }
-    router.back();
   }
 
   function handleDelete() {
@@ -189,11 +199,11 @@ export default function ContainerFormScreen() {
       />
 
       <Pressable
-        style={[styles.saveButton, !canSave && styles.saveButtonDisabled]}
-        disabled={!canSave}
+        style={[styles.saveButton, (!canSave || isSaving) && styles.saveButtonDisabled]}
+        disabled={!canSave || isSaving}
         onPress={handleSave}
         accessibilityRole="button"
-        accessibilityState={{ disabled: !canSave }}
+        accessibilityState={{ disabled: !canSave || isSaving }}
         accessibilityLabel="Enregistrer le récipient"
       >
         <Text style={styles.saveButtonText}>Enregistrer</Text>
