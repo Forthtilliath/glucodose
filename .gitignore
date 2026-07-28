@@ -47,3 +47,11 @@ example
 
 # fichier source Ciqual brut téléchargé (voir scripts/import-ciqual.mjs)
 scripts/ciqual-source/
+
+# Docs internes de travail : gardées en local, pas publiées sur le repo
+# GitHub public. Seuls README/CHANGELOG sont exclus de la règle : tout
+# nouveau .md est ignoré par défaut, pas besoin de penser à l'ajouter ici à
+# chaque fois.
+*.md
+!README.md
+!CHANGELOG.md

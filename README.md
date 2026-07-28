@@ -205,8 +205,6 @@ génère un fichier SQL dans `drizzle/`, appliqué automatiquement au démarrage
 
 ## Idées pour la suite
 
-Liste complète et à jour dans [`UPGRADES.md`](./UPGRADES.md). En bref, les pistes non encore faites :
-
 - Export PDF de l'historique, pensé pour être montré à un·e soignant·e
 - Photos également sur les aliments/recettes
 - Historique filtrable par aliment ou par période

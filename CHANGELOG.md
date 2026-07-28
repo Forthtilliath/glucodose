@@ -22,7 +22,7 @@ Première version suivie. L'app était déjà fonctionnelle avant cette date (hi
 - Tests unitaires du moteur de calcul (`src/lib/insulin.ts`).
 
 ### Corrigé
-- Voir [`UPGRADES.md`](./UPGRADES.md) pour le détail des corrections de robustesse/sécurité (validation des valeurs négatives, contraintes de clé étrangère SQLite, permission microphone superflue, etc.).
+- Validation des valeurs négatives (poids, glucides, glycémie), contraintes de clé étrangère SQLite activées, permission microphone superflue retirée.
 
 [Unreleased]: https://github.com/Forthtilliath/glucodose/compare/v1.0.0...HEAD
 [1.0.0]: https://github.com/Forthtilliath/glucodose/releases/tag/v1.0.0
