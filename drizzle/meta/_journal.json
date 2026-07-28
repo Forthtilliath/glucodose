@@ -15,6 +15,13 @@
       "when": 1784494061677,
       "tag": "0001_sturdy_nehzno",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1785271196631,
+      "tag": "0002_previous_azazel",
+      "breakpoints": true
     }
   ]
 }

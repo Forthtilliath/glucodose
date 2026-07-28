@@ -51,14 +51,18 @@ export async function createIngredient(input: {
   carbsPer100g: number;
   source?: string;
   notes?: string;
-}) {
-  await db.insert(foods).values({
-    name: input.name,
-    type: "ingredient",
-    carbsPer100g: input.carbsPer100g,
-    source: input.source,
-    notes: input.notes,
-  });
+}): Promise<number> {
+  const [row] = await db
+    .insert(foods)
+    .values({
+      name: input.name,
+      type: "ingredient",
+      carbsPer100g: input.carbsPer100g,
+      source: input.source,
+      notes: input.notes,
+    })
+    .returning({ id: foods.id });
+  return row.id;
 }
 
 export async function updateIngredient(
@@ -200,6 +204,7 @@ export async function updateSettings(input: {
   glycemiaUnit: "mmol/L" | "g/L";
   targetGlycemia: number | null;
   sensitivityFactor: number | null;
+  showInsulinDose: boolean;
 }) {
   await db
     .insert(settings)
@@ -208,6 +213,7 @@ export async function updateSettings(input: {
       glycemiaUnit: input.glycemiaUnit,
       targetGlycemia: input.targetGlycemia,
       sensitivityFactor: input.sensitivityFactor,
+      showInsulinDose: input.showInsulinDose,
     })
     .onConflictDoUpdate({
       target: settings.id,
@@ -215,6 +221,7 @@ export async function updateSettings(input: {
         glycemiaUnit: input.glycemiaUnit,
         targetGlycemia: input.targetGlycemia,
         sensitivityFactor: input.sensitivityFactor,
+        showInsulinDose: input.showInsulinDose,
         updatedAt: new Date().toISOString(),
       },
     });

@@ -14,22 +14,13 @@ import {
   updateIngredient,
 } from "@/db/repository";
 import { foods } from "@/db/schema";
-import { ALL_CIQUAL_FOODS, normalizeForSearch, searchCiqualFoods, type CiqualFood } from "@/lib/ciqual";
+import { ALL_CIQUAL_FOODS, rankByNameMatch, searchCiqualFoods, type CiqualFood } from "@/lib/ciqual";
 import { formatCarbs, MAX_CARBS_PER_100G } from "@/lib/insulin";
 import { type ThemeColors, useColors } from "@/theme/colors";
 import { PickerModal, type PickerItem } from "@/components/PickerModal";
 
 function filterCiqualItems(items: PickerItem[], query: string): PickerItem[] {
-  const normalizedQuery = normalizeForSearch(query);
-  const matches: { item: PickerItem; matchIndex: number }[] = [];
-  for (const item of items) {
-    const matchIndex = normalizeForSearch(item.label).indexOf(normalizedQuery);
-    if (matchIndex !== -1) {
-      matches.push({ item, matchIndex });
-    }
-  }
-  matches.sort((a, b) => a.matchIndex - b.matchIndex || a.item.label.length - b.item.label.length);
-  return matches.map((m) => m.item);
+  return rankByNameMatch(items, query, (item) => item.label);
 }
 
 export default function IngredientFormScreen() {
