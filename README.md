@@ -1,6 +1,6 @@
 <div align="center">
 
-# 🩺 Dose Insuline
+# 🩺 GlucoDose
 
 **Calculateur de dose d'insuline au repas — pesée, aliments, recettes et correction, sans calculette.**
 
@@ -33,11 +33,13 @@ Cette app remplace la calculette : elle mémorise les poids de récipients, les 
 
 | Écran | Rôle |
 |---|---|
-| **⚖️ Peser** | Flux principal : choisir un récipient (ou une tare manuelle) → peser → poids net automatique → choisir l'aliment → choisir le ratio → dose repas + correction optionnelle affichées en direct, avant enregistrement dans l'historique |
-| **🍽️ Aliments** | CRUD des ingrédients simples (glucides/100g) et des recettes composées. Une recette calcule ses glucides/100g à partir de ses composants pesés, puis devient réutilisable **exactement comme un ingrédient** dans l'écran Peser |
+| **⚖️ Peser** | Flux principal : choisir un récipient (ou une tare manuelle) → peser → poids net automatique → choisir l'aliment → choisir le ratio → dose repas + correction optionnelle affichées en direct, avant enregistrement dans l'historique. Un réglage permet de s'arrêter au calcul des glucides, sans dose (voir Réglages) |
+| **🍽️ Aliments** | CRUD des ingrédients simples (glucides/100g) et des recettes composées. Une recette calcule ses glucides/100g à partir de ses composants pesés, puis devient réutilisable **exactement comme un ingrédient** dans l'écran Peser. Suggestions automatiques depuis la table **Ciqual** (Anses) pendant la frappe, avec une recherche complète accessible en un tap |
 | **📦 Récipients** | CRUD des récipients avec leur poids à vide, et une **photo** (prise ou choisie en galerie) pour les repérer d'un coup d'œil dans le sélecteur |
-| **⚙️ Réglages** | Ratios insuline/glucides (un ou plusieurs, ex. un par repas), glycémie cible et facteur de sensibilité pour la dose de correction, unité (mmol/L ou g/L), export/import JSON complet de la base |
+| **⚙️ Réglages** | Activer/désactiver le calcul de dose (mode "glucides seuls"), ratios insuline/glucides (un ou plusieurs, ex. un par repas), glycémie cible et facteur de sensibilité pour la dose de correction, unité (mmol/L ou g/L), export/import JSON complet de la base, Aide / Contact / À propos / Mentions légales |
 | **🕘 Historique** | Journal des pesées enregistrées, avec le détail dose repas / dose de correction |
+
+Depuis l'écran Peser, les sheets de sélection récipient/aliment permettent aussi d'**ajouter directement** un nouveau récipient, un nouvel aliment/recette, ou un aliment trouvé dans **Ciqual** (créé et sélectionné en un tap, sans quitter l'écran).
 
 Un appui long sur l'icône de l'app propose aussi des **raccourcis directs** : Peser, Nouveau récipient, Nouvel aliment.
 
@@ -100,6 +102,7 @@ erDiagram
         text glycemiaUnit
         real targetGlycemia
         real sensitivityFactor
+        bool showInsulinDose
     }
     WEIGHINGS {
         int id PK
@@ -139,14 +142,19 @@ src/
 │   └── repository.ts             # Toutes les écritures (create/update/delete)
 ├── lib/
 │   ├── insulin.ts                # Formules de calcul, seule source de vérité
+│   ├── ciqual.ts                 # Recherche dans la table Ciqual (Anses) bundlée en local
 │   └── photos.ts                 # Stockage permanent des photos de récipients
 ├── components/
-│   └── PickerModal.tsx           # Sélecteur générique (recherche + miniature)
+│   └── PickerModal.tsx           # Sélecteur générique (recherche + miniature + ajout rapide)
 └── theme/
     └── colors.ts
 
+assets/data/ciqual.json            # Table Ciqual pré-traitée (voir scripts/import-ciqual.mjs)
 drizzle/                          # Migrations SQL générées (versionnées)
 drizzle.config.ts
+scripts/
+├── import-ciqual.mjs             # Convertit le fichier officiel Ciqual (Anses) en assets/data/ciqual.json
+└── generate-icons.mjs            # Génère les icônes de l'app (assets/images/)
 ```
 
 ## Démarrer le projet
@@ -177,6 +185,8 @@ Scanner le QR code affiché avec Expo Go, ou lancer un simulateur iOS (`i`) / é
 | `npm run lint` | Lint du projet |
 | `npx tsc --noEmit` | Vérification TypeScript |
 | `npx drizzle-kit generate` | Génère une migration SQL après modification de `src/db/schema.ts` |
+| `npm run import-ciqual` | Reconvertit le fichier Ciqual (Anses) en `assets/data/ciqual.json` (voir le script pour l'URL source) |
+| `npm run generate-icons` | Régénère les icônes de l'app (`assets/images/`) à partir des formes définies dans le script |
 
 ### Base de données & migrations
 
@@ -188,8 +198,16 @@ npx drizzle-kit generate
 
 génère un fichier SQL dans `drizzle/`, appliqué automatiquement au démarrage de l'app (écran de chargement le temps de la migration). Les migrations sont versionnées avec le code — ne jamais les modifier a posteriori une fois publiées, toujours en générer de nouvelles.
 
+## Versioning & contribution
+
+- Le suivi des changements se fait dans [`CHANGELOG.md`](./CHANGELOG.md) (format [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/)), avec des versions [semver](https://semver.org/lang/fr/) (`version` dans `package.json`/`app.json`).
+- La branche `main` est protégée : tout changement passe par une branche dédiée + une Pull Request (pas de push direct).
+
 ## Idées pour la suite
 
+Liste complète et à jour dans [`UPGRADES.md`](./UPGRADES.md). En bref, les pistes non encore faites :
+
+- Export PDF de l'historique, pensé pour être montré à un·e soignant·e
 - Photos également sur les aliments/recettes
 - Historique filtrable par aliment ou par période
 
