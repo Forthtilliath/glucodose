@@ -7,7 +7,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { db } from "@/db/client";
 import { deleteWeighing } from "@/db/repository";
 import { weighings } from "@/db/schema";
-import { formatInsulinUnits, formatWeight } from "@/lib/insulin";
+import { formatCarbs, formatInsulinUnits, formatWeight } from "@/lib/insulin";
 import { type ThemeColors, useColors } from "@/theme/colors";
 
 export default function HistoryScreen() {
@@ -33,7 +33,11 @@ export default function HistoryScreen() {
           <View
             style={styles.row}
             accessible
-            accessibilityLabel={`${item.foodNameSnapshot}, le ${new Date(item.weighedAt).toLocaleString("fr-FR")}, dose totale ${formatInsulinUnits(item.totalInsulinUnits)} unités`}
+            accessibilityLabel={
+              item.ratioLabelSnapshot
+                ? `${item.foodNameSnapshot}, le ${new Date(item.weighedAt).toLocaleString("fr-FR")}, dose totale ${formatInsulinUnits(item.totalInsulinUnits)} unités`
+                : `${item.foodNameSnapshot}, le ${new Date(item.weighedAt).toLocaleString("fr-FR")}, ${formatCarbs(item.carbsG)} de glucides`
+            }
           >
             <View style={styles.rowMain}>
               <Text style={styles.rowLabel}>{item.foodNameSnapshot}</Text>
@@ -49,7 +53,9 @@ export default function HistoryScreen() {
                 </Text>
               )}
             </View>
-            <Text style={styles.rowValue}>{formatInsulinUnits(item.totalInsulinUnits)} U</Text>
+            {item.ratioLabelSnapshot && (
+              <Text style={styles.rowValue}>{formatInsulinUnits(item.totalInsulinUnits)} U</Text>
+            )}
             <Pressable
               onPress={() => handleDelete(item.id)}
               hitSlop={10}

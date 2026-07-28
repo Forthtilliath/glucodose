@@ -1,0 +1,1 @@
+ALTER TABLE `settings` ADD `show_insulin_dose` integer DEFAULT true NOT NULL;

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { FlatList, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
+import { FlatList, Pressable, ScrollView, StyleSheet, Switch, Text, TextInput, View } from "react-native";
 import { eq } from "drizzle-orm";
 import { useLiveQuery } from "drizzle-orm/expo-sqlite";
 import { useRouter } from "expo-router";
@@ -22,6 +22,7 @@ export default function SettingsScreen() {
   const [glycemiaUnit, setGlycemiaUnit] = useState<"mmol/L" | "g/L">("mmol/L");
   const [targetGlycemia, setTargetGlycemia] = useState("");
   const [sensitivityFactor, setSensitivityFactor] = useState("");
+  const [showInsulinDose, setShowInsulinDose] = useState(true);
 
   useEffect(() => {
     if (currentSettings) {
@@ -30,6 +31,7 @@ export default function SettingsScreen() {
       setSensitivityFactor(
         currentSettings.sensitivityFactor != null ? String(currentSettings.sensitivityFactor) : ""
       );
+      setShowInsulinDose(currentSettings.showInsulinDose);
     }
   }, [currentSettings]);
 
@@ -50,12 +52,41 @@ export default function SettingsScreen() {
       glycemiaUnit,
       targetGlycemia: targetGlycemia.trim() ? parseFloat(targetGlycemia) : null,
       sensitivityFactor: sensitivityFactor.trim() ? parseFloat(sensitivityFactor) : null,
+      showInsulinDose,
+    });
+  }
+
+  // Bascule à effet immédiat (pas besoin de passer par "Enregistrer les
+  // réglages"), comme n'importe quel interrupteur de préférence.
+  async function handleToggleShowInsulinDose(value: boolean) {
+    setShowInsulinDose(value);
+    await updateSettings({
+      glycemiaUnit,
+      targetGlycemia: targetGlycemia.trim() ? parseFloat(targetGlycemia) : null,
+      sensitivityFactor: sensitivityFactor.trim() ? parseFloat(sensitivityFactor) : null,
+      showInsulinDose: value,
     });
   }
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-      <Text style={styles.sectionTitle}>Correction d'hyperglycémie</Text>
+      <Text style={styles.sectionTitle}>Calcul de dose</Text>
+      <View style={styles.toggleRow}>
+        <View style={styles.toggleRowText}>
+          <Text style={styles.toggleRowLabel}>Afficher le calcul de dose d'insuline</Text>
+          <Text style={styles.helpText}>
+            Désactive pour t'arrêter au calcul des glucides (étape 3), sans ratio ni dose d'insuline.
+          </Text>
+        </View>
+        <Switch
+          value={showInsulinDose}
+          onValueChange={handleToggleShowInsulinDose}
+          trackColor={{ true: colors.primary }}
+          accessibilityLabel="Afficher le calcul de dose d'insuline"
+        />
+      </View>
+
+      <Text style={[styles.sectionTitle, styles.ratiosTitle]}>Correction d'hyperglycémie</Text>
       <Text style={styles.helpText}>
         Optionnel. Renseigné, l'écran Peser proposera d'ajouter une dose de correction en plus de la dose
         repas, selon ta glycémie actuelle.
@@ -226,6 +257,19 @@ function createStyles(colors: ThemeColors) {
     sectionTitle: { fontSize: 15, fontWeight: "700", color: colors.text, marginTop: 8 },
     ratiosTitle: { marginTop: 28 },
     helpText: { fontSize: 12, color: colors.textMuted, marginTop: 4, marginBottom: 4 },
+    toggleRow: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 12,
+      backgroundColor: colors.surface,
+      borderWidth: 1,
+      borderColor: colors.border,
+      borderRadius: 10,
+      padding: 14,
+      marginTop: 8,
+    },
+    toggleRowText: { flex: 1 },
+    toggleRowLabel: { fontSize: 15, fontWeight: "600", color: colors.text },
     label: { fontSize: 13, fontWeight: "600", color: colors.textMuted, marginTop: 12 },
     input: {
       backgroundColor: colors.surface,

@@ -24,6 +24,9 @@ type Props = {
   // Filtre personnalisé (ex: classement par pertinence) ; par défaut, simple
   // sous-chaîne insensible à la casse, comme avant.
   filterItems?: (items: PickerItem[], query: string) => PickerItem[];
+  // Actions "ajouter" toujours visibles en haut de la liste, même si la
+  // recherche ne matche rien (contrairement aux résultats, filtrés).
+  extraActions?: { label: string; onPress: () => void }[];
 };
 
 export function PickerModal({
@@ -35,6 +38,7 @@ export function PickerModal({
   emptyMessage,
   initialQuery,
   filterItems,
+  extraActions,
 }: Props) {
   const colors = useColors();
   const styles = useMemo(() => createStyles(colors), [colors]);
@@ -72,6 +76,25 @@ export function PickerModal({
         <FlatList
           data={filtered}
           keyExtractor={(item) => String(item.id)}
+          keyboardShouldPersistTaps="handled"
+          ListHeaderComponent={
+            extraActions && extraActions.length > 0 ? (
+              <View style={styles.extraActions}>
+                {extraActions.map((action) => (
+                  <Pressable
+                    key={action.label}
+                    style={styles.row}
+                    onPress={action.onPress}
+                    accessibilityRole="button"
+                    accessibilityLabel={action.label}
+                  >
+                    <Ionicons name="add-circle-outline" size={20} color={colors.primary} />
+                    <Text style={[styles.rowLabel, styles.extraActionLabel]}>{action.label}</Text>
+                  </Pressable>
+                ))}
+              </View>
+            ) : null
+          }
           ListEmptyComponent={
             <Text style={styles.empty}>{emptyMessage ?? "Aucun résultat."}</Text>
           }
@@ -145,5 +168,7 @@ function createStyles(colors: ThemeColors) {
     rowLabel: { fontSize: 16, fontWeight: "600", color: colors.text },
     rowSubtitle: { fontSize: 13, color: colors.textMuted, marginTop: 2 },
     empty: { textAlign: "center", color: colors.textMuted, marginTop: 24 },
+    extraActions: { marginBottom: 4 },
+    extraActionLabel: { color: colors.primary },
   });
 }

@@ -2,13 +2,14 @@ import { useEffect, useMemo, useState } from "react";
 import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
 import { eq } from "drizzle-orm";
 import { useLiveQuery } from "drizzle-orm/expo-sqlite";
-import { useLocalSearchParams } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 
 import { PickerModal, type PickerItem } from "@/components/PickerModal";
 import { db } from "@/db/client";
-import { recordWeighing } from "@/db/repository";
+import { createIngredient, recordWeighing } from "@/db/repository";
 import { containers, foods, insulinRatios, settings } from "@/db/schema";
+import { ALL_CIQUAL_FOODS, rankByNameMatch } from "@/lib/ciqual";
 import {
   computeCarbsGrams,
   computeCorrectionInsulinUnits,
@@ -21,10 +22,15 @@ import {
 } from "@/lib/insulin";
 import { type ThemeColors, useColors } from "@/theme/colors";
 
+function filterCiqualPickerItems(items: PickerItem[], query: string): PickerItem[] {
+  return rankByNameMatch(items, query, (item) => item.label);
+}
+
 export default function WeighScreen() {
   const colors = useColors();
   const styles = useMemo(() => createStyles(colors), [colors]);
   const { autoFocusWeight } = useLocalSearchParams<{ autoFocusWeight?: string }>();
+  const router = useRouter();
 
   const { data: containerList } = useLiveQuery(db.select().from(containers).orderBy(containers.name));
   const { data: foodList } = useLiveQuery(
@@ -36,7 +42,8 @@ export default function WeighScreen() {
   const targetGlycemia = appSettings?.targetGlycemia ?? null;
   const sensitivityFactor = appSettings?.sensitivityFactor ?? null;
   const glycemiaUnit = appSettings?.glycemiaUnit ?? null;
-  const correctionAvailable = targetGlycemia != null && sensitivityFactor != null;
+  const showInsulinDose = appSettings?.showInsulinDose ?? true;
+  const correctionAvailable = showInsulinDose && targetGlycemia != null && sensitivityFactor != null;
 
   const [selectedContainerId, setSelectedContainerId] = useState<number | null>(null);
   const [manualTare, setManualTare] = useState("0");
@@ -48,15 +55,17 @@ export default function WeighScreen() {
   const [containerPickerVisible, setContainerPickerVisible] = useState(false);
   const [foodPickerVisible, setFoodPickerVisible] = useState(false);
   const [ratioPickerVisible, setRatioPickerVisible] = useState(false);
+  const [ciqualQuickAddVisible, setCiqualQuickAddVisible] = useState(false);
   const [savedMessage, setSavedMessage] = useState<string | null>(null);
 
   // Sélectionne le premier ratio disponible par défaut, pour éviter un clic
-  // supplémentaire quand une seule tranche horaire est configurée.
+  // supplémentaire quand une seule tranche horaire est configurée. Inutile
+  // (et faussement rassurant) si le calcul de dose est désactivé.
   useEffect(() => {
-    if (selectedRatioId == null && ratioList && ratioList.length > 0) {
+    if (showInsulinDose && selectedRatioId == null && ratioList && ratioList.length > 0) {
       setSelectedRatioId(ratioList[0].id);
     }
-  }, [ratioList, selectedRatioId]);
+  }, [ratioList, selectedRatioId, showInsulinDose]);
 
   const selectedContainer = (containerList ?? []).find((c) => c.id === selectedContainerId) ?? null;
   const selectedFood = (foodList ?? []).find((f) => f.id === selectedFoodId) ?? null;
@@ -114,16 +123,37 @@ export default function WeighScreen() {
       })),
     [ratioList]
   );
+  const ciqualItems: PickerItem[] = useMemo(
+    () =>
+      ALL_CIQUAL_FOODS.map((food, index) => ({
+        id: index,
+        label: food.name,
+        subtitle: `${formatCarbs(food.carbsPer100g)} / 100 g`,
+      })),
+    []
+  );
+
+  async function handleSelectCiqualQuickAdd(item: PickerItem) {
+    const food = ALL_CIQUAL_FOODS[item.id];
+    if (!food) return;
+    const newFoodId = await createIngredient({
+      name: food.name,
+      carbsPer100g: food.carbsPer100g,
+      source: "Ciqual",
+    });
+    setSelectedFoodId(newFoodId);
+    setCiqualQuickAddVisible(false);
+  }
 
   const canSave =
     grossWeightValid &&
     grossWeightNumber > 0 &&
     (selectedContainer != null || manualTareValid) &&
     selectedFood != null &&
-    selectedRatio != null;
+    (!showInsulinDose || selectedRatio != null);
 
   async function handleSave() {
-    if (!selectedFood || !selectedRatio) return;
+    if (!selectedFood || (showInsulinDose && !selectedRatio)) return;
     await recordWeighing({
       foodId: selectedFood.id,
       foodName: selectedFood.name,
@@ -133,18 +163,21 @@ export default function WeighScreen() {
       netWeightG,
       carbsPer100g: selectedFood.carbsPer100g,
       carbsG,
-      ratioId: selectedRatio.id,
-      ratioLabel: selectedRatio.label,
-      carbsGramsPerUnit: selectedRatio.carbsGramsPerUnit,
-      mealInsulinUnits,
-      glycemiaUnit,
-      currentGlycemia: !Number.isNaN(currentGlycemiaNumber) ? currentGlycemiaNumber : null,
-      targetGlycemia,
-      sensitivityFactor,
-      correctionInsulinUnits,
-      totalInsulinUnits,
+      ratioId: showInsulinDose && selectedRatio ? selectedRatio.id : null,
+      ratioLabel: showInsulinDose && selectedRatio ? selectedRatio.label : null,
+      carbsGramsPerUnit: showInsulinDose && selectedRatio ? selectedRatio.carbsGramsPerUnit : null,
+      mealInsulinUnits: showInsulinDose ? mealInsulinUnits : 0,
+      glycemiaUnit: showInsulinDose ? glycemiaUnit : null,
+      currentGlycemia: showInsulinDose && !Number.isNaN(currentGlycemiaNumber) ? currentGlycemiaNumber : null,
+      targetGlycemia: showInsulinDose ? targetGlycemia : null,
+      sensitivityFactor: showInsulinDose ? sensitivityFactor : null,
+      correctionInsulinUnits: showInsulinDose ? correctionInsulinUnits : 0,
+      totalInsulinUnits: showInsulinDose ? totalInsulinUnits : 0,
     });
-    setSavedMessage(`Pesée enregistrée : ${formatInsulinUnits(totalInsulinUnits)} U pour ${selectedFood.name}`);
+    const savedText = showInsulinDose
+      ? `Pesée enregistrée : ${formatInsulinUnits(totalInsulinUnits)} U pour ${selectedFood.name}`
+      : `Pesée enregistrée : ${formatCarbs(carbsG)} de glucides pour ${selectedFood.name}`;
+    setSavedMessage(savedText);
     setGrossWeight("");
     setSelectedFoodId(null);
     setCurrentGlycemia("");
@@ -219,29 +252,33 @@ export default function WeighScreen() {
         <Text style={styles.selectorLabel}>{selectedFood ? selectedFood.name : "Choisir un aliment"}</Text>
         <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />
       </Pressable>
-      {selectedFood ? (
+      {selectedFood && showInsulinDose ? (
         <Text style={styles.netWeightHint}>{formatCarbs(carbsG)} de glucides</Text>
       ) : null}
 
-      <Text style={styles.sectionTitle}>4. Ratio insuline/glucides</Text>
-      <Pressable
-        style={styles.selector}
-        onPress={() => setRatioPickerVisible(true)}
-        disabled={(ratioList ?? []).length === 0}
-        accessibilityRole="button"
-        accessibilityLabel={
-          selectedRatio
-            ? `Ratio : ${selectedRatio.label}, 1 unité pour ${formatCarbs(selectedRatio.carbsGramsPerUnit)}. Modifier.`
-            : "Aucun ratio configuré, va dans Réglages"
-        }
-      >
-        <Text style={styles.selectorLabel}>
-          {selectedRatio
-            ? `${selectedRatio.label} (1 U / ${formatCarbs(selectedRatio.carbsGramsPerUnit)})`
-            : "Aucun ratio configuré — va dans Réglages"}
-        </Text>
-        <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />
-      </Pressable>
+      {showInsulinDose && (
+        <>
+          <Text style={styles.sectionTitle}>4. Ratio insuline/glucides</Text>
+          <Pressable
+            style={styles.selector}
+            onPress={() => setRatioPickerVisible(true)}
+            disabled={(ratioList ?? []).length === 0}
+            accessibilityRole="button"
+            accessibilityLabel={
+              selectedRatio
+                ? `Ratio : ${selectedRatio.label}, 1 unité pour ${formatCarbs(selectedRatio.carbsGramsPerUnit)}. Modifier.`
+                : "Aucun ratio configuré, va dans Réglages"
+            }
+          >
+            <Text style={styles.selectorLabel}>
+              {selectedRatio
+                ? `${selectedRatio.label} (1 U / ${formatCarbs(selectedRatio.carbsGramsPerUnit)})`
+                : "Aucun ratio configuré — va dans Réglages"}
+            </Text>
+            <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />
+          </Pressable>
+        </>
+      )}
 
       {correctionAvailable && (
         <>
@@ -266,20 +303,33 @@ export default function WeighScreen() {
         </>
       )}
 
-      <View
-        style={styles.resultBox}
-        accessible
-        accessibilityLabel={`Dose d'insuline totale : ${formatInsulinUnits(totalInsulinUnits)} unités`}
-      >
-        <Text style={styles.resultLabel}>Dose d'insuline totale</Text>
-        <Text style={styles.resultValue}>{formatInsulinUnits(totalInsulinUnits)} U</Text>
-        {correctionInsulinUnits > 0 && (
-          <Text style={styles.resultBreakdown}>
-            {formatInsulinUnits(mealInsulinUnits)} U repas + {formatInsulinUnits(correctionInsulinUnits)} U
-            correction
-          </Text>
-        )}
-      </View>
+      {showInsulinDose ? (
+        <View
+          style={styles.resultBox}
+          accessible
+          accessibilityLabel={`Dose d'insuline totale : ${formatInsulinUnits(totalInsulinUnits)} unités`}
+        >
+          <Text style={styles.resultLabel}>Dose d'insuline totale</Text>
+          <Text style={styles.resultValue}>{formatInsulinUnits(totalInsulinUnits)} U</Text>
+          {correctionInsulinUnits > 0 && (
+            <Text style={styles.resultBreakdown}>
+              {formatInsulinUnits(mealInsulinUnits)} U repas + {formatInsulinUnits(correctionInsulinUnits)} U
+              correction
+            </Text>
+          )}
+        </View>
+      ) : (
+        selectedFood && (
+          <View
+            style={styles.resultBox}
+            accessible
+            accessibilityLabel={`Glucides : ${formatCarbs(carbsG)}`}
+          >
+            <Text style={styles.resultLabel}>Glucides</Text>
+            <Text style={styles.resultValue}>{formatCarbs(carbsG)}</Text>
+          </View>
+        )
+      )}
 
       {savedMessage ? (
         <Text style={styles.savedMessage} accessibilityLiveRegion="polite">
@@ -308,6 +358,15 @@ export default function WeighScreen() {
         }}
         onClose={() => setContainerPickerVisible(false)}
         emptyMessage="Aucun récipient enregistré."
+        extraActions={[
+          {
+            label: "Ajouter un récipient",
+            onPress: () => {
+              setContainerPickerVisible(false);
+              router.push("/containers/new");
+            },
+          },
+        ]}
       />
       <PickerModal
         visible={foodPickerVisible}
@@ -319,6 +378,31 @@ export default function WeighScreen() {
         }}
         onClose={() => setFoodPickerVisible(false)}
         emptyMessage="Aucun aliment enregistré."
+        extraActions={[
+          {
+            label: "Ajouter un aliment ou une recette",
+            onPress: () => {
+              setFoodPickerVisible(false);
+              router.push("/foods/new");
+            },
+          },
+          {
+            label: "Chercher dans Ciqual",
+            onPress: () => {
+              setFoodPickerVisible(false);
+              setCiqualQuickAddVisible(true);
+            },
+          },
+        ]}
+      />
+      <PickerModal
+        visible={ciqualQuickAddVisible}
+        title="Chercher dans Ciqual"
+        items={ciqualItems}
+        filterItems={filterCiqualPickerItems}
+        onSelect={handleSelectCiqualQuickAdd}
+        onClose={() => setCiqualQuickAddVisible(false)}
+        emptyMessage="Aucun aliment trouvé dans Ciqual."
       />
       <PickerModal
         visible={ratioPickerVisible}
@@ -387,6 +471,7 @@ function createStyles(colors: ThemeColors) {
       paddingHorizontal: 14,
       paddingVertical: 16,
       fontSize: 28,
+      lineHeight: 34,
       fontWeight: "700",
       color: colors.text,
       textAlign: "center",

@@ -83,6 +83,11 @@ export const settings = sqliteTable("settings", {
     .default("mmol/L"),
   targetGlycemia: real("target_glycemia"),
   sensitivityFactor: real("sensitivity_factor"), // baisse de glycémie pour 1 unité, dans glycemiaUnit
+  // Désactivable pour les utilisateurs qui veulent juste connaître les
+  // glucides d'un repas, sans calcul de dose (pas de ratio ni de correction).
+  showInsulinDose: integer("show_insulin_dose", { mode: "boolean" })
+    .notNull()
+    .default(true),
   updatedAt: text("updated_at")
     .notNull()
     .default(sql`(current_timestamp)`),
