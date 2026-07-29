@@ -1,12 +1,13 @@
 import { useMemo } from "react";
-import { Alert, FlatList, Pressable, StyleSheet, Text, View } from "react-native";
+import { FlatList, StyleSheet, Text, View } from "react-native";
 import { desc } from "drizzle-orm";
 import { useLiveQuery } from "drizzle-orm/expo-sqlite";
-import { Ionicons } from "@expo/vector-icons";
 
+import { SwipeableRow } from "@/components/SwipeableRow";
 import { db } from "@/db/client";
 import { deleteWeighing } from "@/db/repository";
 import { weighings } from "@/db/schema";
+import { confirmDestructive } from "@/lib/confirmDelete";
 import { formatCarbs, formatInsulinUnits, formatWeight } from "@/lib/insulin";
 import { type ThemeColors, useColors } from "@/theme/colors";
 
@@ -16,10 +17,7 @@ export default function HistoryScreen() {
   const { data } = useLiveQuery(db.select().from(weighings).orderBy(desc(weighings.weighedAt)));
 
   function handleDelete(id: number) {
-    Alert.alert("Supprimer cette pesée ?", "Cette action est définitive.", [
-      { text: "Annuler", style: "cancel" },
-      { text: "Supprimer", style: "destructive", onPress: () => deleteWeighing(id) },
-    ]);
+    confirmDestructive("Supprimer cette pesée ?", () => deleteWeighing(id));
   }
 
   return (
@@ -30,42 +28,38 @@ export default function HistoryScreen() {
         contentContainerStyle={styles.list}
         ListEmptyComponent={<Text style={styles.empty}>Aucune pesée enregistrée pour l'instant.</Text>}
         renderItem={({ item }) => (
-          <View
-            style={styles.row}
-            accessible
-            accessibilityLabel={
-              item.ratioLabelSnapshot
-                ? `${item.foodNameSnapshot}, le ${new Date(item.weighedAt).toLocaleString("fr-FR")}, dose totale ${formatInsulinUnits(item.totalInsulinUnits)} unités`
-                : `${item.foodNameSnapshot}, le ${new Date(item.weighedAt).toLocaleString("fr-FR")}, ${formatCarbs(item.carbsG)} de glucides`
-            }
+          <SwipeableRow
+            onDelete={() => handleDelete(item.id)}
+            deleteLabel={`Supprimer la pesée ${item.foodNameSnapshot}`}
           >
-            <View style={styles.rowMain}>
-              <Text style={styles.rowLabel}>{item.foodNameSnapshot}</Text>
-              <Text style={styles.rowSubtitle}>
-                {new Date(item.weighedAt).toLocaleString("fr-FR")} · {formatWeight(item.netWeightG)} net ·{" "}
-                {item.carbsG.toFixed(1)} g glucides
-                {item.ratioLabelSnapshot ? ` · ${item.ratioLabelSnapshot}` : ""}
-              </Text>
-              {item.correctionInsulinUnits > 0 && (
+            <View
+              style={styles.row}
+              accessible
+              accessibilityLabel={
+                item.ratioLabelSnapshot
+                  ? `${item.foodNameSnapshot}, le ${new Date(item.weighedAt).toLocaleString("fr-FR")}, dose totale ${formatInsulinUnits(item.totalInsulinUnits)} unités`
+                  : `${item.foodNameSnapshot}, le ${new Date(item.weighedAt).toLocaleString("fr-FR")}, ${formatCarbs(item.carbsG)} de glucides`
+              }
+            >
+              <View style={styles.rowMain}>
+                <Text style={styles.rowLabel}>{item.foodNameSnapshot}</Text>
                 <Text style={styles.rowSubtitle}>
-                  dont {formatInsulinUnits(item.correctionInsulinUnits)} U de correction (glycémie{" "}
-                  {item.currentGlycemia} {item.glycemiaUnitSnapshot})
+                  {new Date(item.weighedAt).toLocaleString("fr-FR")} · {formatWeight(item.netWeightG)} net ·{" "}
+                  {item.carbsG.toFixed(1)} g glucides
+                  {item.ratioLabelSnapshot ? ` · ${item.ratioLabelSnapshot}` : ""}
                 </Text>
+                {item.correctionInsulinUnits > 0 && (
+                  <Text style={styles.rowSubtitle}>
+                    dont {formatInsulinUnits(item.correctionInsulinUnits)} U de correction (glycémie{" "}
+                    {item.currentGlycemia} {item.glycemiaUnitSnapshot})
+                  </Text>
+                )}
+              </View>
+              {item.ratioLabelSnapshot && (
+                <Text style={styles.rowValue}>{formatInsulinUnits(item.totalInsulinUnits)} U</Text>
               )}
             </View>
-            {item.ratioLabelSnapshot && (
-              <Text style={styles.rowValue}>{formatInsulinUnits(item.totalInsulinUnits)} U</Text>
-            )}
-            <Pressable
-              onPress={() => handleDelete(item.id)}
-              hitSlop={10}
-              style={styles.deleteIcon}
-              accessibilityRole="button"
-              accessibilityLabel={`Supprimer la pesée ${item.foodNameSnapshot}`}
-            >
-              <Ionicons name="trash-outline" size={18} color={colors.danger} />
-            </Pressable>
-          </View>
+          </SwipeableRow>
         )}
       />
     </View>
@@ -90,7 +84,6 @@ function createStyles(colors: ThemeColors) {
     rowMain: { flex: 1 },
     rowLabel: { fontSize: 15, fontWeight: "600", color: colors.text },
     rowSubtitle: { fontSize: 12, color: colors.textMuted, marginTop: 2 },
-    rowValue: { fontSize: 16, fontWeight: "700", color: colors.primary, marginRight: 12 },
-    deleteIcon: { padding: 4 },
+    rowValue: { fontSize: 16, fontWeight: "700", color: colors.primary },
   });
 }

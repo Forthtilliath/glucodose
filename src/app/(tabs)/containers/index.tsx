@@ -2,13 +2,14 @@ import { useMemo } from "react";
 import { Link, useRouter } from "expo-router";
 import { desc } from "drizzle-orm";
 import { useLiveQuery } from "drizzle-orm/expo-sqlite";
-import { Alert, FlatList, Image, Pressable, StyleSheet, Text, View } from "react-native";
+import { FlatList, Image, Pressable, StyleSheet, Text, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 
 import { SwipeableRow } from "@/components/SwipeableRow";
 import { db } from "@/db/client";
 import { deleteContainer } from "@/db/repository";
 import { containers } from "@/db/schema";
+import { confirmDestructive } from "@/lib/confirmDelete";
 import { formatWeight } from "@/lib/insulin";
 import { type ThemeColors, useColors } from "@/theme/colors";
 
@@ -19,14 +20,9 @@ export default function ContainersScreen() {
   const { data } = useLiveQuery(db.select().from(containers).orderBy(desc(containers.updatedAt)));
 
   function handleDelete(container: { id: number; name: string; photoUri: string | null }) {
-    Alert.alert(`Supprimer "${container.name}" ?`, "Cette action est définitive.", [
-      { text: "Annuler", style: "cancel" },
-      {
-        text: "Supprimer",
-        style: "destructive",
-        onPress: () => deleteContainer(container.id, container.photoUri),
-      },
-    ]);
+    confirmDestructive(`Supprimer "${container.name}" ?`, () =>
+      deleteContainer(container.id, container.photoUri)
+    );
   }
 
   return (

@@ -1,21 +1,23 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Alert, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
+import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
 import { eq } from "drizzle-orm";
 import { useLiveQuery } from "drizzle-orm/expo-sqlite";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 
 import { db } from "@/db/client";
-import {
-  archiveFood,
-  createIngredient,
-  deleteFood,
-  isFoodUsedInRecipes,
-  updateIngredient,
-} from "@/db/repository";
+import { createIngredient, updateIngredient } from "@/db/repository";
 import { foods } from "@/db/schema";
-import { ALL_CIQUAL_FOODS, rankByNameMatch, searchCiqualFoods, type CiqualFood } from "@/lib/ciqual";
+import {
+  ALL_CIQUAL_FOODS,
+  CIQUAL_PICKER_ITEMS,
+  rankByNameMatch,
+  searchCiqualFoods,
+  type CiqualFood,
+} from "@/lib/ciqual";
+import { confirmDeleteOrArchiveFood } from "@/lib/confirmDelete";
 import { formatCarbs, MAX_CARBS_PER_100G } from "@/lib/insulin";
+import { useSubmitGuard } from "@/lib/useSubmitGuard";
 import { type ThemeColors, useColors } from "@/theme/colors";
 import { PickerModal, type PickerItem } from "@/components/PickerModal";
 
@@ -40,19 +42,9 @@ export default function IngredientFormScreen() {
   const [notes, setNotes] = useState("");
   const [isCiqualPickerVisible, setIsCiqualPickerVisible] = useState(false);
   const [isSuggestionsOpen, setIsSuggestionsOpen] = useState(false);
-  const [isSaving, setIsSaving] = useState(false);
+  const { isSaving, guard } = useSubmitGuard();
   const nameInputRef = useRef<TextInput>(null);
   const carbsInputRef = useRef<TextInput>(null);
-
-  const ciqualItems: PickerItem[] = useMemo(
-    () =>
-      ALL_CIQUAL_FOODS.map((food, index) => ({
-        id: index,
-        label: food.name,
-        subtitle: `${formatCarbs(food.carbsPer100g)} / 100 g`,
-      })),
-    []
-  );
 
   // Suggestions compactes affichées automatiquement pendant la frappe. La
   // modale plein écran (icône loupe) reste dispo pour chercher plus large.
@@ -101,9 +93,7 @@ export default function IngredientFormScreen() {
     parsedCarbsPer100g <= MAX_CARBS_PER_100G;
 
   async function handleSave() {
-    if (isSaving) return;
-    setIsSaving(true);
-    try {
+    await guard(async () => {
       if (isNew) {
         await createIngredient({
           name: name.trim(),
@@ -120,41 +110,13 @@ export default function IngredientFormScreen() {
         });
       }
       router.back();
-    } finally {
-      setIsSaving(false);
-    }
+    });
   }
 
   async function handleDelete() {
-    const inUse = await isFoodUsedInRecipes(foodId as number);
-    if (inUse) {
-      Alert.alert(
-        "Ingrédient utilisé dans une recette",
-        "Impossible de le supprimer car il est utilisé dans au moins une recette. Tu peux l'archiver à la place : il n'apparaîtra plus dans les listes mais restera valide dans les recettes existantes.",
-        [
-          { text: "Annuler", style: "cancel" },
-          {
-            text: "Archiver",
-            onPress: async () => {
-              await archiveFood(foodId as number);
-              router.back();
-            },
-          },
-        ]
-      );
-      return;
-    }
-    Alert.alert("Supprimer cet ingrédient ?", "Cette action est définitive.", [
-      { text: "Annuler", style: "cancel" },
-      {
-        text: "Supprimer",
-        style: "destructive",
-        onPress: async () => {
-          await deleteFood(foodId as number);
-          router.back();
-        },
-      },
-    ]);
+    await confirmDeleteOrArchiveFood({ id: foodId as number, name: existing?.name ?? name }, () =>
+      router.back()
+    );
   }
 
   return (
@@ -276,7 +238,7 @@ export default function IngredientFormScreen() {
       <PickerModal
         visible={isCiqualPickerVisible}
         title="Chercher dans Ciqual"
-        items={ciqualItems}
+        items={CIQUAL_PICKER_ITEMS}
         initialQuery={name}
         filterItems={filterCiqualItems}
         onSelect={handleSelectCiqualPickerItem}

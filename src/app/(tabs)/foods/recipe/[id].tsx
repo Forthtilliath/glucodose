@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Alert, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
+import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
 import { and, eq, ne } from "drizzle-orm";
 import { useLiveQuery } from "drizzle-orm/expo-sqlite";
 import { useLocalSearchParams, useRouter } from "expo-router";
@@ -7,14 +7,11 @@ import { Ionicons } from "@expo/vector-icons";
 
 import { PickerModal, type PickerItem } from "@/components/PickerModal";
 import { db } from "@/db/client";
-import {
-  archiveFood,
-  deleteFood,
-  isFoodUsedInRecipes,
-  saveRecipe,
-} from "@/db/repository";
+import { saveRecipe } from "@/db/repository";
 import { foods, recipeComponents } from "@/db/schema";
+import { confirmDeleteOrArchiveFood } from "@/lib/confirmDelete";
 import { computeCarbsGrams, computeRecipeCarbsPer100g, formatCarbs, formatWeight, MAX_WEIGHT_G } from "@/lib/insulin";
+import { useSubmitGuard } from "@/lib/useSubmitGuard";
 import { type ThemeColors, useColors } from "@/theme/colors";
 
 type Row = { key: string; foodId: number; weightG: string };
@@ -61,7 +58,7 @@ export default function RecipeFormScreen() {
   const [notes, setNotes] = useState("");
   const [rows, setRows] = useState<Row[]>([]);
   const [pickerVisible, setPickerVisible] = useState(false);
-  const [isSaving, setIsSaving] = useState(false);
+  const { isSaving, guard } = useSubmitGuard();
 
   useEffect(() => {
     if (existing) {
@@ -132,9 +129,7 @@ export default function RecipeFormScreen() {
     });
 
   async function handleSave() {
-    if (isSaving) return;
-    setIsSaving(true);
-    try {
+    await guard(async () => {
       await saveRecipe(recipeFoodId, {
         name: name.trim(),
         notes: notes.trim() || undefined,
@@ -145,41 +140,13 @@ export default function RecipeFormScreen() {
         })),
       });
       router.back();
-    } finally {
-      setIsSaving(false);
-    }
+    });
   }
 
   async function handleDelete() {
-    const inUse = await isFoodUsedInRecipes(recipeFoodId as number);
-    if (inUse) {
-      Alert.alert(
-        "Recette utilisée ailleurs",
-        "Impossible de la supprimer car elle est utilisée comme composant d'une autre recette. Tu peux l'archiver à la place.",
-        [
-          { text: "Annuler", style: "cancel" },
-          {
-            text: "Archiver",
-            onPress: async () => {
-              await archiveFood(recipeFoodId as number);
-              router.back();
-            },
-          },
-        ]
-      );
-      return;
-    }
-    Alert.alert("Supprimer cette recette ?", "Cette action est définitive.", [
-      { text: "Annuler", style: "cancel" },
-      {
-        text: "Supprimer",
-        style: "destructive",
-        onPress: async () => {
-          await deleteFood(recipeFoodId as number);
-          router.back();
-        },
-      },
-    ]);
+    await confirmDeleteOrArchiveFood({ id: recipeFoodId as number, name: existing?.name ?? name }, () =>
+      router.back()
+    );
   }
 
   return (

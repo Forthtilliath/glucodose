@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Alert, Pressable, ScrollView, StyleSheet, Text, TextInput } from "react-native";
+import { Pressable, ScrollView, StyleSheet, Text, TextInput } from "react-native";
 import { eq } from "drizzle-orm";
 import { useLiveQuery } from "drizzle-orm/expo-sqlite";
 import { useLocalSearchParams, useRouter } from "expo-router";
@@ -7,6 +7,8 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import { db } from "@/db/client";
 import { createRatio, deleteRatio, updateRatio } from "@/db/repository";
 import { insulinRatios } from "@/db/schema";
+import { confirmDestructive } from "@/lib/confirmDelete";
+import { useSubmitGuard } from "@/lib/useSubmitGuard";
 import { type ThemeColors, useColors } from "@/theme/colors";
 
 export default function RatioFormScreen() {
@@ -22,7 +24,7 @@ export default function RatioFormScreen() {
 
   const [label, setLabel] = useState("");
   const [carbsGramsPerUnit, setCarbsGramsPerUnit] = useState("");
-  const [isSaving, setIsSaving] = useState(false);
+  const { isSaving, guard } = useSubmitGuard();
 
   useEffect(() => {
     if (existing) {
@@ -35,32 +37,21 @@ export default function RatioFormScreen() {
   const canSave = label.trim().length > 0 && !Number.isNaN(parsedValue) && parsedValue > 0;
 
   async function handleSave() {
-    if (isSaving) return;
-    setIsSaving(true);
-    try {
+    await guard(async () => {
       if (isNew) {
         await createRatio({ label: label.trim(), carbsGramsPerUnit: parsedValue });
       } else {
         await updateRatio(ratioId as number, { label: label.trim(), carbsGramsPerUnit: parsedValue });
       }
       router.back();
-    } finally {
-      setIsSaving(false);
-    }
+    });
   }
 
   function handleDelete() {
-    Alert.alert("Supprimer ce ratio ?", "Cette action est définitive.", [
-      { text: "Annuler", style: "cancel" },
-      {
-        text: "Supprimer",
-        style: "destructive",
-        onPress: async () => {
-          await deleteRatio(ratioId as number);
-          router.back();
-        },
-      },
-    ]);
+    confirmDestructive("Supprimer ce ratio ?", async () => {
+      await deleteRatio(ratioId as number);
+      router.back();
+    });
   }
 
   return (
