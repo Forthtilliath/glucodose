@@ -17,8 +17,10 @@ import {
 } from "@/lib/ciqual";
 import { confirmDeleteOrArchiveFood } from "@/lib/confirmDelete";
 import { formatCarbs, MAX_CARBS_PER_100G } from "@/lib/insulin";
+import { deletePhoto, saveFoodPhoto } from "@/lib/photos";
 import { useSubmitGuard } from "@/lib/useSubmitGuard";
 import { type ThemeColors, useColors } from "@/theme/colors";
+import { PhotoPicker } from "@/components/PhotoPicker";
 import { PickerModal, type PickerItem } from "@/components/PickerModal";
 
 function filterCiqualItems(items: PickerItem[], query: string): PickerItem[] {
@@ -40,6 +42,7 @@ export default function IngredientFormScreen() {
   const [carbsPer100g, setCarbsPer100g] = useState("");
   const [source, setSource] = useState("");
   const [notes, setNotes] = useState("");
+  const [photoUri, setPhotoUri] = useState<string | null>(null);
   const [isCiqualPickerVisible, setIsCiqualPickerVisible] = useState(false);
   const [isSuggestionsOpen, setIsSuggestionsOpen] = useState(false);
   const { isSaving, guard } = useSubmitGuard();
@@ -82,6 +85,7 @@ export default function IngredientFormScreen() {
       setCarbsPer100g(String(existing.carbsPer100g));
       setSource(existing.source ?? "");
       setNotes(existing.notes ?? "");
+      setPhotoUri(existing.photoUri ?? null);
     }
   }, [existing]);
 
@@ -94,12 +98,18 @@ export default function IngredientFormScreen() {
 
   async function handleSave() {
     await guard(async () => {
+      // Nettoie l'ancienne photo sur disque si elle a été remplacée ou retirée,
+      // pour ne pas accumuler des fichiers orphelins au fil des éditions.
+      if (existing?.photoUri && existing.photoUri !== photoUri) {
+        deletePhoto(existing.photoUri);
+      }
       if (isNew) {
         await createIngredient({
           name: name.trim(),
           carbsPer100g: parsedCarbsPer100g,
           source: source.trim() || undefined,
           notes: notes.trim() || undefined,
+          photoUri,
         });
       } else {
         await updateIngredient(foodId as number, {
@@ -107,6 +117,7 @@ export default function IngredientFormScreen() {
           carbsPer100g: parsedCarbsPer100g,
           source: source.trim() || undefined,
           notes: notes.trim() || undefined,
+          photoUri,
         });
       }
       router.back();
@@ -114,8 +125,9 @@ export default function IngredientFormScreen() {
   }
 
   async function handleDelete() {
-    await confirmDeleteOrArchiveFood({ id: foodId as number, name: existing?.name ?? name }, () =>
-      router.back()
+    await confirmDeleteOrArchiveFood(
+      { id: foodId as number, name: existing?.name ?? name, photoUri: existing?.photoUri },
+      () => router.back()
     );
   }
 
@@ -125,6 +137,13 @@ export default function IngredientFormScreen() {
       contentContainerStyle={styles.content}
       keyboardShouldPersistTaps="handled"
     >
+      <PhotoPicker
+        photoUri={photoUri}
+        onChange={setPhotoUri}
+        savePhoto={saveFoodPhoto}
+        photoLabel="de l'ingrédient"
+      />
+
       <Text style={styles.label}>Nom</Text>
       <View style={styles.nameFieldWrapper}>
         <View style={styles.nameFieldRow}>

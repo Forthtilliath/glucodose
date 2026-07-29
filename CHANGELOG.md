@@ -9,6 +9,8 @@ Le format suit [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/), et le p
 ### Ajouté
 - Swipe-to-delete sur les listes récipients et aliments.
 - Vérification et installation des mises à jour depuis les releases GitHub (Réglages).
+- Photo sur les ingrédients et recettes (comme pour les récipients), visible dans les listes et les sélecteurs.
+- Suite de tests unitaires complète : moteur Ciqual, mises à jour, sauvegarde, et couche base de données (contraintes, transactions) sur une vraie base SQLite en mémoire.
 
 ### Corrigé
 - Double-soumission possible sur les formulaires récipient, ingrédient, recette et ratio (le formulaire pouvait créer plusieurs entrées identiques).

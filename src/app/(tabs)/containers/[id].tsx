@@ -1,17 +1,16 @@
 import { useEffect, useMemo, useState } from "react";
-import { Alert, Image, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
+import { Pressable, ScrollView, StyleSheet, Text, TextInput } from "react-native";
 import { eq } from "drizzle-orm";
 import { useLiveQuery } from "drizzle-orm/expo-sqlite";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import * as ImagePicker from "expo-image-picker";
-import { Ionicons } from "@expo/vector-icons";
 
+import { PhotoPicker } from "@/components/PhotoPicker";
 import { db } from "@/db/client";
 import { deleteContainer, createContainer, updateContainer } from "@/db/repository";
 import { containers } from "@/db/schema";
 import { confirmDestructive } from "@/lib/confirmDelete";
 import { formatWeight, MAX_WEIGHT_G } from "@/lib/insulin";
-import { deleteContainerPhoto, saveContainerPhoto } from "@/lib/photos";
+import { deletePhoto, saveContainerPhoto } from "@/lib/photos";
 import { useSubmitGuard } from "@/lib/useSubmitGuard";
 import { type ThemeColors, useColors } from "@/theme/colors";
 
@@ -50,56 +49,12 @@ export default function ContainerFormScreen() {
     parsedTareWeight >= 0 &&
     parsedTareWeight <= MAX_WEIGHT_G;
 
-  async function pickFromCamera() {
-    const permission = await ImagePicker.requestCameraPermissionsAsync();
-    if (!permission.granted) {
-      Alert.alert("Accès à l'appareil photo refusé", "Autorise l'accès dans les réglages du téléphone pour prendre une photo.");
-      return;
-    }
-    const result = await ImagePicker.launchCameraAsync({
-      mediaTypes: "images",
-      quality: 0.5,
-      allowsEditing: true,
-      aspect: [1, 1],
-    });
-    if (!result.canceled && result.assets[0]) {
-      const savedUri = await saveContainerPhoto(result.assets[0].uri);
-      setPhotoUri(savedUri);
-    }
-  }
-
-  async function pickFromLibrary() {
-    const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (!permission.granted) {
-      Alert.alert("Accès aux photos refusé", "Autorise l'accès dans les réglages du téléphone pour choisir une photo.");
-      return;
-    }
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: "images",
-      quality: 0.5,
-      allowsEditing: true,
-      aspect: [1, 1],
-    });
-    if (!result.canceled && result.assets[0]) {
-      const savedUri = await saveContainerPhoto(result.assets[0].uri);
-      setPhotoUri(savedUri);
-    }
-  }
-
-  function handlePickPhoto() {
-    Alert.alert("Photo du récipient", undefined, [
-      { text: "Prendre une photo", onPress: pickFromCamera },
-      { text: "Choisir dans la galerie", onPress: pickFromLibrary },
-      { text: "Annuler", style: "cancel" },
-    ]);
-  }
-
   async function handleSave() {
     await guard(async () => {
       // Nettoie l'ancienne photo sur disque si elle a été remplacée ou retirée,
       // pour ne pas accumuler des fichiers orphelins au fil des éditions.
       if (existing?.photoUri && existing.photoUri !== photoUri) {
-        deleteContainerPhoto(existing.photoUri);
+        deletePhoto(existing.photoUri);
       }
       if (isNew) {
         await createContainer({
@@ -129,30 +84,12 @@ export default function ContainerFormScreen() {
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-      <Pressable
-        style={styles.photoPicker}
-        onPress={handlePickPhoto}
-        accessibilityRole="button"
-        accessibilityLabel={photoUri ? "Photo du récipient. Modifier." : "Ajouter une photo du récipient"}
-      >
-        {photoUri ? (
-          <Image source={{ uri: photoUri }} style={styles.photoPreview} accessibilityIgnoresInvertColors />
-        ) : (
-          <View style={styles.photoPlaceholder}>
-            <Ionicons name="camera-outline" size={28} color={colors.textMuted} />
-            <Text style={styles.photoPlaceholderText}>Ajouter une photo</Text>
-          </View>
-        )}
-      </Pressable>
-      {photoUri ? (
-        <Pressable
-          onPress={() => setPhotoUri(null)}
-          accessibilityRole="button"
-          accessibilityLabel="Retirer la photo"
-        >
-          <Text style={styles.clearLink}>Retirer la photo</Text>
-        </Pressable>
-      ) : null}
+      <PhotoPicker
+        photoUri={photoUri}
+        onChange={setPhotoUri}
+        savePhoto={saveContainerPhoto}
+        photoLabel="du récipient"
+      />
 
       <Text style={styles.label}>Nom</Text>
       <TextInput
@@ -215,22 +152,6 @@ function createStyles(colors: ThemeColors) {
   return StyleSheet.create({
     container: { flex: 1, backgroundColor: colors.background },
     content: { padding: 16, gap: 8 },
-    photoPicker: { alignSelf: "center", marginTop: 8 },
-    photoPreview: { width: 140, height: 140, borderRadius: 16, backgroundColor: colors.surface },
-    photoPlaceholder: {
-      width: 140,
-      height: 140,
-      borderRadius: 16,
-      borderWidth: 1,
-      borderStyle: "dashed",
-      borderColor: colors.border,
-      backgroundColor: colors.surface,
-      alignItems: "center",
-      justifyContent: "center",
-      gap: 6,
-    },
-    photoPlaceholderText: { fontSize: 12, color: colors.textMuted },
-    clearLink: { color: colors.primary, fontSize: 13, textAlign: "center", marginTop: 8 },
     label: { fontSize: 13, fontWeight: "600", color: colors.textMuted, marginTop: 12 },
     input: {
       backgroundColor: colors.surface,

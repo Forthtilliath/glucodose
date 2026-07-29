@@ -111,6 +111,7 @@ export default function WeighScreen() {
         id: f.id,
         label: f.name,
         subtitle: `${formatCarbs(f.carbsPer100g)} glucides/100g${f.type === "recipe" ? " · recette" : ""}`,
+        imageUri: f.photoUri,
       })),
     [foodList]
   );

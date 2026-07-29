@@ -4,13 +4,15 @@ import journal from './meta/_journal.json';
 import m0000 from './0000_closed_zeigeist.sql';
 import m0001 from './0001_sturdy_nehzno.sql';
 import m0002 from './0002_previous_azazel.sql';
+import m0003 from './0003_sudden_juggernaut.sql';
 
   export default {
     journal,
     migrations: {
       m0000,
 m0001,
-m0002
+m0002,
+m0003
     }
   }
   

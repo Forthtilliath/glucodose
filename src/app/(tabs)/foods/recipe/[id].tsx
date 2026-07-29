@@ -5,12 +5,14 @@ import { useLiveQuery } from "drizzle-orm/expo-sqlite";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 
+import { PhotoPicker } from "@/components/PhotoPicker";
 import { PickerModal, type PickerItem } from "@/components/PickerModal";
 import { db } from "@/db/client";
 import { saveRecipe } from "@/db/repository";
 import { foods, recipeComponents } from "@/db/schema";
 import { confirmDeleteOrArchiveFood } from "@/lib/confirmDelete";
 import { computeCarbsGrams, computeRecipeCarbsPer100g, formatCarbs, formatWeight, MAX_WEIGHT_G } from "@/lib/insulin";
+import { deletePhoto, saveFoodPhoto } from "@/lib/photos";
 import { useSubmitGuard } from "@/lib/useSubmitGuard";
 import { type ThemeColors, useColors } from "@/theme/colors";
 
@@ -56,6 +58,7 @@ export default function RecipeFormScreen() {
 
   const [name, setName] = useState("");
   const [notes, setNotes] = useState("");
+  const [photoUri, setPhotoUri] = useState<string | null>(null);
   const [rows, setRows] = useState<Row[]>([]);
   const [pickerVisible, setPickerVisible] = useState(false);
   const { isSaving, guard } = useSubmitGuard();
@@ -64,6 +67,7 @@ export default function RecipeFormScreen() {
     if (existing) {
       setName(existing.name);
       setNotes(existing.notes ?? "");
+      setPhotoUri(existing.photoUri ?? null);
     }
   }, [existing]);
 
@@ -86,6 +90,7 @@ export default function RecipeFormScreen() {
         id: f.id,
         label: f.name,
         subtitle: `${formatCarbs(f.carbsPer100g)} glucides/100g${f.type === "recipe" ? " · recette" : ""}`,
+        imageUri: f.photoUri,
       })),
     [availableFoods]
   );
@@ -130,9 +135,15 @@ export default function RecipeFormScreen() {
 
   async function handleSave() {
     await guard(async () => {
+      // Nettoie l'ancienne photo sur disque si elle a été remplacée ou retirée,
+      // pour ne pas accumuler des fichiers orphelins au fil des éditions.
+      if (existing?.photoUri && existing.photoUri !== photoUri) {
+        deletePhoto(existing.photoUri);
+      }
       await saveRecipe(recipeFoodId, {
         name: name.trim(),
         notes: notes.trim() || undefined,
+        photoUri,
         components: rows.map((r) => ({
           componentFoodId: r.foodId,
           weightG: parseFloat(r.weightG),
@@ -144,13 +155,21 @@ export default function RecipeFormScreen() {
   }
 
   async function handleDelete() {
-    await confirmDeleteOrArchiveFood({ id: recipeFoodId as number, name: existing?.name ?? name }, () =>
-      router.back()
+    await confirmDeleteOrArchiveFood(
+      { id: recipeFoodId as number, name: existing?.name ?? name, photoUri: existing?.photoUri },
+      () => router.back()
     );
   }
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
+      <PhotoPicker
+        photoUri={photoUri}
+        onChange={setPhotoUri}
+        savePhoto={saveFoodPhoto}
+        photoLabel="de la recette"
+      />
+
       <Text style={styles.label}>Nom de la recette</Text>
       <TextInput
         style={styles.input}

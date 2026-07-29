@@ -16,7 +16,10 @@ export function confirmDestructive(title: string, onConfirm: () => void) {
 // suppression directe est bloquée par la contrainte de clé étrangère).
 // onDone est appelé après l'archivage ou la suppression effective, jamais
 // après une simple annulation.
-export async function confirmDeleteOrArchiveFood(food: { id: number; name: string }, onDone: () => void) {
+export async function confirmDeleteOrArchiveFood(
+  food: { id: number; name: string; photoUri?: string | null },
+  onDone: () => void
+) {
   const inUse = await isFoodUsedInRecipes(food.id);
   if (inUse) {
     Alert.alert(
@@ -41,7 +44,7 @@ export async function confirmDeleteOrArchiveFood(food: { id: number; name: strin
       text: "Supprimer",
       style: "destructive",
       onPress: async () => {
-        await deleteFood(food.id);
+        await deleteFood(food.id, food.photoUri ?? null);
         onDone();
       },
     },

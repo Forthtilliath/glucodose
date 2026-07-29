@@ -2,9 +2,10 @@ import { Directory, File, Paths } from "expo-file-system";
 
 // expo-image-picker renvoie souvent un fichier dans un dossier de cache
 // temporaire (nettoyable par l'OS) : on le copie vers le dossier document,
-// stable, pour que la photo du récipient survive au nettoyage du cache.
-function getContainersDirectory(): Directory {
-  const dir = new Directory(Paths.document, "containers");
+// stable, pour que la photo survive au nettoyage du cache. Un sous-dossier
+// par type d'entité (containers, foods...) pour ne pas tout mélanger.
+function getPhotosDirectory(subdir: string): Directory {
+  const dir = new Directory(Paths.document, subdir);
   if (!dir.exists) {
     dir.create({ intermediates: true });
   }
@@ -18,14 +19,23 @@ export function getFileExtension(uri: string): string {
   return extensionMatch ? extensionMatch[1] : "jpg";
 }
 
-export async function saveContainerPhoto(sourceUri: string): Promise<string> {
-  const destination = new File(getContainersDirectory(), `container-${Date.now()}.${getFileExtension(sourceUri)}`);
+async function savePhoto(sourceUri: string, subdir: string, prefix: string): Promise<string> {
+  const destination = new File(getPhotosDirectory(subdir), `${prefix}-${Date.now()}.${getFileExtension(sourceUri)}`);
   const source = new File(sourceUri);
   await source.copy(destination);
   return destination.uri;
 }
 
-export function deleteContainerPhoto(uri: string) {
+export function saveContainerPhoto(sourceUri: string): Promise<string> {
+  return savePhoto(sourceUri, "containers", "container");
+}
+
+export function saveFoodPhoto(sourceUri: string): Promise<string> {
+  return savePhoto(sourceUri, "foods", "food");
+}
+
+// Générique : la suppression ne dépend pas du type d'entité, juste de l'uri.
+export function deletePhoto(uri: string) {
   try {
     const file = new File(uri);
     if (file.exists) {

@@ -2,10 +2,11 @@ import { useMemo } from "react";
 import { Link, useRouter } from "expo-router";
 import { desc } from "drizzle-orm";
 import { useLiveQuery } from "drizzle-orm/expo-sqlite";
-import { FlatList, Image, Pressable, StyleSheet, Text, View } from "react-native";
+import { FlatList, Pressable, StyleSheet, Text, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 
 import { SwipeableRow } from "@/components/SwipeableRow";
+import { Thumbnail } from "@/components/Thumbnail";
 import { db } from "@/db/client";
 import { deleteContainer } from "@/db/repository";
 import { containers } from "@/db/schema";
@@ -42,13 +43,7 @@ export default function ContainersScreen() {
               accessibilityRole="button"
               accessibilityLabel={`Récipient ${item.name}, tare ${formatWeight(item.tareWeightG)}. Modifier.`}
             >
-              {item.photoUri ? (
-                <Image source={{ uri: item.photoUri }} style={styles.thumbnail} accessibilityIgnoresInvertColors />
-              ) : (
-                <View style={styles.thumbnailPlaceholder}>
-                  <Ionicons name="cube-outline" size={22} color={colors.textMuted} />
-                </View>
-              )}
+              <Thumbnail photoUri={item.photoUri} placeholderIcon="cube-outline" />
               <View style={styles.rowMain}>
                 <Text style={styles.rowLabel}>{item.name}</Text>
                 {item.notes ? <Text style={styles.rowSubtitle}>{item.notes}</Text> : null}
@@ -82,15 +77,6 @@ function createStyles(colors: ThemeColors) {
       borderRadius: 12,
       padding: 12,
       marginBottom: 10,
-    },
-    thumbnail: { width: 48, height: 48, borderRadius: 10, backgroundColor: colors.background },
-    thumbnailPlaceholder: {
-      width: 48,
-      height: 48,
-      borderRadius: 10,
-      backgroundColor: colors.background,
-      alignItems: "center",
-      justifyContent: "center",
     },
     rowMain: { flex: 1 },
     rowLabel: { fontSize: 16, fontWeight: "600", color: colors.text },

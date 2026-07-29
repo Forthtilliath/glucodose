@@ -1,7 +1,7 @@
 import { eq } from "drizzle-orm";
 
 import { computeCarbsGrams, computeRecipeCarbsPer100g } from "@/lib/insulin";
-import { deleteContainerPhoto } from "@/lib/photos";
+import { deletePhoto } from "@/lib/photos";
 import { db } from "./client";
 import { containers, foods, insulinRatios, recipeComponents, settings, weighings } from "./schema";
 
@@ -39,7 +39,7 @@ export async function updateContainer(
 
 export async function deleteContainer(id: number, photoUri: string | null) {
   if (photoUri) {
-    deleteContainerPhoto(photoUri);
+    deletePhoto(photoUri);
   }
   await db.delete(containers).where(eq(containers.id, id));
 }
@@ -51,6 +51,7 @@ export async function createIngredient(input: {
   carbsPer100g: number;
   source?: string;
   notes?: string;
+  photoUri?: string | null;
 }): Promise<number> {
   const [row] = await db
     .insert(foods)
@@ -60,6 +61,7 @@ export async function createIngredient(input: {
       carbsPer100g: input.carbsPer100g,
       source: input.source,
       notes: input.notes,
+      photoUri: input.photoUri ?? null,
     })
     .returning({ id: foods.id });
   return row.id;
@@ -67,7 +69,7 @@ export async function createIngredient(input: {
 
 export async function updateIngredient(
   id: number,
-  input: { name: string; carbsPer100g: number; source?: string; notes?: string }
+  input: { name: string; carbsPer100g: number; source?: string; notes?: string; photoUri?: string | null }
 ) {
   await db
     .update(foods)
@@ -76,6 +78,7 @@ export async function updateIngredient(
       carbsPer100g: input.carbsPer100g,
       source: input.source,
       notes: input.notes,
+      photoUri: input.photoUri ?? null,
       updatedAt: new Date().toISOString(),
     })
     .where(eq(foods.id, id));
@@ -92,7 +95,7 @@ export type RecipeComponentInput = {
 // valeurs, pas une réaction automatique à l'édition d'un ingrédient existant.
 export async function saveRecipe(
   recipeId: number | null,
-  input: { name: string; notes?: string; components: RecipeComponentInput[] }
+  input: { name: string; notes?: string; photoUri?: string | null; components: RecipeComponentInput[] }
 ) {
   const totalWeightG = input.components.reduce((sum, c) => sum + c.weightG, 0);
   const totalCarbsG = input.components.reduce(
@@ -113,6 +116,7 @@ export async function saveRecipe(
           totalWeightG,
           totalCarbsG,
           notes: input.notes,
+          photoUri: input.photoUri ?? null,
         })
         .returning({ id: foods.id });
       foodId = inserted.id;
@@ -125,6 +129,7 @@ export async function saveRecipe(
           totalWeightG,
           totalCarbsG,
           notes: input.notes,
+          photoUri: input.photoUri ?? null,
           updatedAt: new Date().toISOString(),
         })
         .where(eq(foods.id, foodId));
@@ -167,9 +172,12 @@ export async function archiveFood(id: number) {
 
 // Lève une erreur explicite si l'aliment est référencé ailleurs, pour laisser
 // l'écran appelant proposer l'archivage plutôt qu'échouer silencieusement.
-export async function deleteFood(id: number) {
+export async function deleteFood(id: number, photoUri: string | null) {
   if (await isFoodUsedInRecipes(id)) {
     throw new Error("FOOD_IN_USE");
+  }
+  if (photoUri) {
+    deletePhoto(photoUri);
   }
   await db.delete(foods).where(eq(foods.id, id));
 }
