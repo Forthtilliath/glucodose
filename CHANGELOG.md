@@ -6,6 +6,11 @@ Le format suit [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/), et le p
 
 ## [Unreleased]
 
+## [1.3.0] - 2026-07-30
+
+### Ajouté
+- Le widget d'accueil Android affiche désormais le résumé du jour (glucides totaux, et dose totale si le calcul de dose est activé) en plus du raccourci "Peser". Le widget se rafraîchit immédiatement après l'enregistrement d'une pesée, sans attendre son cycle périodique.
+
 ## [1.2.3] - 2026-07-30
 
 ### Modifié
