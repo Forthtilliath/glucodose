@@ -3,19 +3,19 @@ import { eq } from "drizzle-orm";
 import * as schema from "./schema";
 import { closeTestDb, createTestDb, mockDbClient, resetTestDb, type TestDb } from "./testDb";
 
-jest.mock("@/lib/photos", () => ({ deleteContainerPhoto: jest.fn() }));
+jest.mock("@/lib/photos", () => ({ deletePhoto: jest.fn() }));
 
 type Repository = typeof import("./repository");
 
 let testDb: TestDb;
 let repo: Repository;
-let deleteContainerPhotoMock: jest.Mock;
+let deletePhotoMock: jest.Mock;
 
 beforeAll(async () => {
   testDb = await createTestDb();
   mockDbClient("./client", testDb);
   repo = require("./repository");
-  deleteContainerPhotoMock = require("@/lib/photos").deleteContainerPhoto;
+  deletePhotoMock = require("@/lib/photos").deletePhoto;
 });
 
 afterAll(() => {
@@ -24,7 +24,7 @@ afterAll(() => {
 
 beforeEach(async () => {
   await resetTestDb(testDb);
-  deleteContainerPhotoMock.mockClear();
+  deletePhotoMock.mockClear();
 });
 
 describe("récipients", () => {
@@ -45,7 +45,7 @@ describe("récipients", () => {
 
     await repo.deleteContainer(created.id, created.photoUri);
 
-    expect(deleteContainerPhotoMock).toHaveBeenCalledWith("file:///bol.jpg");
+    expect(deletePhotoMock).toHaveBeenCalledWith("file:///bol.jpg");
     const remaining = await testDb.select().from(schema.containers);
     expect(remaining).toHaveLength(0);
   });
@@ -81,15 +81,32 @@ describe("aliments : ingrédients", () => {
     expect(row.name).toBe("Pomme golden");
     expect(row.carbsPer100g).toBe(13);
   });
+
+  it("enregistre et met à jour la photo d'un ingrédient", async () => {
+    const id = await repo.createIngredient({ name: "Pomme", carbsPer100g: 12, photoUri: "file:///pomme.jpg" });
+    let [row] = await testDb.select().from(schema.foods).where(eq(schema.foods.id, id));
+    expect(row.photoUri).toBe("file:///pomme.jpg");
+
+    await repo.updateIngredient(id, { name: "Pomme", carbsPer100g: 12, photoUri: null });
+    [row] = await testDb.select().from(schema.foods).where(eq(schema.foods.id, id));
+    expect(row.photoUri).toBeNull();
+  });
 });
 
 describe("aliments : suppression et archivage", () => {
   it("supprime un ingrédient non utilisé dans une recette", async () => {
     const id = await repo.createIngredient({ name: "Pomme", carbsPer100g: 12 });
-    await repo.deleteFood(id);
+    await repo.deleteFood(id, null);
 
     const remaining = await testDb.select().from(schema.foods);
     expect(remaining).toHaveLength(0);
+  });
+
+  it("supprime la photo sur disque en même temps que l'ingrédient", async () => {
+    const id = await repo.createIngredient({ name: "Pomme", carbsPer100g: 12, photoUri: "file:///pomme.jpg" });
+    await repo.deleteFood(id, "file:///pomme.jpg");
+
+    expect(deletePhotoMock).toHaveBeenCalledWith("file:///pomme.jpg");
   });
 
   it("refuse de supprimer un ingrédient utilisé dans une recette (FOOD_IN_USE)", async () => {
@@ -99,7 +116,7 @@ describe("aliments : suppression et archivage", () => {
       components: [{ componentFoodId: ingredientId, weightG: 200, carbsPer100gAtEntry: 70 }],
     });
 
-    await expect(repo.deleteFood(ingredientId)).rejects.toThrow("FOOD_IN_USE");
+    await expect(repo.deleteFood(ingredientId, null)).rejects.toThrow("FOOD_IN_USE");
   });
 
   it("la contrainte de clé étrangère de la base refuse aussi une suppression directe (ceinture et bretelles)", async () => {
@@ -172,6 +189,26 @@ describe("recettes", () => {
       .where(eq(schema.recipeComponents.recipeFoodId, recipeId as number));
     expect(components).toHaveLength(1);
     expect(components[0].componentFoodId).toBe(sugarId);
+  });
+
+  it("enregistre et met à jour la photo d'une recette", async () => {
+    const flourId = await repo.createIngredient({ name: "Farine", carbsPer100g: 70 });
+
+    const recipeId = await repo.saveRecipe(null, {
+      name: "Gâteau",
+      photoUri: "file:///gateau.jpg",
+      components: [{ componentFoodId: flourId, weightG: 200, carbsPer100gAtEntry: 70 }],
+    });
+    let [recipe] = await testDb.select().from(schema.foods).where(eq(schema.foods.id, recipeId as number));
+    expect(recipe.photoUri).toBe("file:///gateau.jpg");
+
+    await repo.saveRecipe(recipeId, {
+      name: "Gâteau",
+      photoUri: null,
+      components: [{ componentFoodId: flourId, weightG: 200, carbsPer100gAtEntry: 70 }],
+    });
+    [recipe] = await testDb.select().from(schema.foods).where(eq(schema.foods.id, recipeId as number));
+    expect(recipe.photoUri).toBeNull();
   });
 });
 

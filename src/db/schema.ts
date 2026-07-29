@@ -30,6 +30,7 @@ export const foods = sqliteTable("foods", {
   totalCarbsG: real("total_carbs_g"),
   source: text("source"),
   notes: text("notes"),
+  photoUri: text("photo_uri"),
   isArchived: integer("is_archived", { mode: "boolean" })
     .notNull()
     .default(false),
