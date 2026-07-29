@@ -1,6 +1,14 @@
 import renderer, { act } from "react-test-renderer";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 
+// IMPORTANT : ce test doit rester en dehors de src/app/ — Expo Router scanne
+// récursivement ce dossier pour générer les routes, et un fichier de test qui
+// y traînerait serait chargé comme une route dans le bundle de PRODUCTION,
+// plantant immédiatement au démarrage sur `jest.mock(...)` (qui n'existe pas
+// hors de Jest) : "ReferenceError: Property 'jest' doesn't exist". C'est
+// exactement ce qui est arrivé en plaçant initialement ce fichier dans
+// src/app/_layout.test.tsx.
+//
 // _layout.tsx importe la vraie base (expo-sqlite, indisponible en Jest), les
 // migrations générées et expo-router/expo-quick-actions : tout est mocké ici
 // pour isoler ce qu'on veut vérifier — la présence du GestureHandlerRootView
@@ -32,7 +40,7 @@ jest.mock("expo-router", () => ({
   ),
 }));
 
-import RootLayout from "./_layout";
+import RootLayout from "../app/_layout";
 
 describe("RootLayout", () => {
   it("est enveloppé dans un GestureHandlerRootView, requis pour le swipe-to-delete", () => {
