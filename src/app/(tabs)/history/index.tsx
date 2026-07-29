@@ -1,7 +1,9 @@
 import { useMemo, useState } from "react";
-import { FlatList, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
+import { ActivityIndicator, Alert, FlatList, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 import { desc } from "drizzle-orm";
 import { useLiveQuery } from "drizzle-orm/expo-sqlite";
+import * as Sharing from "expo-sharing";
+import { Ionicons } from "@expo/vector-icons";
 
 import { SwipeableRow } from "@/components/SwipeableRow";
 import { db } from "@/db/client";
@@ -10,6 +12,7 @@ import { weighings } from "@/db/schema";
 import { normalizeForSearch } from "@/lib/ciqual";
 import { confirmDestructive } from "@/lib/confirmDelete";
 import { getPeriodStartMs, type PeriodFilter } from "@/lib/historyFilters";
+import { exportHistoryToPdf } from "@/lib/historyPdf";
 import { formatCarbs, formatInsulinUnits, formatWeight } from "@/lib/insulin";
 import { type ThemeColors, useColors } from "@/theme/colors";
 
@@ -27,6 +30,7 @@ export default function HistoryScreen() {
 
   const [searchQuery, setSearchQuery] = useState("");
   const [periodFilter, setPeriodFilter] = useState<PeriodFilter>("all");
+  const [isExportingPdf, setIsExportingPdf] = useState(false);
 
   const filteredData = useMemo(() => {
     if (!data) return [];
@@ -43,6 +47,31 @@ export default function HistoryScreen() {
 
   function handleDelete(id: number) {
     confirmDestructive("Supprimer cette pesée ?", () => deleteWeighing(id));
+  }
+
+  async function handleExportPdf() {
+    if (filteredData.length === 0) {
+      Alert.alert("Rien à exporter", "Aucune pesée ne correspond au filtre actuel.");
+      return;
+    }
+    setIsExportingPdf(true);
+    try {
+      const periodLabel = PERIOD_OPTIONS.find((option) => option.value === periodFilter)?.label;
+      const title =
+        periodFilter === "all" ? "Historique des pesées" : `Historique des pesées — ${periodLabel}`;
+      const uri = await exportHistoryToPdf(filteredData, title);
+
+      const canShare = await Sharing.isAvailableAsync();
+      if (canShare) {
+        await Sharing.shareAsync(uri, { mimeType: "application/pdf", dialogTitle: "Partager l'historique" });
+      } else {
+        Alert.alert("Export prêt", `Fichier créé : ${uri}`);
+      }
+    } catch {
+      Alert.alert("Échec de l'export", "Une erreur est survenue pendant la création du PDF.");
+    } finally {
+      setIsExportingPdf(false);
+    }
   }
 
   return (
@@ -74,6 +103,22 @@ export default function HistoryScreen() {
             </Pressable>
           ))}
         </View>
+        <Pressable
+          style={[styles.exportButton, isExportingPdf && styles.exportButtonDisabled]}
+          onPress={handleExportPdf}
+          disabled={isExportingPdf}
+          accessibilityRole="button"
+          accessibilityLabel="Exporter l'historique affiché en PDF"
+        >
+          {isExportingPdf ? (
+            <ActivityIndicator color={colors.primary} />
+          ) : (
+            <>
+              <Ionicons name="document-text-outline" size={18} color={colors.primary} />
+              <Text style={styles.exportButtonText}>Exporter en PDF</Text>
+            </>
+          )}
+        </Pressable>
       </View>
 
       <FlatList
@@ -151,6 +196,18 @@ function createStyles(colors: ThemeColors) {
     periodOptionActive: { backgroundColor: colors.primary, borderColor: colors.primary },
     periodOptionText: { fontSize: 13, fontWeight: "600", color: colors.text },
     periodOptionTextActive: { color: colors.primaryText },
+    exportButton: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "center",
+      gap: 8,
+      borderWidth: 1,
+      borderColor: colors.primary,
+      borderRadius: 10,
+      paddingVertical: 10,
+    },
+    exportButtonDisabled: { opacity: 0.6 },
+    exportButtonText: { color: colors.primary, fontSize: 14, fontWeight: "600" },
     list: { padding: 16 },
     empty: { textAlign: "center", color: colors.textMuted, marginTop: 40 },
     row: {

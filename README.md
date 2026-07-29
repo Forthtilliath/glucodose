@@ -34,14 +34,14 @@ Cette app remplace la calculette : elle mémorise les poids de récipients, les 
 | Écran | Rôle |
 |---|---|
 | **⚖️ Peser** | Flux principal : choisir un récipient (ou une tare manuelle) → peser → poids net automatique → choisir l'aliment → choisir le ratio → dose repas + correction optionnelle affichées en direct, avant enregistrement dans l'historique. Un réglage permet de s'arrêter au calcul des glucides, sans dose (voir Réglages) |
-| **🍽️ Aliments** | CRUD des ingrédients simples (glucides/100g) et des recettes composées. Une recette calcule ses glucides/100g à partir de ses composants pesés, puis devient réutilisable **exactement comme un ingrédient** dans l'écran Peser. Suggestions automatiques depuis la table **Ciqual** (Anses) pendant la frappe, avec une recherche complète accessible en un tap |
+| **🍽️ Aliments** | CRUD des ingrédients simples (glucides/100g) et des recettes composées, chacun avec une **photo** optionnelle. Une recette calcule ses glucides/100g à partir de ses composants pesés, puis devient réutilisable **exactement comme un ingrédient** dans l'écran Peser. Suggestions automatiques depuis la table **Ciqual** (Anses) pendant la frappe, avec une recherche complète accessible en un tap |
 | **📦 Récipients** | CRUD des récipients avec leur poids à vide, et une **photo** (prise ou choisie en galerie) pour les repérer d'un coup d'œil dans le sélecteur |
-| **⚙️ Réglages** | Activer/désactiver le calcul de dose (mode "glucides seuls"), ratios insuline/glucides (un ou plusieurs, ex. un par repas), glycémie cible et facteur de sensibilité pour la dose de correction, unité (mmol/L ou g/L), export/import JSON complet de la base, Aide / Contact / À propos / Mentions légales |
-| **🕘 Historique** | Journal des pesées enregistrées, avec le détail dose repas / dose de correction |
+| **⚙️ Réglages** | Activer/désactiver le calcul de dose (mode "glucides seuls"), ratios insuline/glucides (un ou plusieurs, ex. un par repas), glycémie cible et facteur de sensibilité pour la dose de correction, unité (mmol/L ou g/L), export/import JSON complet de la base, vérification des mises à jour, Aide / Contact / À propos / Mentions légales |
+| **🕘 Historique** | Journal des pesées enregistrées avec le détail dose repas / dose de correction, filtrable par nom d'aliment et par période, exportable en **PDF** pour être partagé (ex. avec ton équipe soignante) |
 
 Depuis l'écran Peser, les sheets de sélection récipient/aliment permettent aussi d'**ajouter directement** un nouveau récipient, un nouvel aliment/recette, ou un aliment trouvé dans **Ciqual** (créé et sélectionné en un tap, sans quitter l'écran).
 
-Un appui long sur l'icône de l'app propose aussi des **raccourcis directs** : Peser, Nouveau récipient, Nouvel aliment.
+Un appui long sur l'icône de l'app propose aussi des **raccourcis directs** : Peser, Nouveau récipient, Nouvel aliment. Un **widget d'écran d'accueil** Android propose le même raccourci vers Peser.
 
 ### La méthode de calcul
 
