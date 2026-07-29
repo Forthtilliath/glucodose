@@ -10,6 +10,7 @@ Le format suit [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/), et le p
 - Swipe-to-delete sur les listes récipients et aliments.
 - Vérification et installation des mises à jour depuis les releases GitHub (Réglages).
 - Photo sur les ingrédients et recettes (comme pour les récipients), visible dans les listes et les sélecteurs.
+- Filtres sur l'Historique : recherche par nom d'aliment et période (aujourd'hui / 7 jours / 30 jours / tout).
 - Suite de tests unitaires complète : moteur Ciqual, mises à jour, sauvegarde, et couche base de données (contraintes, transactions) sur une vraie base SQLite en mémoire.
 
 ### Corrigé
