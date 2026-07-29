@@ -34,7 +34,9 @@
     "react-native-worklets": "0.10.0"
   },
   "devDependencies": {
+    "@libsql/client": "^0.17.4",
     "@types/jest": "29.5.14",
+    "@types/node": "^26.1.2",
     "@types/react": "~19.2.2",
     "babel-plugin-inline-import": "^3.0.0",
     "drizzle-kit": "^0.31.10",
@@ -56,6 +58,9 @@
   },
   "private": true,
   "jest": {
-    "preset": "jest-expo"
+    "preset": "jest-expo",
+    "moduleNameMapper": {
+      "^@/assets/(.*)$": "<rootDir>/assets/$1"
+    }
   }
 }

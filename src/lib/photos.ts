@@ -11,10 +11,15 @@ function getContainersDirectory(): Directory {
   return dir;
 }
 
+// Exportée pour être testée isolément : c'est la seule partie de ce fichier
+// qui ne dépend pas du système de fichiers natif.
+export function getFileExtension(uri: string): string {
+  const extensionMatch = uri.split("?")[0].match(/\.(\w+)$/);
+  return extensionMatch ? extensionMatch[1] : "jpg";
+}
+
 export async function saveContainerPhoto(sourceUri: string): Promise<string> {
-  const extensionMatch = sourceUri.split("?")[0].match(/\.(\w+)$/);
-  const extension = extensionMatch ? extensionMatch[1] : "jpg";
-  const destination = new File(getContainersDirectory(), `container-${Date.now()}.${extension}`);
+  const destination = new File(getContainersDirectory(), `container-${Date.now()}.${getFileExtension(sourceUri)}`);
   const source = new File(sourceUri);
   await source.copy(destination);
   return destination.uri;

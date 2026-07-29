@@ -1,0 +1,140 @@
+import { closeTestDb, createTestDb, mockDbClient, resetTestDb, type TestDb } from "@/db/testDb";
+import * as schema from "@/db/schema";
+
+type FakeFileSystem = {
+  store: Map<string, string>;
+};
+
+// Double léger d'expo-file-system : un simple magasin clé/valeur en mémoire,
+// suffisant pour vérifier ce que exportAllData/importAllData lisent et
+// écrivent, sans dépendre du système de fichiers natif (indisponible en Jest).
+jest.mock("expo-file-system", () => {
+  const store = new Map<string, string>();
+  (globalThis as unknown as { __fakeFs: FakeFileSystem }).__fakeFs = { store };
+
+  class FakeFile {
+    uri: string;
+    constructor(...parts: (string | { uri: string })[]) {
+      this.uri = parts.map((p) => (typeof p === "string" ? p : p.uri)).join("/");
+    }
+    get exists() {
+      return store.has(this.uri);
+    }
+    create() {
+      store.set(this.uri, "");
+    }
+    write(content: string) {
+      store.set(this.uri, content);
+    }
+    delete() {
+      store.delete(this.uri);
+    }
+    async text() {
+      const content = store.get(this.uri);
+      if (content === undefined) throw new Error(`Fake file not found: ${this.uri}`);
+      return content;
+    }
+  }
+
+  return { File: FakeFile, Paths: { cache: { uri: "cache" } } };
+});
+
+type Backup = typeof import("./backup");
+
+let testDb: TestDb;
+let backup: Backup;
+let fakeFs: FakeFileSystem;
+
+beforeAll(async () => {
+  testDb = await createTestDb();
+  mockDbClient("@/db/client", testDb);
+  backup = require("./backup");
+  fakeFs = (globalThis as unknown as { __fakeFs: FakeFileSystem }).__fakeFs;
+});
+
+afterAll(() => {
+  closeTestDb(testDb);
+});
+
+beforeEach(async () => {
+  await resetTestDb(testDb);
+  fakeFs.store.clear();
+});
+
+describe("exportAllData", () => {
+  it("exporte toutes les tables dans un fichier JSON et retourne son uri", async () => {
+    await testDb.insert(schema.containers).values({ name: "Bol", tareWeightG: 100 });
+
+    const uri = await backup.exportAllData();
+    const content = JSON.parse(fakeFs.store.get(uri) as string);
+
+    expect(content.schemaVersion).toBe(1);
+    expect(content.containers).toHaveLength(1);
+    expect(content.containers[0].name).toBe("Bol");
+    expect(content.foods).toEqual([]);
+  });
+});
+
+describe("importAllData", () => {
+  it("rejette un fichier qui n'est pas du JSON valide", async () => {
+    fakeFs.store.set("bad.json", "ceci n'est pas du json");
+    await expect(backup.importAllData("bad.json")).rejects.toThrow(backup.InvalidBackupFileError);
+  });
+
+  it("rejette un JSON qui ne ressemble pas à une sauvegarde", async () => {
+    fakeFs.store.set("bad.json", JSON.stringify({ hello: "world" }));
+    await expect(backup.importAllData("bad.json")).rejects.toThrow(backup.InvalidBackupFileError);
+  });
+
+  it("rejette une sauvegarde d'une version de schéma plus récente que celle supportée", async () => {
+    fakeFs.store.set(
+      "future.json",
+      JSON.stringify({
+        schemaVersion: 999,
+        containers: [],
+        foods: [],
+        recipeComponents: [],
+        insulinRatios: [],
+        settings: [],
+        weighings: [],
+      })
+    );
+    await expect(backup.importAllData("future.json")).rejects.toThrow(backup.InvalidBackupFileError);
+  });
+
+  it("remplace entièrement les données existantes par celles du fichier importé", async () => {
+    // Donnée existante avant import, qui doit disparaître après import.
+    await testDb.insert(schema.containers).values({ name: "Ancien bol", tareWeightG: 50 });
+
+    fakeFs.store.set(
+      "backup.json",
+      JSON.stringify({
+        schemaVersion: 1,
+        containers: [{ id: 1, name: "Bol importé", tareWeightG: 120, photoUri: null, notes: null }],
+        foods: [],
+        recipeComponents: [],
+        insulinRatios: [],
+        settings: [],
+        weighings: [],
+      })
+    );
+
+    await backup.importAllData("backup.json");
+
+    const containers = await testDb.select().from(schema.containers);
+    expect(containers).toHaveLength(1);
+    expect(containers[0].name).toBe("Bol importé");
+  });
+});
+
+describe("cleanupExportedFile", () => {
+  it("supprime le fichier s'il existe", () => {
+    fakeFs.store.set("to-delete.json", "{}");
+    backup.cleanupExportedFile("to-delete.json");
+    expect(fakeFs.store.has("to-delete.json")).toBe(false);
+  });
+
+  it("ne lève pas d'erreur si le fichier n'existe pas", () => {
+    expect(() => backup.cleanupExportedFile("does-not-exist.json")).not.toThrow();
+  });
+});
