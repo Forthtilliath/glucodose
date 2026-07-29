@@ -40,6 +40,7 @@ export default function IngredientFormScreen() {
   const [notes, setNotes] = useState("");
   const [isCiqualPickerVisible, setIsCiqualPickerVisible] = useState(false);
   const [isSuggestionsOpen, setIsSuggestionsOpen] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   const nameInputRef = useRef<TextInput>(null);
   const carbsInputRef = useRef<TextInput>(null);
 
@@ -100,22 +101,28 @@ export default function IngredientFormScreen() {
     parsedCarbsPer100g <= MAX_CARBS_PER_100G;
 
   async function handleSave() {
-    if (isNew) {
-      await createIngredient({
-        name: name.trim(),
-        carbsPer100g: parsedCarbsPer100g,
-        source: source.trim() || undefined,
-        notes: notes.trim() || undefined,
-      });
-    } else {
-      await updateIngredient(foodId as number, {
-        name: name.trim(),
-        carbsPer100g: parsedCarbsPer100g,
-        source: source.trim() || undefined,
-        notes: notes.trim() || undefined,
-      });
+    if (isSaving) return;
+    setIsSaving(true);
+    try {
+      if (isNew) {
+        await createIngredient({
+          name: name.trim(),
+          carbsPer100g: parsedCarbsPer100g,
+          source: source.trim() || undefined,
+          notes: notes.trim() || undefined,
+        });
+      } else {
+        await updateIngredient(foodId as number, {
+          name: name.trim(),
+          carbsPer100g: parsedCarbsPer100g,
+          source: source.trim() || undefined,
+          notes: notes.trim() || undefined,
+        });
+      }
+      router.back();
+    } finally {
+      setIsSaving(false);
     }
-    router.back();
   }
 
   async function handleDelete() {
@@ -151,7 +158,11 @@ export default function IngredientFormScreen() {
   }
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.content}>
+    <ScrollView
+      style={styles.container}
+      contentContainerStyle={styles.content}
+      keyboardShouldPersistTaps="handled"
+    >
       <Text style={styles.label}>Nom</Text>
       <View style={styles.nameFieldWrapper}>
         <View style={styles.nameFieldRow}>
@@ -241,11 +252,11 @@ export default function IngredientFormScreen() {
       />
 
       <Pressable
-        style={[styles.saveButton, !canSave && styles.saveButtonDisabled]}
-        disabled={!canSave}
+        style={[styles.saveButton, (!canSave || isSaving) && styles.saveButtonDisabled]}
+        disabled={!canSave || isSaving}
         onPress={handleSave}
         accessibilityRole="button"
-        accessibilityState={{ disabled: !canSave }}
+        accessibilityState={{ disabled: !canSave || isSaving }}
         accessibilityLabel="Enregistrer l'ingrédient"
       >
         <Text style={styles.saveButtonText}>Enregistrer</Text>

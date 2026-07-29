@@ -6,6 +6,15 @@ Le format suit [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/), et le p
 
 ## [Unreleased]
 
+### Ajouté
+- Swipe-to-delete sur les listes récipients et aliments.
+- Vérification et installation des mises à jour depuis les releases GitHub (Réglages).
+
+### Corrigé
+- Double-soumission possible sur les formulaires récipient, ingrédient, recette et ratio (le formulaire pouvait créer plusieurs entrées identiques).
+- Sélection d'un résultat Ciqual dans le formulaire ingrédient qui ne mettait pas à jour le formulaire.
+- Icône et écran de démarrage plus nets, avec le nom de l'app affiché.
+
 ## [1.0.0] - 2026-07-28
 
 Première version suivie. L'app était déjà fonctionnelle avant cette date (historique de commits complet dans le repo) — ceci marque le début du suivi de version, pas la première ligne de code.

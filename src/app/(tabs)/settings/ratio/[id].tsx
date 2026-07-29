@@ -22,6 +22,7 @@ export default function RatioFormScreen() {
 
   const [label, setLabel] = useState("");
   const [carbsGramsPerUnit, setCarbsGramsPerUnit] = useState("");
+  const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
     if (existing) {
@@ -34,12 +35,18 @@ export default function RatioFormScreen() {
   const canSave = label.trim().length > 0 && !Number.isNaN(parsedValue) && parsedValue > 0;
 
   async function handleSave() {
-    if (isNew) {
-      await createRatio({ label: label.trim(), carbsGramsPerUnit: parsedValue });
-    } else {
-      await updateRatio(ratioId as number, { label: label.trim(), carbsGramsPerUnit: parsedValue });
+    if (isSaving) return;
+    setIsSaving(true);
+    try {
+      if (isNew) {
+        await createRatio({ label: label.trim(), carbsGramsPerUnit: parsedValue });
+      } else {
+        await updateRatio(ratioId as number, { label: label.trim(), carbsGramsPerUnit: parsedValue });
+      }
+      router.back();
+    } finally {
+      setIsSaving(false);
     }
-    router.back();
   }
 
   function handleDelete() {
@@ -78,11 +85,11 @@ export default function RatioFormScreen() {
       />
 
       <Pressable
-        style={[styles.saveButton, !canSave && styles.saveButtonDisabled]}
-        disabled={!canSave}
+        style={[styles.saveButton, (!canSave || isSaving) && styles.saveButtonDisabled]}
+        disabled={!canSave || isSaving}
         onPress={handleSave}
         accessibilityRole="button"
-        accessibilityState={{ disabled: !canSave }}
+        accessibilityState={{ disabled: !canSave || isSaving }}
         accessibilityLabel="Enregistrer le ratio"
       >
         <Text style={styles.saveButtonText}>Enregistrer</Text>

@@ -61,6 +61,7 @@ export default function RecipeFormScreen() {
   const [notes, setNotes] = useState("");
   const [rows, setRows] = useState<Row[]>([]);
   const [pickerVisible, setPickerVisible] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
     if (existing) {
@@ -131,16 +132,22 @@ export default function RecipeFormScreen() {
     });
 
   async function handleSave() {
-    await saveRecipe(recipeFoodId, {
-      name: name.trim(),
-      notes: notes.trim() || undefined,
-      components: rows.map((r) => ({
-        componentFoodId: r.foodId,
-        weightG: parseFloat(r.weightG),
-        carbsPer100gAtEntry: foodMap.get(r.foodId)?.carbsPer100g ?? 0,
-      })),
-    });
-    router.back();
+    if (isSaving) return;
+    setIsSaving(true);
+    try {
+      await saveRecipe(recipeFoodId, {
+        name: name.trim(),
+        notes: notes.trim() || undefined,
+        components: rows.map((r) => ({
+          componentFoodId: r.foodId,
+          weightG: parseFloat(r.weightG),
+          carbsPer100gAtEntry: foodMap.get(r.foodId)?.carbsPer100g ?? 0,
+        })),
+      });
+      router.back();
+    } finally {
+      setIsSaving(false);
+    }
   }
 
   async function handleDelete() {
@@ -254,11 +261,11 @@ export default function RecipeFormScreen() {
       />
 
       <Pressable
-        style={[styles.saveButton, !canSave && styles.saveButtonDisabled]}
-        disabled={!canSave}
+        style={[styles.saveButton, (!canSave || isSaving) && styles.saveButtonDisabled]}
+        disabled={!canSave || isSaving}
         onPress={handleSave}
         accessibilityRole="button"
-        accessibilityState={{ disabled: !canSave }}
+        accessibilityState={{ disabled: !canSave || isSaving }}
         accessibilityLabel="Enregistrer la recette"
       >
         <Text style={styles.saveButtonText}>Enregistrer la recette</Text>
