@@ -2,6 +2,11 @@
   "extends": "expo/tsconfig.base",
   "compilerOptions": {
     "strict": true,
+    // Sans ceci, les globals ambiants de node/jest (process, __dirname,
+    // describe, expect...) utilisés par les fichiers de test ne sont pas
+    // reconnus. Si un futur package @types/* doit fournir des globals
+    // ambiants (pas via import), il faudra l'ajouter ici aussi.
+    "types": ["node", "jest"],
     "paths": {
       "@/*": [
         "./src/*"
