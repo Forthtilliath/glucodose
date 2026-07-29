@@ -6,6 +6,15 @@ Le format suit [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/), et le p
 
 ## [Unreleased]
 
+## [1.2.3] - 2026-07-30
+
+### Modifié
+- Les mises à jour ont désormais leur propre page (`Réglages → Mises à jour`) au lieu d'être affichées en ligne sur le menu principal.
+
+### Corrigé
+- Le bouton "Rechercher une mise à jour" passait sur 3 lignes au lieu de 2 pendant la vérification (résolu par le passage à sa propre page).
+- Widget Android : ajout d'un rafraîchissement périodique (30 min) en filet de sécurité si le premier rendu échoue au moment de l'ajout (probable restriction de démarrage en arrière-plan sur certains téléphones, ex. Honor/Magic OS — peut nécessiter d'autoriser manuellement GlucoDose dans le gestionnaire de démarrage du téléphone).
+
 ## [1.2.2] - 2026-07-30
 
 ### Corrigé
@@ -60,7 +69,8 @@ Première version suivie. L'app était déjà fonctionnelle avant cette date (hi
 ### Corrigé
 - Validation des valeurs négatives (poids, glucides, glycémie), contraintes de clé étrangère SQLite activées, permission microphone superflue retirée.
 
-[Unreleased]: https://github.com/Forthtilliath/glucodose/compare/v1.2.2...HEAD
+[Unreleased]: https://github.com/Forthtilliath/glucodose/compare/v1.2.3...HEAD
+[1.2.3]: https://github.com/Forthtilliath/glucodose/releases/tag/v1.2.3
 [1.2.2]: https://github.com/Forthtilliath/glucodose/releases/tag/v1.2.2
 [1.2.1]: https://github.com/Forthtilliath/glucodose/releases/tag/v1.2.1
 [1.2.0]: https://github.com/Forthtilliath/glucodose/releases/tag/v1.2.0

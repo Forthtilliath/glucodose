@@ -2,7 +2,7 @@
   "expo": {
     "name": "GlucoDose",
     "slug": "glucodose",
-    "version": "1.2.2",
+    "version": "1.2.3",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "glucodose",
@@ -19,7 +19,7 @@
       },
       "predictiveBackGestureEnabled": false,
       "package": "com.forth.glucodose",
-      "versionCode": 10202,
+      "versionCode": 10203,
       "permissions": [
         "android.permission.REQUEST_INSTALL_PACKAGES"
       ]
@@ -58,7 +58,8 @@
               "description": "Raccourci vers l'écran de pesée.",
               "minWidth": "110dp",
               "minHeight": "110dp",
-              "resizeMode": "none"
+              "resizeMode": "none",
+              "updatePeriodMillis": 1800000
             }
           ]
         }
