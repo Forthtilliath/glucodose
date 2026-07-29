@@ -6,6 +6,12 @@ Le format suit [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/), et le p
 
 ## [Unreleased]
 
+## [1.2.1] - 2026-07-29
+
+### Corrigé
+- **Crash au démarrage** ("Property 'jest' doesn't exist") présent dans les APK 1.1.0 et 1.2.0 : un fichier de test avait été placé dans `src/app/`, scanné par Expo Router pour générer les routes, et se retrouvait chargé comme une route dans le bundle de production.
+- `versionCode` Android jamais incrémenté depuis la création du projet (toujours `1`) : empêchait Android de reconnaître correctement les mises à jour installées manuellement (le vérificateur de mise à jour intégré pouvait donc échouer silencieusement à remplacer une version installée par une plus récente).
+
 ## [1.2.0] - 2026-07-29
 
 ### Ajouté
@@ -49,7 +55,8 @@ Première version suivie. L'app était déjà fonctionnelle avant cette date (hi
 ### Corrigé
 - Validation des valeurs négatives (poids, glucides, glycémie), contraintes de clé étrangère SQLite activées, permission microphone superflue retirée.
 
-[Unreleased]: https://github.com/Forthtilliath/glucodose/compare/v1.2.0...HEAD
+[Unreleased]: https://github.com/Forthtilliath/glucodose/compare/v1.2.1...HEAD
+[1.2.1]: https://github.com/Forthtilliath/glucodose/releases/tag/v1.2.1
 [1.2.0]: https://github.com/Forthtilliath/glucodose/releases/tag/v1.2.0
 [1.1.0]: https://github.com/Forthtilliath/glucodose/releases/tag/v1.1.0
 [1.0.0]: https://github.com/Forthtilliath/glucodose/releases/tag/v1.0.0
