@@ -58,26 +58,25 @@ export default function SettingsScreen() {
     (!Number.isNaN(parseFloat(sensitivityFactor)) && parseFloat(sensitivityFactor) > 0);
   const canSaveSettings = targetGlycemiaValid && sensitivityFactorValid;
 
-  async function handleSaveSettings() {
-    if (!canSaveSettings) return;
-    await updateSettings({
+  function saveCurrentSettings(showInsulinDoseOverride: boolean) {
+    return updateSettings({
       glycemiaUnit,
       targetGlycemia: targetGlycemia.trim() ? parseFloat(targetGlycemia) : null,
       sensitivityFactor: sensitivityFactor.trim() ? parseFloat(sensitivityFactor) : null,
-      showInsulinDose,
+      showInsulinDose: showInsulinDoseOverride,
     });
+  }
+
+  async function handleSaveSettings() {
+    if (!canSaveSettings) return;
+    await saveCurrentSettings(showInsulinDose);
   }
 
   // Bascule à effet immédiat (pas besoin de passer par "Enregistrer les
   // réglages"), comme n'importe quel interrupteur de préférence.
   async function handleToggleShowInsulinDose(value: boolean) {
     setShowInsulinDose(value);
-    await updateSettings({
-      glycemiaUnit,
-      targetGlycemia: targetGlycemia.trim() ? parseFloat(targetGlycemia) : null,
-      sensitivityFactor: sensitivityFactor.trim() ? parseFloat(sensitivityFactor) : null,
-      showInsulinDose: value,
-    });
+    await saveCurrentSettings(value);
   }
 
   async function handleCheckForUpdate() {
