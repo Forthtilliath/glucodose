@@ -6,6 +6,8 @@ Le format suit [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/), et le p
 
 ## [Unreleased]
 
+## [1.1.0] - 2026-07-29
+
 ### Ajouté
 - Swipe-to-delete sur les listes récipients et aliments.
 - Vérification et installation des mises à jour depuis les releases GitHub (Réglages).
@@ -19,6 +21,7 @@ Le format suit [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/), et le p
 - Double-soumission possible sur les formulaires récipient, ingrédient, recette et ratio (le formulaire pouvait créer plusieurs entrées identiques).
 - Sélection d'un résultat Ciqual dans le formulaire ingrédient qui ne mettait pas à jour le formulaire.
 - Icône et écran de démarrage plus nets, avec le nom de l'app affiché.
+- Swipe-to-delete ne fonctionnait pas du tout : le `GestureHandlerRootView` requis par react-native-gesture-handler n'enveloppait jamais réellement la racine de l'app malgré ce qui était supposé.
 
 ## [1.0.0] - 2026-07-28
 
@@ -38,5 +41,6 @@ Première version suivie. L'app était déjà fonctionnelle avant cette date (hi
 ### Corrigé
 - Validation des valeurs négatives (poids, glucides, glycémie), contraintes de clé étrangère SQLite activées, permission microphone superflue retirée.
 
-[Unreleased]: https://github.com/Forthtilliath/glucodose/compare/v1.0.0...HEAD
+[Unreleased]: https://github.com/Forthtilliath/glucodose/compare/v1.1.0...HEAD
+[1.1.0]: https://github.com/Forthtilliath/glucodose/releases/tag/v1.1.0
 [1.0.0]: https://github.com/Forthtilliath/glucodose/releases/tag/v1.0.0
