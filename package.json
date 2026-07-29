@@ -61,6 +61,9 @@
   "private": true,
   "jest": {
     "preset": "jest-expo",
+    "setupFiles": [
+      "react-native-gesture-handler/jestSetup"
+    ],
     "moduleNameMapper": {
       "^@/assets/(.*)$": "<rootDir>/assets/$1"
     }
