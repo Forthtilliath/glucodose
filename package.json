@@ -1,7 +1,7 @@
 {
   "name": "glucodose",
   "main": "./index.js",
-  "version": "1.2.1",
+  "version": "1.2.2",
   "dependencies": {
     "@expo/ui": "~57.0.8",
     "@expo/vector-icons": "^15.0.2",

@@ -6,6 +6,11 @@ Le format suit [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/), et le p
 
 ## [Unreleased]
 
+## [1.2.2] - 2026-07-30
+
+### Corrigé
+- Recherche Ciqual (et Historique) qui ne trouvait rien pour un nom tapé avec une vraie ligature `œ`/`æ` (ex. "Œuf") : Ciqual orthographie ces mots en toutes lettres ("Oeuf"), et la ligature ne se décompose pas via la normalisation Unicode utilisée jusqu'ici.
+
 ## [1.2.1] - 2026-07-29
 
 ### Corrigé
@@ -55,7 +60,8 @@ Première version suivie. L'app était déjà fonctionnelle avant cette date (hi
 ### Corrigé
 - Validation des valeurs négatives (poids, glucides, glycémie), contraintes de clé étrangère SQLite activées, permission microphone superflue retirée.
 
-[Unreleased]: https://github.com/Forthtilliath/glucodose/compare/v1.2.1...HEAD
+[Unreleased]: https://github.com/Forthtilliath/glucodose/compare/v1.2.2...HEAD
+[1.2.2]: https://github.com/Forthtilliath/glucodose/releases/tag/v1.2.2
 [1.2.1]: https://github.com/Forthtilliath/glucodose/releases/tag/v1.2.1
 [1.2.0]: https://github.com/Forthtilliath/glucodose/releases/tag/v1.2.0
 [1.1.0]: https://github.com/Forthtilliath/glucodose/releases/tag/v1.1.0
