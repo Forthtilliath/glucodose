@@ -22,6 +22,7 @@ import { useSubmitGuard } from "@/lib/useSubmitGuard";
 import { type ThemeColors, useColors } from "@/theme/colors";
 import { PhotoPicker } from "@/components/PhotoPicker";
 import { PickerModal, type PickerItem } from "@/components/PickerModal";
+import { VoiceSearchButton } from "@/components/VoiceSearchButton";
 
 function filterCiqualItems(items: PickerItem[], query: string): PickerItem[] {
   return rankByNameMatch(items, query, (item) => item.label);
@@ -177,6 +178,15 @@ export default function IngredientFormScreen() {
             >
               <Ionicons name="search-outline" size={20} color={colors.primary} />
             </Pressable>
+          )}
+          {isNew && (
+            <VoiceSearchButton
+              onResult={(transcript) => {
+                setName(transcript);
+                setIsSuggestionsOpen(true);
+              }}
+              accessibilityLabel="Dicter le nom de l'aliment à chercher dans Ciqual"
+            />
           )}
         </View>
         {suggestions.length > 0 && (

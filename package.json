@@ -1,7 +1,7 @@
 {
   "name": "glucodose",
   "main": "./index.js",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "dependencies": {
     "@expo/ui": "~57.0.7",
     "@expo/vector-icons": "^15.0.2",
@@ -19,6 +19,7 @@
     "expo-quick-actions": "^6.0.2",
     "expo-router": "~57.0.7",
     "expo-sharing": "~57.0.6",
+    "expo-speech-recognition": "^56.0.1",
     "expo-splash-screen": "~57.0.4",
     "expo-sqlite": "~57.0.1",
     "expo-status-bar": "~57.0.1",
