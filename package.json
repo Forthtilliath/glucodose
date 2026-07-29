@@ -15,6 +15,7 @@
     "expo-image-picker": "~57.0.5",
     "expo-intent-launcher": "~57.0.1",
     "expo-linking": "~57.0.3",
+    "expo-print": "~57.0.1",
     "expo-quick-actions": "^6.0.2",
     "expo-router": "~57.0.7",
     "expo-sharing": "~57.0.6",
