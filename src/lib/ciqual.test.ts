@@ -8,6 +8,13 @@ describe("normalizeForSearch", () => {
   it("retire les espaces en début/fin", () => {
     expect(normalizeForSearch("  Pomme  ")).toBe("pomme");
   });
+
+  it("développe les ligatures œ/æ, absentes de Ciqual qui les orthographie en toutes lettres", () => {
+    expect(normalizeForSearch("Œuf")).toBe("oeuf");
+    expect(normalizeForSearch("œuf")).toBe("oeuf");
+    expect(normalizeForSearch("Bœuf")).toBe("boeuf");
+    expect(normalizeForSearch("nævus")).toBe("naevus");
+  });
 });
 
 describe("rankByNameMatch", () => {
@@ -62,5 +69,11 @@ describe("searchCiqualFoods", () => {
   it("limite le nombre de résultats", () => {
     const results = searchCiqualFoods("pomme", 2);
     expect(results.length).toBeLessThanOrEqual(2);
+  });
+
+  it("trouve les oeufs même écrits avec la ligature Œ", () => {
+    const results = searchCiqualFoods("Œuf");
+    expect(results.length).toBeGreaterThan(0);
+    expect(results.some((food) => /oeuf/i.test(food.name))).toBe(true);
   });
 });
