@@ -38,6 +38,8 @@
   },
   "devDependencies": {
     "@libsql/client": "^0.17.4",
+    "@react-native/jest-preset": "^0.86.2",
+    "@testing-library/react-native": "^12.9.0",
     "@types/jest": "29.5.14",
     "@types/node": "^26.1.2",
     "@types/react": "~19.2.2",
@@ -64,6 +66,9 @@
     "preset": "jest-expo",
     "setupFiles": [
       "react-native-gesture-handler/jestSetup"
+    ],
+    "setupFilesAfterEnv": [
+      "<rootDir>/jest.setup.js"
     ],
     "moduleNameMapper": {
       "^@/assets/(.*)$": "<rootDir>/assets/$1"
