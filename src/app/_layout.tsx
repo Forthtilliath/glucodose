@@ -1,5 +1,6 @@
 import { useEffect, useMemo } from "react";
 import { ActivityIndicator, StyleSheet, Text, useColorScheme, View } from "react-native";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { DarkTheme, DefaultTheme, Stack, ThemeProvider, useRouter } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import * as QuickActions from "expo-quick-actions";
@@ -47,34 +48,45 @@ export default function RootLayout() {
     return () => subscription.remove();
   }, [success, router]);
 
+  // Racine requise par react-native-gesture-handler pour que les gestes
+  // (dont le swipe-to-delete des listes) fonctionnent : sans ce wrapper, le
+  // pan responder natif n'est jamais installé et le geste ne se déclenche
+  // simplement pas, sans erreur visible.
   if (error) {
     return (
-      <View style={styles.center}>
-        <Text style={styles.errorTitle}>Erreur de migration de la base</Text>
-        <Text style={styles.errorMessage}>{error.message}</Text>
-      </View>
+      <GestureHandlerRootView style={styles.flex}>
+        <View style={styles.center}>
+          <Text style={styles.errorTitle}>Erreur de migration de la base</Text>
+          <Text style={styles.errorMessage}>{error.message}</Text>
+        </View>
+      </GestureHandlerRootView>
     );
   }
 
   if (!success) {
     return (
-      <View style={styles.center}>
-        <ActivityIndicator size="large" />
-      </View>
+      <GestureHandlerRootView style={styles.flex}>
+        <View style={styles.center}>
+          <ActivityIndicator size="large" />
+        </View>
+      </GestureHandlerRootView>
     );
   }
 
   return (
-    <ThemeProvider value={scheme === "dark" ? DarkTheme : DefaultTheme}>
-      <Stack screenOptions={{ headerTitleAlign: "center" }}>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-      </Stack>
-    </ThemeProvider>
+    <GestureHandlerRootView style={styles.flex}>
+      <ThemeProvider value={scheme === "dark" ? DarkTheme : DefaultTheme}>
+        <Stack screenOptions={{ headerTitleAlign: "center" }}>
+          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+        </Stack>
+      </ThemeProvider>
+    </GestureHandlerRootView>
   );
 }
 
 function createStyles(colors: ReturnType<typeof useColors>) {
   return StyleSheet.create({
+    flex: { flex: 1 },
     center: {
       flex: 1,
       alignItems: "center",

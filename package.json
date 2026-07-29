@@ -1,7 +1,7 @@
 {
   "name": "glucodose",
   "main": "./index.js",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "dependencies": {
     "@expo/ui": "~57.0.7",
     "@expo/vector-icons": "^15.0.2",
@@ -61,6 +61,9 @@
   "private": true,
   "jest": {
     "preset": "jest-expo",
+    "setupFiles": [
+      "react-native-gesture-handler/jestSetup"
+    ],
     "moduleNameMapper": {
       "^@/assets/(.*)$": "<rootDir>/assets/$1"
     }
