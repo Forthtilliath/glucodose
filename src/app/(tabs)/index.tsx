@@ -9,7 +9,7 @@ import { PickerModal, type PickerItem } from "@/components/PickerModal";
 import { db } from "@/db/client";
 import { createIngredient, recordWeighing } from "@/db/repository";
 import { containers, foods, insulinRatios, settings } from "@/db/schema";
-import { ALL_CIQUAL_FOODS, rankByNameMatch } from "@/lib/ciqual";
+import { ALL_CIQUAL_FOODS, CIQUAL_PICKER_ITEMS, rankByNameMatch } from "@/lib/ciqual";
 import {
   computeCarbsGrams,
   computeCorrectionInsulinUnits,
@@ -123,16 +123,6 @@ export default function WeighScreen() {
       })),
     [ratioList]
   );
-  const ciqualItems: PickerItem[] = useMemo(
-    () =>
-      ALL_CIQUAL_FOODS.map((food, index) => ({
-        id: index,
-        label: food.name,
-        subtitle: `${formatCarbs(food.carbsPer100g)} / 100 g`,
-      })),
-    []
-  );
-
   async function handleSelectCiqualQuickAdd(item: PickerItem) {
     const food = ALL_CIQUAL_FOODS[item.id];
     if (!food) return;
@@ -152,6 +142,36 @@ export default function WeighScreen() {
     selectedFood != null &&
     (!showInsulinDose || selectedRatio != null);
 
+  // Regroupe tous les champs liés au calcul de dose : quand ce calcul est
+  // désactivé (mode "glucides seuls"), la pesée est quand même enregistrée,
+  // juste sans aucune de ces valeurs.
+  const insulinFields =
+    showInsulinDose && selectedRatio
+      ? {
+          ratioId: selectedRatio.id,
+          ratioLabel: selectedRatio.label,
+          carbsGramsPerUnit: selectedRatio.carbsGramsPerUnit,
+          mealInsulinUnits,
+          glycemiaUnit,
+          currentGlycemia: !Number.isNaN(currentGlycemiaNumber) ? currentGlycemiaNumber : null,
+          targetGlycemia,
+          sensitivityFactor,
+          correctionInsulinUnits,
+          totalInsulinUnits,
+        }
+      : {
+          ratioId: null,
+          ratioLabel: null,
+          carbsGramsPerUnit: null,
+          mealInsulinUnits: 0,
+          glycemiaUnit: null,
+          currentGlycemia: null,
+          targetGlycemia: null,
+          sensitivityFactor: null,
+          correctionInsulinUnits: 0,
+          totalInsulinUnits: 0,
+        };
+
   async function handleSave() {
     if (!selectedFood || (showInsulinDose && !selectedRatio)) return;
     await recordWeighing({
@@ -163,16 +183,7 @@ export default function WeighScreen() {
       netWeightG,
       carbsPer100g: selectedFood.carbsPer100g,
       carbsG,
-      ratioId: showInsulinDose && selectedRatio ? selectedRatio.id : null,
-      ratioLabel: showInsulinDose && selectedRatio ? selectedRatio.label : null,
-      carbsGramsPerUnit: showInsulinDose && selectedRatio ? selectedRatio.carbsGramsPerUnit : null,
-      mealInsulinUnits: showInsulinDose ? mealInsulinUnits : 0,
-      glycemiaUnit: showInsulinDose ? glycemiaUnit : null,
-      currentGlycemia: showInsulinDose && !Number.isNaN(currentGlycemiaNumber) ? currentGlycemiaNumber : null,
-      targetGlycemia: showInsulinDose ? targetGlycemia : null,
-      sensitivityFactor: showInsulinDose ? sensitivityFactor : null,
-      correctionInsulinUnits: showInsulinDose ? correctionInsulinUnits : 0,
-      totalInsulinUnits: showInsulinDose ? totalInsulinUnits : 0,
+      ...insulinFields,
     });
     const savedText = showInsulinDose
       ? `Pesée enregistrée : ${formatInsulinUnits(totalInsulinUnits)} U pour ${selectedFood.name}`
@@ -398,7 +409,7 @@ export default function WeighScreen() {
       <PickerModal
         visible={ciqualQuickAddVisible}
         title="Chercher dans Ciqual"
-        items={ciqualItems}
+        items={CIQUAL_PICKER_ITEMS}
         filterItems={filterCiqualPickerItems}
         onSelect={handleSelectCiqualQuickAdd}
         onClose={() => setCiqualQuickAddVisible(false)}

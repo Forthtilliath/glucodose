@@ -9,8 +9,10 @@ import { Ionicons } from "@expo/vector-icons";
 import { db } from "@/db/client";
 import { deleteContainer, createContainer, updateContainer } from "@/db/repository";
 import { containers } from "@/db/schema";
+import { confirmDestructive } from "@/lib/confirmDelete";
 import { formatWeight, MAX_WEIGHT_G } from "@/lib/insulin";
 import { deleteContainerPhoto, saveContainerPhoto } from "@/lib/photos";
+import { useSubmitGuard } from "@/lib/useSubmitGuard";
 import { type ThemeColors, useColors } from "@/theme/colors";
 
 export default function ContainerFormScreen() {
@@ -30,7 +32,7 @@ export default function ContainerFormScreen() {
   const [tareWeight, setTareWeight] = useState("");
   const [notes, setNotes] = useState("");
   const [photoUri, setPhotoUri] = useState<string | null>(null);
-  const [isSaving, setIsSaving] = useState(false);
+  const { isSaving, guard } = useSubmitGuard();
 
   useEffect(() => {
     if (existing) {
@@ -93,12 +95,7 @@ export default function ContainerFormScreen() {
   }
 
   async function handleSave() {
-    // Garde contre le double tap : sans ça, plusieurs taps rapides avant que
-    // la navigation retour ne se produise créaient plusieurs récipients
-    // identiques (chaque tap relançait handleSave en parallèle).
-    if (isSaving) return;
-    setIsSaving(true);
-    try {
+    await guard(async () => {
       // Nettoie l'ancienne photo sur disque si elle a été remplacée ou retirée,
       // pour ne pas accumuler des fichiers orphelins au fil des éditions.
       if (existing?.photoUri && existing.photoUri !== photoUri) {
@@ -120,23 +117,14 @@ export default function ContainerFormScreen() {
         });
       }
       router.back();
-    } finally {
-      setIsSaving(false);
-    }
+    });
   }
 
   function handleDelete() {
-    Alert.alert("Supprimer ce récipient ?", "Cette action est définitive.", [
-      { text: "Annuler", style: "cancel" },
-      {
-        text: "Supprimer",
-        style: "destructive",
-        onPress: async () => {
-          await deleteContainer(containerId as number, existing?.photoUri ?? null);
-          router.back();
-        },
-      },
-    ]);
+    confirmDestructive("Supprimer ce récipient ?", async () => {
+      await deleteContainer(containerId as number, existing?.photoUri ?? null);
+      router.back();
+    });
   }
 
   return (

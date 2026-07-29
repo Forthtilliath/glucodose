@@ -2,13 +2,13 @@ import { useMemo } from "react";
 import { Link, useRouter } from "expo-router";
 import { desc, eq } from "drizzle-orm";
 import { useLiveQuery } from "drizzle-orm/expo-sqlite";
-import { Alert, FlatList, Pressable, StyleSheet, Text, View } from "react-native";
+import { FlatList, Pressable, StyleSheet, Text, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 
 import { SwipeableRow } from "@/components/SwipeableRow";
 import { db } from "@/db/client";
-import { archiveFood, deleteFood, isFoodUsedInRecipes } from "@/db/repository";
 import { foods } from "@/db/schema";
+import { confirmDeleteOrArchiveFood } from "@/lib/confirmDelete";
 import { formatCarbs } from "@/lib/insulin";
 import { type ThemeColors, useColors } from "@/theme/colors";
 
@@ -21,22 +21,7 @@ export default function FoodsScreen() {
   );
 
   async function handleDelete(food: { id: number; name: string }) {
-    const inUse = await isFoodUsedInRecipes(food.id);
-    if (inUse) {
-      Alert.alert(
-        `"${food.name}" est utilisé dans une recette`,
-        "Impossible de le supprimer. Tu peux l'archiver à la place : il n'apparaîtra plus dans les listes mais restera valide dans les recettes existantes.",
-        [
-          { text: "Annuler", style: "cancel" },
-          { text: "Archiver", onPress: () => archiveFood(food.id) },
-        ]
-      );
-      return;
-    }
-    Alert.alert(`Supprimer "${food.name}" ?`, "Cette action est définitive.", [
-      { text: "Annuler", style: "cancel" },
-      { text: "Supprimer", style: "destructive", onPress: () => deleteFood(food.id) },
-    ]);
+    await confirmDeleteOrArchiveFood(food, () => {});
   }
 
   return (
