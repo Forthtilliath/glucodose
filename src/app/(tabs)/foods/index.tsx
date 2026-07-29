@@ -6,6 +6,7 @@ import { FlatList, Pressable, StyleSheet, Text, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 
 import { SwipeableRow } from "@/components/SwipeableRow";
+import { Thumbnail } from "@/components/Thumbnail";
 import { db } from "@/db/client";
 import { foods } from "@/db/schema";
 import { confirmDeleteOrArchiveFood } from "@/lib/confirmDelete";
@@ -20,7 +21,7 @@ export default function FoodsScreen() {
     db.select().from(foods).where(eq(foods.isArchived, false)).orderBy(desc(foods.updatedAt))
   );
 
-  async function handleDelete(food: { id: number; name: string }) {
+  async function handleDelete(food: { id: number; name: string; photoUri: string | null }) {
     await confirmDeleteOrArchiveFood(food, () => {});
   }
 
@@ -45,6 +46,7 @@ export default function FoodsScreen() {
               accessibilityRole="button"
               accessibilityLabel={`${item.type === "recipe" ? "Recette" : "Ingrédient"} ${item.name}, ${formatCarbs(item.carbsPer100g)} pour 100g. Modifier.`}
             >
+              <Thumbnail photoUri={item.photoUri} placeholderIcon="restaurant-outline" />
               <View style={styles.rowMain}>
                 <View style={[styles.badge, item.type === "recipe" ? styles.badgeRecipe : styles.badgeIngredient]}>
                   <Text style={styles.badgeText}>{item.type === "recipe" ? "Recette" : "Ingrédient"}</Text>
@@ -74,6 +76,7 @@ function createStyles(colors: ThemeColors) {
       flexDirection: "row",
       justifyContent: "space-between",
       alignItems: "center",
+      gap: 12,
       backgroundColor: colors.surface,
       borderWidth: 1,
       borderColor: colors.border,
