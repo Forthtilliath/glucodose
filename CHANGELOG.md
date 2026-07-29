@@ -6,6 +6,14 @@ Le format suit [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/), et le p
 
 ## [Unreleased]
 
+## [1.2.0] - 2026-07-29
+
+### Ajouté
+- Recherche vocale pour dicter le nom d'un aliment à chercher dans Ciqual (bouton micro sur l'écran ingrédient).
+
+### Modifié
+- Écran Réglages réorganisé : "Dose et correction" et "Ratios insuline/glucides" ont désormais leur propre page, la page principale devient un simple menu groupé par sections.
+
 ## [1.1.0] - 2026-07-29
 
 ### Ajouté
@@ -41,6 +49,7 @@ Première version suivie. L'app était déjà fonctionnelle avant cette date (hi
 ### Corrigé
 - Validation des valeurs négatives (poids, glucides, glycémie), contraintes de clé étrangère SQLite activées, permission microphone superflue retirée.
 
-[Unreleased]: https://github.com/Forthtilliath/glucodose/compare/v1.1.0...HEAD
+[Unreleased]: https://github.com/Forthtilliath/glucodose/compare/v1.2.0...HEAD
+[1.2.0]: https://github.com/Forthtilliath/glucodose/releases/tag/v1.2.0
 [1.1.0]: https://github.com/Forthtilliath/glucodose/releases/tag/v1.1.0
 [1.0.0]: https://github.com/Forthtilliath/glucodose/releases/tag/v1.0.0

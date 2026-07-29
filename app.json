@@ -2,7 +2,7 @@
   "expo": {
     "name": "GlucoDose",
     "slug": "glucodose",
-    "version": "1.1.0",
+    "version": "1.2.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "glucodose",
@@ -19,7 +19,9 @@
       },
       "predictiveBackGestureEnabled": false,
       "package": "com.forth.glucodose",
-      "permissions": ["android.permission.REQUEST_INSTALL_PACKAGES"]
+      "permissions": [
+        "android.permission.REQUEST_INSTALL_PACKAGES"
+      ]
     },
     "web": {
       "output": "static",
@@ -40,8 +42,7 @@
         "expo-image-picker",
         {
           "photosPermission": "L'app utilise tes photos pour illustrer tes récipients.",
-          "cameraPermission": "L'app utilise l'appareil photo pour prendre en photo tes récipients.",
-          "microphonePermission": false
+          "cameraPermission": "L'app utilise l'appareil photo pour prendre en photo tes récipients."
         }
       ],
       "expo-sharing",
@@ -59,6 +60,13 @@
               "resizeMode": "none"
             }
           ]
+        }
+      ],
+      [
+        "expo-speech-recognition",
+        {
+          "microphonePermission": "L'app utilise le micro pour la recherche vocale d'aliment.",
+          "speechRecognitionPermission": "L'app utilise la reconnaissance vocale pour la recherche d'aliment."
         }
       ]
     ],
