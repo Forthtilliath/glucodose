@@ -1,0 +1,29 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      # --legacy-peer-deps : @react-native/jest-preset (requis par jest-expo)
+      # et react-native ont des exigences de peer dependency légèrement
+      # incompatibles (0.86.0 exact vs ^0.86.2) — sans impact réel, mais npm
+      # bloque sinon la résolution en mode strict.
+      - run: npm ci --legacy-peer-deps
+
+      - name: Vérification des types
+        run: npx tsc --noEmit
+
+      - name: Tests unitaires
+        run: npx jest --ci
