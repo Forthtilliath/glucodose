@@ -6,6 +6,14 @@ Le format suit [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/), et le p
 
 ## [Unreleased]
 
+## [1.10.0] - 2026-07-30
+
+### Ajouté
+- Le widget d'écran d'accueil devient un vrai sélecteur rapide : une case récipient et une case aliment font défiler les éléments récents sur simple tap (sans ouvrir l'app), et un bouton "Peser" ouvre l'écran de pesée avec cette sélection déjà pré-remplie.
+
+### Modifié
+- Le widget n'affiche plus le résumé du jour (glucides/dose totale) — remplacé par ce sélecteur rapide, jugé plus utile qu'un simple résumé.
+
 ## [1.9.2] - 2026-07-30
 
 ### Corrigé
