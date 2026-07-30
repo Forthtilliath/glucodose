@@ -6,6 +6,12 @@ Le format suit [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/), et le p
 
 ## [Unreleased]
 
+## [1.9.2] - 2026-07-30
+
+### Corrigé
+- Le nom de fichier des sauvegardes exportées (Réglages → Sauvegarde) reprenait encore l'ancien nom de l'app ("dose-insuline") au lieu de "glucodose".
+- Les notes de version affichées dans Réglages → Mises à jour (historique + mise à jour disponible) apparaissaient en Markdown brut ("### Titre", "- item") au lieu d'un vrai titre et d'une vraie liste.
+
 ## [1.9.1] - 2026-07-30
 
 ### Corrigé
