@@ -89,6 +89,17 @@ export const settings = sqliteTable("settings", {
   showInsulinDose: integer("show_insulin_dose", { mode: "boolean" })
     .notNull()
     .default(true),
+  // Sélection courante du widget d'accueil (cycle "Récents" sur tap) :
+  // permet de reprendre le récipient/aliment choisi entre deux ouvertures du
+  // widget, sans jamais ouvrir l'app. Pas de vraie contrainte de clé
+  // étrangère ici : SQLite n'applique pas correctement ON DELETE SET NULL
+  // sur une colonne ajoutée après coup via ALTER TABLE ADD COLUMN (seule une
+  // vraie création de table le permet) — une FK sans cette action aurait
+  // bloqué la suppression d'un aliment/récipient dès qu'il est sélectionné
+  // dans le widget. getWidgetSelection() gère déjà un id devenu orphelin en
+  // le traitant comme "aucune sélection".
+  widgetSelectedContainerId: integer("widget_selected_container_id"),
+  widgetSelectedFoodId: integer("widget_selected_food_id"),
   updatedAt: text("updated_at")
     .notNull()
     .default(sql`(current_timestamp)`),

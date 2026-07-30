@@ -2,7 +2,7 @@
   "expo": {
     "name": "GlucoDose",
     "slug": "glucodose",
-    "version": "1.9.3",
+    "version": "1.10.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "glucodose",
@@ -19,7 +19,7 @@
       },
       "predictiveBackGestureEnabled": false,
       "package": "com.forth.glucodose",
-      "versionCode": 10903,
+      "versionCode": 11000,
       "permissions": [
         "android.permission.REQUEST_INSTALL_PACKAGES"
       ]
@@ -55,10 +55,10 @@
             {
               "name": "WeighWidget",
               "label": "Peser (GlucoDose)",
-              "description": "Raccourci vers l'écran de pesée.",
-              "minWidth": "110dp",
+              "description": "Récipient/aliment récents + raccourci vers l'écran de pesée.",
+              "minWidth": "180dp",
               "minHeight": "110dp",
-              "resizeMode": "none",
+              "resizeMode": "horizontal",
               "updatePeriodMillis": 1800000
             }
           ]
