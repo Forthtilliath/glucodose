@@ -3,6 +3,7 @@ import { FlatList, Image, Modal, Pressable, StyleSheet, Text, TextInput, View } 
 import { Ionicons } from "@expo/vector-icons";
 
 import { type ThemeColors, useColors } from "@/theme/colors";
+import { VoiceSearchButton } from "@/components/VoiceSearchButton";
 
 export type PickerItem = {
   id: number;
@@ -64,15 +65,18 @@ export function PickerModal({
             <Text style={styles.close}>Fermer</Text>
           </Pressable>
         </View>
-        <TextInput
-          style={styles.search}
-          placeholder="Rechercher…"
-          placeholderTextColor={colors.textMuted}
-          value={query}
-          onChangeText={setQuery}
-          autoFocus
-          accessibilityLabel="Rechercher"
-        />
+        <View style={styles.searchRow}>
+          <TextInput
+            style={[styles.search, styles.searchInput]}
+            placeholder="Rechercher…"
+            placeholderTextColor={colors.textMuted}
+            value={query}
+            onChangeText={setQuery}
+            autoFocus
+            accessibilityLabel="Rechercher"
+          />
+          <VoiceSearchButton onResult={setQuery} accessibilityLabel="Dicter la recherche" />
+        </View>
         <FlatList
           data={filtered}
           keyExtractor={(item) => String(item.id)}
@@ -133,6 +137,7 @@ function createStyles(colors: ThemeColors) {
     header: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 12 },
     title: { fontSize: 20, fontWeight: "700", color: colors.text },
     close: { fontSize: 16, color: colors.primary },
+    searchRow: { flexDirection: "row", alignItems: "center", gap: 10, marginBottom: 8 },
     search: {
       backgroundColor: colors.surface,
       borderWidth: 1,
@@ -141,9 +146,9 @@ function createStyles(colors: ThemeColors) {
       paddingHorizontal: 12,
       paddingVertical: 10,
       fontSize: 16,
-      marginBottom: 8,
       color: colors.text,
     },
+    searchInput: { flex: 1, marginBottom: 0 },
     row: {
       flexDirection: "row",
       alignItems: "center",

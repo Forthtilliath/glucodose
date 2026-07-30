@@ -6,6 +6,14 @@ Le format suit [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/), et le p
 
 ## [Unreleased]
 
+## [1.4.0] - 2026-07-30
+
+### Ajouté
+- Recherche vocale disponible sur tous les sélecteurs (récipient, aliment, recette, ratio), et plus seulement sur le champ nom de l'écran ingrédient.
+
+### Corrigé
+- Deux boutons de recherche vocale montés en même temps sur le même écran (ex. champ nom + sélecteur Ciqual) pouvaient tous les deux recevoir le résultat d'une même dictée, l'un des deux silencieusement en arrière-plan.
+
 ## [1.3.0] - 2026-07-30
 
 ### Ajouté
