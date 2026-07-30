@@ -16,10 +16,8 @@ type ExportedData = {
   weighings: (typeof weighings.$inferSelect)[];
 };
 
-// Écrit un export JSON complet dans un fichier temporaire et retourne son
-// URI, prêt à être partagé (voir Sharing.shareAsync côté écran).
-export async function exportAllData(): Promise<string> {
-  const data: ExportedData = {
+async function buildExportedData(): Promise<ExportedData> {
+  return {
     schemaVersion: SCHEMA_VERSION,
     exportedAt: new Date().toISOString(),
     containers: await db.select().from(containers),
@@ -29,6 +27,12 @@ export async function exportAllData(): Promise<string> {
     settings: await db.select().from(settings),
     weighings: await db.select().from(weighings),
   };
+}
+
+// Écrit un export JSON complet dans un fichier temporaire et retourne son
+// URI, prêt à être partagé (voir Sharing.shareAsync côté écran).
+export async function exportAllData(): Promise<string> {
+  const data = await buildExportedData();
 
   const dateStamp = data.exportedAt.slice(0, 10);
   const file = new File(Paths.cache, `glucodose-sauvegarde-${dateStamp}.json`);
@@ -38,6 +42,34 @@ export async function exportAllData(): Promise<string> {
   file.create();
   file.write(JSON.stringify(data, null, 2));
   return file.uri;
+}
+
+// Nom fixe (écrasé à chaque sauvegarde) plutôt qu'horodaté comme l'export
+// manuel : ce fichier est un filet de sécurité qui ne garde que le dernier
+// état, pas un historique de versions. Dans Paths.document (pas .cache) pour
+// ne pas être supprimé par le système en cas de stockage bas.
+const AUTO_BACKUP_FILENAME = "glucodose-sauvegarde-auto.json";
+
+// Sauvegarde silencieuse déclenchée après une période d'inactivité sur les
+// réglages/aliments/récipients (voir useAutoBackup) — filet de sécurité en
+// cas d'oubli d'export manuel, pas une alternative à la restauration.
+export async function runAutoBackup(): Promise<void> {
+  const data = await buildExportedData();
+  const file = new File(Paths.document, AUTO_BACKUP_FILENAME);
+  if (file.exists) file.delete();
+  file.create();
+  file.write(JSON.stringify(data, null, 2));
+}
+
+export async function getAutoBackupSavedAt(): Promise<string | null> {
+  const file = new File(Paths.document, AUTO_BACKUP_FILENAME);
+  if (!file.exists) return null;
+  try {
+    const data = JSON.parse(await file.text()) as Partial<ExportedData>;
+    return data.exportedAt ?? null;
+  } catch {
+    return null;
+  }
 }
 
 function isExportedData(value: unknown): value is ExportedData {

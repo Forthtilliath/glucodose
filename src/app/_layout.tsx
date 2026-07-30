@@ -8,10 +8,20 @@ import { useMigrations } from "drizzle-orm/expo-sqlite/migrator";
 
 import { db } from "@/db/client";
 import { QUICK_ACTIONS, routeForQuickAction } from "@/lib/quickActions";
+import { useAutoBackup } from "@/lib/useAutoBackup";
 import { useColors } from "@/theme/colors";
 import migrations from "../../drizzle/migrations";
 
 SplashScreen.preventAutoHideAsync();
+
+// Composant séparé (plutôt qu'un appel direct du hook dans RootLayout) : ne
+// doit être monté qu'une fois la base prête (voir le early-return `!success`
+// plus bas), sans quoi useAutoBackup interrogerait des tables pas encore
+// migrées.
+function AutoBackupRunner() {
+  useAutoBackup();
+  return null;
+}
 
 export default function RootLayout() {
   const { success, error } = useMigrations(db, migrations);
@@ -76,6 +86,7 @@ export default function RootLayout() {
   return (
     <GestureHandlerRootView style={styles.flex}>
       <ThemeProvider value={scheme === "dark" ? DarkTheme : DefaultTheme}>
+        <AutoBackupRunner />
         <Stack screenOptions={{ headerTitleAlign: "center" }}>
           <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         </Stack>

@@ -36,7 +36,7 @@ jest.mock("expo-file-system", () => {
     }
   }
 
-  return { File: FakeFile, Paths: { cache: { uri: "cache" } } };
+  return { File: FakeFile, Paths: { cache: { uri: "cache" }, document: { uri: "document" } } };
 });
 
 type Backup = typeof import("./backup");
@@ -124,6 +124,36 @@ describe("importAllData", () => {
     const containers = await testDb.select().from(schema.containers);
     expect(containers).toHaveLength(1);
     expect(containers[0].name).toBe("Bol importé");
+  });
+});
+
+describe("runAutoBackup / getAutoBackupSavedAt", () => {
+  it("retourne null tant qu'aucune sauvegarde automatique n'a eu lieu", async () => {
+    expect(await backup.getAutoBackupSavedAt()).toBeNull();
+  });
+
+  it("écrit la sauvegarde dans un fichier au nom fixe, écrasé à chaque appel", async () => {
+    await testDb.insert(schema.containers).values({ name: "Bol", tareWeightG: 100 });
+    await backup.runAutoBackup();
+
+    const savedAt = await backup.getAutoBackupSavedAt();
+    expect(savedAt).not.toBeNull();
+
+    // Un fichier fixe (pas horodaté comme l'export manuel) : un seul fichier
+    // dans le magasin après plusieurs sauvegardes successives.
+    await backup.runAutoBackup();
+    const filesAfterTwoRuns = [...fakeFs.store.keys()].filter((uri) => uri.includes("sauvegarde-auto"));
+    expect(filesAfterTwoRuns).toHaveLength(1);
+  });
+
+  it("contient les mêmes données que l'export manuel", async () => {
+    await testDb.insert(schema.containers).values({ name: "Bol", tareWeightG: 100 });
+    await backup.runAutoBackup();
+
+    const autoFile = [...fakeFs.store.keys()].find((uri) => uri.includes("sauvegarde-auto"));
+    const content = JSON.parse(fakeFs.store.get(autoFile as string) as string);
+    expect(content.containers).toHaveLength(1);
+    expect(content.containers[0].name).toBe("Bol");
   });
 });
 
