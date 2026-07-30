@@ -4,7 +4,6 @@ import { desc, eq } from "drizzle-orm";
 import { useLiveQuery } from "drizzle-orm/expo-sqlite";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
-import { requestWidgetUpdate } from "react-native-android-widget";
 
 import { PickerModal, type PickerItem } from "@/components/PickerModal";
 import { db } from "@/db/client";
@@ -12,8 +11,6 @@ import { createIngredient, deleteWeighing, recordWeighing } from "@/db/repositor
 import { containers, foods, insulinRatios, settings, weighings } from "@/db/schema";
 import { ALL_CIQUAL_FOODS, CIQUAL_PICKER_ITEMS, rankByNameMatch } from "@/lib/ciqual";
 import { getMostRecentIds } from "@/lib/recentIds";
-import { getTodaySummary } from "@/widgets/dailySummary";
-import { WeighWidget } from "@/widgets/WeighWidget";
 import {
   computeCarbsGrams,
   computeCorrectionInsulinUnits,
@@ -47,7 +44,11 @@ const SAVED_MESSAGE_DURATION_MS = 8000;
 export default function WeighScreen() {
   const colors = useColors();
   const styles = useMemo(() => createStyles(colors), [colors]);
-  const { autoFocusWeight } = useLocalSearchParams<{ autoFocusWeight?: string }>();
+  const {
+    autoFocusWeight,
+    containerId: containerIdParam,
+    foodId: foodIdParam,
+  } = useLocalSearchParams<{ autoFocusWeight?: string; containerId?: string; foodId?: string }>();
   const router = useRouter();
 
   const { data: containerList } = useLiveQuery(db.select().from(containers).orderBy(containers.name));
@@ -86,6 +87,13 @@ export default function WeighScreen() {
   const [savedMessage, setSavedMessage] = useState<string | null>(null);
   const [lastWeighingId, setLastWeighingId] = useState<number | null>(null);
   const savedMessageTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Pré-remplit récipient/aliment quand on arrive depuis le widget d'accueil
+  // (sélection faite là-bas, sans avoir à la refaire dans l'app).
+  useEffect(() => {
+    if (containerIdParam) setSelectedContainerId(Number(containerIdParam));
+    if (foodIdParam) setSelectedFoodId(Number(foodIdParam));
+  }, [containerIdParam, foodIdParam]);
 
   // Sélectionne le premier ratio disponible par défaut, pour éviter un clic
   // supplémentaire quand une seule tranche horaire est configurée. Inutile
@@ -208,18 +216,6 @@ export default function WeighScreen() {
           totalInsulinUnits: 0,
         };
 
-  // Rafraîchit le widget d'accueil tout de suite plutôt que d'attendre son
-  // cycle périodique (jusqu'à 30 min) — no-op silencieux sur iOS/sans widget
-  // posé (voir AndroidWidget.ts, module remplacé par un noop). Appelé après
-  // un enregistrement ET après une annulation, puisque les deux changent le
-  // total du jour affiché sur le widget.
-  function refreshWidget() {
-    requestWidgetUpdate({
-      widgetName: "WeighWidget",
-      renderWidget: async () => <WeighWidget summary={await getTodaySummary()} />,
-    }).catch(() => {});
-  }
-
   async function handleSave() {
     if (!selectedFood || (showInsulinDose && !selectedRatio)) return;
     const id = await recordWeighing({
@@ -247,7 +243,6 @@ export default function WeighScreen() {
     // nouveau, au lieu de laisser les deux courir en parallèle.
     if (savedMessageTimeoutRef.current) clearTimeout(savedMessageTimeoutRef.current);
     savedMessageTimeoutRef.current = setTimeout(() => setSavedMessage(null), SAVED_MESSAGE_DURATION_MS);
-    refreshWidget();
   }
 
   async function handleUndoLastWeighing() {
@@ -256,7 +251,6 @@ export default function WeighScreen() {
     await deleteWeighing(lastWeighingId);
     setLastWeighingId(null);
     setSavedMessage(null);
-    refreshWidget();
   }
 
   return (
