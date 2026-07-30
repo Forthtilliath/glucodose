@@ -29,6 +29,7 @@ jest.mock("expo-quick-actions", () => ({
   addListener: jest.fn(() => ({ remove: jest.fn() })),
   initial: null,
 }));
+jest.mock("@/lib/useAutoBackup", () => ({ useAutoBackup: () => {} }));
 jest.mock("expo-router", () => ({
   useRouter: () => ({ push: jest.fn() }),
   ThemeProvider: ({ children }: { children: React.ReactNode }) => children,
