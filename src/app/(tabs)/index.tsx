@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
-import { eq } from "drizzle-orm";
+import { desc, eq } from "drizzle-orm";
 import { useLiveQuery } from "drizzle-orm/expo-sqlite";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
@@ -9,8 +9,9 @@ import { requestWidgetUpdate } from "react-native-android-widget";
 import { PickerModal, type PickerItem } from "@/components/PickerModal";
 import { db } from "@/db/client";
 import { createIngredient, deleteWeighing, recordWeighing } from "@/db/repository";
-import { containers, foods, insulinRatios, settings } from "@/db/schema";
+import { containers, foods, insulinRatios, settings, weighings } from "@/db/schema";
 import { ALL_CIQUAL_FOODS, CIQUAL_PICKER_ITEMS, rankByNameMatch } from "@/lib/ciqual";
+import { getRecentFoodIds } from "@/lib/recentFoods";
 import { getTodaySummary } from "@/widgets/dailySummary";
 import { WeighWidget } from "@/widgets/WeighWidget";
 import {
@@ -29,6 +30,16 @@ function filterCiqualPickerItems(items: PickerItem[], query: string): PickerItem
   return rankByNameMatch(items, query, (item) => item.label);
 }
 
+function toFoodItem(f: typeof foods.$inferSelect, group: string): PickerItem {
+  return {
+    id: f.id,
+    label: f.name,
+    subtitle: `${formatCarbs(f.carbsPer100g)} glucides/100g${f.type === "recipe" ? " · recette" : ""}`,
+    imageUri: f.photoUri,
+    group,
+  };
+}
+
 // Assez long pour laisser le temps de lire le message ET de repérer le lien
 // "Annuler" avant qu'il disparaisse (4s jugées trop courtes en usage réel).
 const SAVED_MESSAGE_DURATION_MS = 8000;
@@ -42,6 +53,15 @@ export default function WeighScreen() {
   const { data: containerList } = useLiveQuery(db.select().from(containers).orderBy(containers.name));
   const { data: foodList } = useLiveQuery(
     db.select().from(foods).where(eq(foods.isArchived, false)).orderBy(foods.name)
+  );
+  // Fenêtre bornée plutôt que tout l'historique : largement suffisant pour
+  // déduire les quelques aliments récents à mettre en avant dans le sélecteur.
+  const { data: recentWeighings } = useLiveQuery(
+    db
+      .select({ foodId: weighings.foodId, weighedAt: weighings.weighedAt })
+      .from(weighings)
+      .orderBy(desc(weighings.weighedAt))
+      .limit(30)
   );
   const { data: ratioList } = useLiveQuery(db.select().from(insulinRatios).orderBy(insulinRatios.position));
   const { data: settingsRows } = useLiveQuery(db.select().from(settings).where(eq(settings.id, 1)));
@@ -114,17 +134,22 @@ export default function WeighScreen() {
       })),
     [containerList]
   );
-  const foodItems: PickerItem[] = useMemo(
-    () =>
-      (foodList ?? []).map((f) => ({
-        id: f.id,
-        label: f.name,
-        subtitle: `${formatCarbs(f.carbsPer100g)} glucides/100g${f.type === "recipe" ? " · recette" : ""}`,
-        imageUri: f.photoUri,
-        group: f.type === "recipe" ? "Recettes" : "Ingrédients",
-      })),
-    [foodList]
-  );
+  const recentFoodIds = useMemo(() => getRecentFoodIds(recentWeighings ?? []), [recentWeighings]);
+
+  // Les aliments récemment pesés sont sortis de leur groupe habituel
+  // (ingrédients/recettes) pour apparaître une seule fois, en tête de liste
+  // sous "Récents", plutôt que dupliqués à deux endroits du sélecteur.
+  const foodItems: PickerItem[] = useMemo(() => {
+    const all = foodList ?? [];
+    const byId = new Map(all.map((f) => [f.id, f]));
+    const recentFoods = recentFoodIds.map((id) => byId.get(id)).filter((f) => f != null);
+    const recentIds = new Set(recentFoods.map((f) => f.id));
+    const restFoods = all.filter((f) => !recentIds.has(f.id));
+    return [
+      ...recentFoods.map((f) => toFoodItem(f, "Récents")),
+      ...restFoods.map((f) => toFoodItem(f, f.type === "recipe" ? "Recettes" : "Ingrédients")),
+    ];
+  }, [foodList, recentFoodIds]);
   const ratioItems: PickerItem[] = useMemo(
     () =>
       (ratioList ?? []).map((r) => ({
@@ -438,6 +463,7 @@ export default function WeighScreen() {
         }}
         onClose={() => setFoodPickerVisible(false)}
         emptyMessage="Aucun aliment enregistré."
+        groupOrder={["Récents", "Ingrédients", "Recettes"]}
         extraActions={[
           {
             label: "Ajouter un aliment ou une recette",

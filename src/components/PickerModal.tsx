@@ -33,6 +33,10 @@ type Props = {
   // Actions "ajouter" toujours visibles en haut de la liste, même si la
   // recherche ne matche rien (contrairement aux résultats, filtrés).
   extraActions?: { label: string; onPress: () => void }[];
+  // Ordre explicite des sections (ex: "Récents" avant "Ingrédients"/"Recettes")
+  // ; par défaut, les sections sont triées par ordre alphabétique du titre.
+  // Un groupe absent de cette liste est placé après, dans l'ordre alphabétique.
+  groupOrder?: string[];
 };
 
 export function PickerModal({
@@ -45,6 +49,7 @@ export function PickerModal({
   initialQuery,
   filterItems,
   extraActions,
+  groupOrder,
 }: Props) {
   const colors = useColors();
   const styles = useMemo(() => createStyles(colors), [colors]);
@@ -77,10 +82,14 @@ export function PickerModal({
       if (group) group.push(item);
       else byGroup.set(key, [item]);
     }
+    function sortIndex(title: string): number {
+      const index = groupOrder?.indexOf(title) ?? -1;
+      return index === -1 ? groupOrder?.length ?? 0 : index;
+    }
     return [...byGroup.entries()]
-      .sort(([a], [b]) => a.localeCompare(b, "fr"))
+      .sort(([a], [b]) => sortIndex(a) - sortIndex(b) || a.localeCompare(b, "fr"))
       .map(([title, data]) => ({ title, data }));
-  }, [filtered, isSearching]);
+  }, [filtered, isSearching, groupOrder]);
 
   return (
     <Modal visible={visible} animationType="slide" onRequestClose={onClose}>
