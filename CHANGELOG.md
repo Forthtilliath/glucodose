@@ -6,6 +6,11 @@ Le format suit [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/), et le p
 
 ## [Unreleased]
 
+## [1.8.0] - 2026-07-30
+
+### Ajouté
+- Nouvel écran Statistiques (Historique → Statistiques) : moyenne de glucides/jour, nombre de pesées/semaine, aliments les plus utilisés, sur la période choisie (7 jours / 30 jours / tout).
+
 ## [1.7.0] - 2026-07-30
 
 ### Ajouté
