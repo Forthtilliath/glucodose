@@ -6,6 +6,11 @@ Le format suit [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/), et le p
 
 ## [Unreleased]
 
+## [1.7.0] - 2026-07-30
+
+### Ajouté
+- Export CSV de l'Historique, en plus du PDF (respecte les filtres actifs) — pour qui veut analyser ses pesées dans un tableur.
+
 ## [1.6.1] - 2026-07-30
 
 ### Modifié
