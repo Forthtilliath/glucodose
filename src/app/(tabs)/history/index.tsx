@@ -11,6 +11,7 @@ import { deleteWeighing } from "@/db/repository";
 import { weighings } from "@/db/schema";
 import { normalizeForSearch } from "@/lib/ciqual";
 import { confirmDestructive } from "@/lib/confirmDelete";
+import { exportHistoryToCsv } from "@/lib/historyCsv";
 import { getPeriodStartMs, type PeriodFilter } from "@/lib/historyFilters";
 import { exportHistoryToPdf } from "@/lib/historyPdf";
 import { formatCarbs, formatInsulinUnits, formatWeight } from "@/lib/insulin";
@@ -31,6 +32,7 @@ export default function HistoryScreen() {
   const [searchQuery, setSearchQuery] = useState("");
   const [periodFilter, setPeriodFilter] = useState<PeriodFilter>("all");
   const [isExportingPdf, setIsExportingPdf] = useState(false);
+  const [isExportingCsv, setIsExportingCsv] = useState(false);
 
   const filteredData = useMemo(() => {
     if (!data) return [];
@@ -74,6 +76,28 @@ export default function HistoryScreen() {
     }
   }
 
+  async function handleExportCsv() {
+    if (filteredData.length === 0) {
+      Alert.alert("Rien à exporter", "Aucune pesée ne correspond au filtre actuel.");
+      return;
+    }
+    setIsExportingCsv(true);
+    try {
+      const uri = await exportHistoryToCsv(filteredData);
+
+      const canShare = await Sharing.isAvailableAsync();
+      if (canShare) {
+        await Sharing.shareAsync(uri, { mimeType: "text/csv", dialogTitle: "Partager l'historique" });
+      } else {
+        Alert.alert("Export prêt", `Fichier créé : ${uri}`);
+      }
+    } catch {
+      Alert.alert("Échec de l'export", "Une erreur est survenue pendant la création du CSV.");
+    } finally {
+      setIsExportingCsv(false);
+    }
+  }
+
   return (
     <View style={styles.container}>
       <View style={styles.filters}>
@@ -103,22 +127,40 @@ export default function HistoryScreen() {
             </Pressable>
           ))}
         </View>
-        <Pressable
-          style={[styles.exportButton, isExportingPdf && styles.exportButtonDisabled]}
-          onPress={handleExportPdf}
-          disabled={isExportingPdf}
-          accessibilityRole="button"
-          accessibilityLabel="Exporter l'historique affiché en PDF"
-        >
-          {isExportingPdf ? (
-            <ActivityIndicator color={colors.primary} />
-          ) : (
-            <>
-              <Ionicons name="document-text-outline" size={18} color={colors.primary} />
-              <Text style={styles.exportButtonText}>Exporter en PDF</Text>
-            </>
-          )}
-        </Pressable>
+        <View style={styles.exportRow}>
+          <Pressable
+            style={[styles.exportButton, isExportingPdf && styles.exportButtonDisabled]}
+            onPress={handleExportPdf}
+            disabled={isExportingPdf}
+            accessibilityRole="button"
+            accessibilityLabel="Exporter l'historique affiché en PDF"
+          >
+            {isExportingPdf ? (
+              <ActivityIndicator color={colors.primary} />
+            ) : (
+              <>
+                <Ionicons name="document-text-outline" size={18} color={colors.primary} />
+                <Text style={styles.exportButtonText}>PDF</Text>
+              </>
+            )}
+          </Pressable>
+          <Pressable
+            style={[styles.exportButton, isExportingCsv && styles.exportButtonDisabled]}
+            onPress={handleExportCsv}
+            disabled={isExportingCsv}
+            accessibilityRole="button"
+            accessibilityLabel="Exporter l'historique affiché en CSV"
+          >
+            {isExportingCsv ? (
+              <ActivityIndicator color={colors.primary} />
+            ) : (
+              <>
+                <Ionicons name="grid-outline" size={18} color={colors.primary} />
+                <Text style={styles.exportButtonText}>CSV</Text>
+              </>
+            )}
+          </Pressable>
+        </View>
       </View>
 
       <FlatList
@@ -196,7 +238,9 @@ function createStyles(colors: ThemeColors) {
     periodOptionActive: { backgroundColor: colors.primary, borderColor: colors.primary },
     periodOptionText: { fontSize: 13, fontWeight: "600", color: colors.text },
     periodOptionTextActive: { color: colors.primaryText },
+    exportRow: { flexDirection: "row", gap: 8 },
     exportButton: {
+      flex: 1,
       flexDirection: "row",
       alignItems: "center",
       justifyContent: "center",
