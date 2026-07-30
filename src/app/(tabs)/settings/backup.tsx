@@ -1,16 +1,21 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { ActivityIndicator, Alert, Pressable, ScrollView, StyleSheet, Text } from "react-native";
 import * as DocumentPicker from "expo-document-picker";
 import * as Sharing from "expo-sharing";
 import { Ionicons } from "@expo/vector-icons";
 
-import { exportAllData, importAllData, InvalidBackupFileError } from "@/lib/backup";
+import { exportAllData, getAutoBackupSavedAt, importAllData, InvalidBackupFileError } from "@/lib/backup";
 import { type ThemeColors, useColors } from "@/theme/colors";
 
 export default function BackupScreen() {
   const colors = useColors();
   const styles = useMemo(() => createStyles(colors), [colors]);
   const [busy, setBusy] = useState<"export" | "import" | null>(null);
+  const [autoBackupSavedAt, setAutoBackupSavedAt] = useState<string | null | undefined>(undefined);
+
+  useEffect(() => {
+    getAutoBackupSavedAt().then(setAutoBackupSavedAt);
+  }, []);
 
   async function handleExport() {
     setBusy("export");
@@ -67,6 +72,12 @@ export default function BackupScreen() {
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
+      <Text style={styles.autoBackupInfo}>
+        {autoBackupSavedAt == null
+          ? "Aucune sauvegarde automatique pour l'instant."
+          : `Sauvegarde automatique : ${new Date(autoBackupSavedAt).toLocaleString("fr-FR")}`}
+      </Text>
+
       <Text style={styles.sectionTitle}>Exporter</Text>
       <Text style={styles.helpText}>
         Crée un fichier JSON contenant tout : récipients, aliments, recettes, ratios, réglages et
@@ -119,6 +130,16 @@ function createStyles(colors: ThemeColors) {
     container: { flex: 1, backgroundColor: colors.background },
     content: { padding: 16, paddingBottom: 48 },
     sectionTitle: { fontSize: 15, fontWeight: "700", color: colors.text },
+    autoBackupInfo: {
+      fontSize: 12,
+      color: colors.textMuted,
+      backgroundColor: colors.surface,
+      borderWidth: 1,
+      borderColor: colors.border,
+      borderRadius: 10,
+      padding: 12,
+      marginBottom: 20,
+    },
     importTitle: { marginTop: 32 },
     helpText: { fontSize: 13, color: colors.textMuted, marginTop: 6, marginBottom: 14, lineHeight: 18 },
     button: {
