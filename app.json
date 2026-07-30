@@ -55,10 +55,10 @@
             {
               "name": "WeighWidget",
               "label": "Peser (GlucoDose)",
-              "description": "Raccourci vers l'écran de pesée.",
-              "minWidth": "110dp",
+              "description": "Récipient/aliment récents + raccourci vers l'écran de pesée.",
+              "minWidth": "180dp",
               "minHeight": "110dp",
-              "resizeMode": "none",
+              "resizeMode": "horizontal",
               "updatePeriodMillis": 1800000
             }
           ]
