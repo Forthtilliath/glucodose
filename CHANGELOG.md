@@ -6,7 +6,11 @@ Le format suit [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/), et le p
 
 ## [Unreleased]
 
-## [1.4.0] - 2026-07-30
+## [1.5.0] - 2026-07-30
+
+### Ajouté
+- Les sélecteurs de récipient/aliment/recette et la recherche Ciqual regroupent maintenant leurs résultats par catégorie (ingrédients vs recettes, groupe alimentaire Anses) quand on parcourt la liste sans rechercher.
+- La page Réglages → Mises à jour affiche désormais l'historique des versions publiées, sous le bouton de vérification.
 
 ### Ajouté
 - Recherche vocale disponible sur tous les sélecteurs (récipient, aliment, recette, ratio), et plus seulement sur le champ nom de l'écran ingrédient.
