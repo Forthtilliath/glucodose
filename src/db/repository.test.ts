@@ -272,6 +272,15 @@ describe("pesées", () => {
     await repo.deleteWeighing(weighing.id);
     expect(await testDb.select().from(schema.weighings)).toHaveLength(0);
   });
+
+  it("retourne l'id de la pesée créée, pour permettre de l'annuler juste après (écran Peser)", async () => {
+    const foodId = await repo.createIngredient({ name: "Pomme", carbsPer100g: 12 });
+    const id = await repo.recordWeighing(buildWeighingInput({ foodId }));
+    expect(typeof id).toBe("number");
+
+    await repo.deleteWeighing(id);
+    expect(await testDb.select().from(schema.weighings)).toHaveLength(0);
+  });
 });
 
 function buildWeighingInput(overrides: Partial<Parameters<Repository["recordWeighing"]>[0]> = {}) {

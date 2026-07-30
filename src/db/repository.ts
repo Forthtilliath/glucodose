@@ -256,27 +256,31 @@ export async function recordWeighing(input: {
   sensitivityFactor: number | null;
   correctionInsulinUnits: number;
   totalInsulinUnits: number;
-}) {
-  await db.insert(weighings).values({
-    foodId: input.foodId,
-    foodNameSnapshot: input.foodName,
-    containerId: input.containerId,
-    grossWeightG: input.grossWeightG,
-    tareWeightG: input.tareWeightG,
-    netWeightG: input.netWeightG,
-    carbsPer100gSnapshot: input.carbsPer100g,
-    carbsG: input.carbsG,
-    ratioId: input.ratioId,
-    ratioLabelSnapshot: input.ratioLabel,
-    carbsGramsPerUnitSnapshot: input.carbsGramsPerUnit,
-    mealInsulinUnits: input.mealInsulinUnits,
-    glycemiaUnitSnapshot: input.glycemiaUnit,
-    currentGlycemia: input.currentGlycemia,
-    targetGlycemiaSnapshot: input.targetGlycemia,
-    sensitivityFactorSnapshot: input.sensitivityFactor,
-    correctionInsulinUnits: input.correctionInsulinUnits,
-    totalInsulinUnits: input.totalInsulinUnits,
-  });
+}): Promise<number> {
+  const [row] = await db
+    .insert(weighings)
+    .values({
+      foodId: input.foodId,
+      foodNameSnapshot: input.foodName,
+      containerId: input.containerId,
+      grossWeightG: input.grossWeightG,
+      tareWeightG: input.tareWeightG,
+      netWeightG: input.netWeightG,
+      carbsPer100gSnapshot: input.carbsPer100g,
+      carbsG: input.carbsG,
+      ratioId: input.ratioId,
+      ratioLabelSnapshot: input.ratioLabel,
+      carbsGramsPerUnitSnapshot: input.carbsGramsPerUnit,
+      mealInsulinUnits: input.mealInsulinUnits,
+      glycemiaUnitSnapshot: input.glycemiaUnit,
+      currentGlycemia: input.currentGlycemia,
+      targetGlycemiaSnapshot: input.targetGlycemia,
+      sensitivityFactorSnapshot: input.sensitivityFactor,
+      correctionInsulinUnits: input.correctionInsulinUnits,
+      totalInsulinUnits: input.totalInsulinUnits,
+    })
+    .returning({ id: weighings.id });
+  return row.id;
 }
 
 export async function deleteWeighing(id: number) {
