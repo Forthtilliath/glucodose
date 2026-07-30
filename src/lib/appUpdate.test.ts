@@ -1,20 +1,48 @@
-import { compareVersions } from "./appUpdate";
+import { downloadAndInstallApk as downloadAndInstallApkBase } from "@forthtilliath/expo-release-updates/downloadAndInstallApk";
+import {
+  fetchLatestRelease as fetchLatestReleaseBase,
+  fetchReleaseHistory as fetchReleaseHistoryBase,
+} from "@forthtilliath/expo-release-updates/githubReleases";
 
-describe("compareVersions", () => {
-  it("détecte une version plus récente", () => {
-    expect(compareVersions("1.1.0", "1.0.0")).toBe(1);
+jest.mock("@forthtilliath/expo-release-updates/githubReleases", () => ({
+  fetchLatestRelease: jest.fn(),
+  fetchReleaseHistory: jest.fn(),
+}));
+jest.mock("@forthtilliath/expo-release-updates/downloadAndInstallApk", () => ({
+  downloadAndInstallApk: jest.fn(),
+}));
+
+import { downloadAndInstallApk, fetchLatestRelease, fetchReleaseHistory } from "./appUpdate";
+
+const REPO = { owner: "Forthtilliath", repo: "glucodose" };
+
+describe("appUpdate", () => {
+  afterEach(() => {
+    jest.clearAllMocks();
   });
 
-  it("détecte une version plus ancienne", () => {
-    expect(compareVersions("1.0.0", "1.1.0")).toBe(-1);
+  it("fetchLatestRelease interroge le dépôt glucodose", async () => {
+    await fetchLatestRelease();
+    expect(fetchLatestReleaseBase).toHaveBeenCalledWith(REPO);
   });
 
-  it("détecte des versions égales", () => {
-    expect(compareVersions("1.2.3", "1.2.3")).toBe(0);
+  it("fetchReleaseHistory interroge le dépôt glucodose avec une limite par défaut de 10", async () => {
+    await fetchReleaseHistory();
+    expect(fetchReleaseHistoryBase).toHaveBeenCalledWith({ ...REPO, limit: 10 });
   });
 
-  it("compare correctement des segments de longueurs différentes", () => {
-    expect(compareVersions("1.2", "1.2.1")).toBe(-1);
-    expect(compareVersions("2.0.0", "1.9.9")).toBe(1);
+  it("fetchReleaseHistory transmet une limite personnalisée", async () => {
+    await fetchReleaseHistory(3);
+    expect(fetchReleaseHistoryBase).toHaveBeenCalledWith({ ...REPO, limit: 3 });
+  });
+
+  it("downloadAndInstallApk utilise un nom de fichier fixe", async () => {
+    const onProgress = jest.fn();
+    await downloadAndInstallApk("https://example.com/app.apk", onProgress);
+    expect(downloadAndInstallApkBase).toHaveBeenCalledWith({
+      apkUrl: "https://example.com/app.apk",
+      fileName: "glucodose-update.apk",
+      onProgress,
+    });
   });
 });
