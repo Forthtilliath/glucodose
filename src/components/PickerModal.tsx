@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { FlatList, Image, Modal, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
+import { Image, Modal, Pressable, SectionList, StyleSheet, Text, TextInput, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 
 import { type ThemeColors, useColors } from "@/theme/colors";
@@ -10,6 +10,11 @@ export type PickerItem = {
   label: string;
   subtitle?: string;
   imageUri?: string | null;
+  // Regroupe les résultats en sections (ex: groupes alimentaires Ciqual,
+  // ingrédients vs recettes) quand on parcourt la liste sans rechercher.
+  // Ignoré pendant une recherche active : on veut alors les meilleurs
+  // résultats globaux, pas la liste repliée par section.
+  group?: string;
 };
 
 type Props = {
@@ -49,12 +54,33 @@ export function PickerModal({
     if (visible) setQuery(initialQuery ?? "");
   }, [visible, initialQuery]);
 
+  const isSearching = query.trim().length > 0;
   const filtered = useMemo(() => {
-    if (!query.trim()) return items;
+    if (!isSearching) return items;
     if (filterItems) return filterItems(items, query);
     const q = query.trim().toLowerCase();
     return items.filter((item) => item.label.toLowerCase().includes(q));
-  }, [items, query, filterItems]);
+  }, [items, query, filterItems, isSearching]);
+
+  // Sections triées par titre : ordre stable et indépendant de l'ordre des
+  // groupes dans les données sources. Pas de section pendant une recherche
+  // (résultats classés par pertinence, pas par groupe), ni si aucun item
+  // n'a de groupe (tous les pickers non-catégorisés, comportement inchangé).
+  const sections = useMemo(() => {
+    if (isSearching || !filtered.some((item) => item.group)) {
+      return [{ title: null as string | null, data: filtered }];
+    }
+    const byGroup = new Map<string, PickerItem[]>();
+    for (const item of filtered) {
+      const key = item.group ?? "Autres";
+      const group = byGroup.get(key);
+      if (group) group.push(item);
+      else byGroup.set(key, [item]);
+    }
+    return [...byGroup.entries()]
+      .sort(([a], [b]) => a.localeCompare(b, "fr"))
+      .map(([title, data]) => ({ title, data }));
+  }, [filtered, isSearching]);
 
   return (
     <Modal visible={visible} animationType="slide" onRequestClose={onClose}>
@@ -77,10 +103,11 @@ export function PickerModal({
           />
           <VoiceSearchButton onResult={setQuery} accessibilityLabel="Dicter la recherche" />
         </View>
-        <FlatList
-          data={filtered}
+        <SectionList
+          sections={sections}
           keyExtractor={(item) => String(item.id)}
           keyboardShouldPersistTaps="handled"
+          stickySectionHeadersEnabled={false}
           ListHeaderComponent={
             extraActions && extraActions.length > 0 ? (
               <View style={styles.extraActions}>
@@ -101,6 +128,9 @@ export function PickerModal({
           }
           ListEmptyComponent={
             <Text style={styles.empty}>{emptyMessage ?? "Aucun résultat."}</Text>
+          }
+          renderSectionHeader={({ section: { title } }) =>
+            title ? <Text style={styles.sectionHeader}>{title}</Text> : null
           }
           renderItem={({ item }) => (
             <Pressable
@@ -173,6 +203,14 @@ function createStyles(colors: ThemeColors) {
     rowLabel: { fontSize: 16, fontWeight: "600", color: colors.text },
     rowSubtitle: { fontSize: 13, color: colors.textMuted, marginTop: 2 },
     empty: { textAlign: "center", color: colors.textMuted, marginTop: 24 },
+    sectionHeader: {
+      fontSize: 13,
+      fontWeight: "700",
+      color: colors.textMuted,
+      textTransform: "uppercase",
+      marginTop: 8,
+      marginBottom: 6,
+    },
     extraActions: { marginBottom: 4 },
     extraActionLabel: { color: colors.primary },
   });

@@ -2,7 +2,7 @@ import ciqualData from "@/assets/data/ciqual.json";
 import { formatCarbs } from "@/lib/insulin";
 import type { PickerItem } from "@/components/PickerModal";
 
-export type CiqualFood = { name: string; carbsPer100g: number };
+export type CiqualFood = { name: string; carbsPer100g: number; group: string };
 
 export const ALL_CIQUAL_FOODS: CiqualFood[] = ciqualData as CiqualFood[];
 
@@ -10,11 +10,13 @@ export const ALL_CIQUAL_FOODS: CiqualFood[] = ciqualData as CiqualFood[];
 // plein écran, calculée une seule fois pour la durée du process : réutilisée
 // telle quelle par tous les écrans qui proposent une recherche/ajout rapide
 // Ciqual (écran Peser, formulaire ingrédient), au lieu de la recalculer à
-// chaque montage d'écran.
+// chaque montage d'écran. Le groupe alimentaire (Anses) sert à regrouper les
+// résultats en sections dans le picker plutôt qu'une longue liste plate.
 export const CIQUAL_PICKER_ITEMS: PickerItem[] = ALL_CIQUAL_FOODS.map((food, index) => ({
   id: index,
   label: food.name,
   subtitle: `${formatCarbs(food.carbsPer100g)} / 100 g`,
+  group: food.group,
 }));
 
 // Les ligatures œ/æ ne se décomposent PAS via normalize("NFD") (contrairement
