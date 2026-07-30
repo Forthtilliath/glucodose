@@ -1,3 +1,5 @@
+"use no memo";
+
 import * as Linking from "expo-linking";
 import { FlexWidget, TextWidget } from "react-native-android-widget";
 
