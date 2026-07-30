@@ -6,6 +6,14 @@ Le format suit [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/), et le p
 
 ## [Unreleased]
 
+## [1.11.0] - 2026-07-30
+
+### Ajouté
+- Sauvegarde automatique et silencieuse, déclenchée 5 minutes après la dernière modification des réglages, aliments/recettes ou récipients — filet de sécurité en plus de l'export manuel (Réglages → Sauvegarde), qui affiche désormais l'heure de la dernière sauvegarde automatique.
+
+### Retiré
+- Widget d'écran d'accueil temporairement désactivé (texte tronqué dans les cases, design pas encore satisfaisant) — le code est conservé pour y revenir plus tard.
+
 ## [1.10.0] - 2026-07-30
 
 ### Ajouté
