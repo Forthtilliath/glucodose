@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { ActivityIndicator, Alert, FlatList, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 import { desc } from "drizzle-orm";
 import { useLiveQuery } from "drizzle-orm/expo-sqlite";
+import { useRouter } from "expo-router";
 import * as Sharing from "expo-sharing";
 import { Ionicons } from "@expo/vector-icons";
 
@@ -27,6 +28,7 @@ const PERIOD_OPTIONS: { value: PeriodFilter; label: string }[] = [
 export default function HistoryScreen() {
   const colors = useColors();
   const styles = useMemo(() => createStyles(colors), [colors]);
+  const router = useRouter();
   const { data } = useLiveQuery(db.select().from(weighings).orderBy(desc(weighings.weighedAt)));
 
   const [searchQuery, setSearchQuery] = useState("");
@@ -127,6 +129,16 @@ export default function HistoryScreen() {
             </Pressable>
           ))}
         </View>
+        <Pressable
+          style={styles.statsLink}
+          onPress={() => router.push({ pathname: "/history/stats", params: { period: periodFilter } })}
+          accessibilityRole="button"
+          accessibilityLabel="Voir les statistiques"
+        >
+          <Ionicons name="bar-chart-outline" size={18} color={colors.primary} />
+          <Text style={styles.statsLinkText}>Statistiques</Text>
+          <Ionicons name="chevron-forward" size={16} color={colors.textMuted} />
+        </Pressable>
         <View style={styles.exportRow}>
           <Pressable
             style={[styles.exportButton, isExportingPdf && styles.exportButtonDisabled]}
@@ -238,6 +250,18 @@ function createStyles(colors: ThemeColors) {
     periodOptionActive: { backgroundColor: colors.primary, borderColor: colors.primary },
     periodOptionText: { fontSize: 13, fontWeight: "600", color: colors.text },
     periodOptionTextActive: { color: colors.primaryText },
+    statsLink: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 8,
+      backgroundColor: colors.surface,
+      borderWidth: 1,
+      borderColor: colors.border,
+      borderRadius: 10,
+      paddingVertical: 10,
+      paddingHorizontal: 12,
+    },
+    statsLinkText: { flex: 1, color: colors.text, fontSize: 14, fontWeight: "600" },
     exportRow: { flexDirection: "row", gap: 8 },
     exportButton: {
       flex: 1,
