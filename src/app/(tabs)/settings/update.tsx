@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { ChangelogNotes } from "@forthtilliath/react-native-kit/ChangelogNotes";
 import Constants from "expo-constants";
 
 import {
@@ -9,7 +10,6 @@ import {
   fetchReleaseHistory,
   type ReleaseHistoryEntry,
 } from "@/lib/appUpdate";
-import { type ChangelogSegment, parseChangelogNotes } from "@/lib/changelogFormat";
 import { type ThemeColors, useColors } from "@/theme/colors";
 
 type UpdateState =
@@ -20,54 +20,20 @@ type UpdateState =
   | { status: "downloading"; progress: number }
   | { status: "error"; message: string };
 
-function segmentsText(segments: ChangelogSegment[]): string {
-  return segments.map((segment) => segment.text).join("");
-}
-
-function renderSegments(segments: ChangelogSegment[], boldStyle: object) {
-  return segments.map((segment) => (
-    <Text key={segment.text} style={segment.bold ? boldStyle : undefined}>
-      {segment.text}
-    </Text>
-  ));
-}
-
-// Les notes de release contiennent du Markdown simple (### titres, listes,
-// gras) — voir parseChangelogNotes. Affiché tel quel, la syntaxe apparaissait
-// en clair au lieu d'un vrai titre/liste.
-function ChangelogNotes({ notes, styles }: { notes: string; styles: ReturnType<typeof createStyles> }) {
-  const blocks = useMemo(() => parseChangelogNotes(notes), [notes]);
-  return (
-    <>
-      {blocks.map((block) => {
-        if (block.type === "heading") {
-          return (
-            <Text key={block.text} style={styles.notesHeading}>
-              {block.text}
-            </Text>
-          );
-        }
-        if (block.type === "item") {
-          return (
-            <View key={segmentsText(block.segments)} style={styles.notesItemRow}>
-              <Text style={styles.notesBullet}>•</Text>
-              <Text style={styles.notesItemText}>{renderSegments(block.segments, styles.notesBold)}</Text>
-            </View>
-          );
-        }
-        return (
-          <Text key={segmentsText(block.segments)} style={styles.helpText}>
-            {renderSegments(block.segments, styles.notesBold)}
-          </Text>
-        );
-      })}
-    </>
-  );
-}
-
 export default function UpdateSettingsScreen() {
   const colors = useColors();
   const styles = useMemo(() => createStyles(colors), [colors]);
+  const changelogNotesStyles = useMemo(
+    () => ({
+      heading: styles.notesHeading,
+      itemRow: styles.notesItemRow,
+      bullet: styles.notesBullet,
+      itemText: styles.notesItemText,
+      text: styles.helpText,
+      bold: styles.notesBold,
+    }),
+    [styles]
+  );
   const currentVersion = Constants.expoConfig?.version ?? "?";
   const [updateState, setUpdateState] = useState<UpdateState>({ status: "idle" });
   const [releaseHistory, setReleaseHistory] = useState<ReleaseHistoryEntry[] | null>(null);
@@ -139,7 +105,9 @@ export default function UpdateSettingsScreen() {
       {updateState.status === "available" && (
         <View style={styles.updateAvailableBox}>
           <Text style={styles.updateAvailableTitle}>Version {updateState.version} disponible</Text>
-          {updateState.notes ? <ChangelogNotes notes={updateState.notes} styles={styles} /> : null}
+          {updateState.notes ? (
+            <ChangelogNotes notes={updateState.notes} styles={changelogNotesStyles} />
+          ) : null}
           <Pressable
             style={styles.button}
             onPress={() => handleInstallUpdate(updateState.apkUrl)}
@@ -175,7 +143,9 @@ export default function UpdateSettingsScreen() {
                   </Text>
                 ) : null}
               </View>
-              {release.notes ? <ChangelogNotes notes={release.notes} styles={styles} /> : null}
+              {release.notes ? (
+                <ChangelogNotes notes={release.notes} styles={changelogNotesStyles} />
+              ) : null}
             </View>
           ))}
         </View>
