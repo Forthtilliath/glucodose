@@ -4,12 +4,15 @@ import { eq } from "drizzle-orm";
 import { useLiveQuery } from "drizzle-orm/expo-sqlite";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
+import { requestWidgetUpdate } from "react-native-android-widget";
 
 import { PickerModal, type PickerItem } from "@/components/PickerModal";
 import { db } from "@/db/client";
 import { createIngredient, recordWeighing } from "@/db/repository";
 import { containers, foods, insulinRatios, settings } from "@/db/schema";
 import { ALL_CIQUAL_FOODS, CIQUAL_PICKER_ITEMS, rankByNameMatch } from "@/lib/ciqual";
+import { getTodaySummary } from "@/widgets/dailySummary";
+import { WeighWidget } from "@/widgets/WeighWidget";
 import {
   computeCarbsGrams,
   computeCorrectionInsulinUnits,
@@ -194,6 +197,13 @@ export default function WeighScreen() {
     setSelectedFoodId(null);
     setCurrentGlycemia("");
     setTimeout(() => setSavedMessage(null), 4000);
+    // Rafraîchit le widget d'accueil tout de suite plutôt que d'attendre son
+    // cycle périodique (jusqu'à 30 min) — no-op silencieux sur iOS/sans
+    // widget posé (voir AndroidWidget.ts, module remplacé par un noop).
+    requestWidgetUpdate({
+      widgetName: "WeighWidget",
+      renderWidget: async () => <WeighWidget summary={await getTodaySummary()} />,
+    }).catch(() => {});
   }
 
   return (

@@ -1,5 +1,6 @@
 import type { WidgetTaskHandler } from "react-native-android-widget";
 
+import { getTodaySummary } from "./dailySummary";
 import { WeighWidget } from "./WeighWidget";
 
 // "OPEN_URI" (utilisé par WeighWidget) est géré nativement par la librairie
@@ -10,7 +11,15 @@ export const widgetTaskHandler: WidgetTaskHandler = async ({ widgetAction, rende
     case "WIDGET_ADDED":
     case "WIDGET_UPDATE":
     case "WIDGET_RESIZED":
-      renderWidget(<WeighWidget />);
+      // Tâche headless indépendante de l'app : si la lecture DB échoue (ex.
+      // migrations pas encore jouées), le widget doit quand même s'afficher
+      // comme simple raccourci plutôt que de rester invisible.
+      try {
+        const summary = await getTodaySummary();
+        renderWidget(<WeighWidget summary={summary} />);
+      } catch {
+        renderWidget(<WeighWidget />);
+      }
       break;
     default:
       break;
