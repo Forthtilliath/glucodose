@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
 import { eq } from "drizzle-orm";
 import { useLiveQuery } from "drizzle-orm/expo-sqlite";
@@ -28,6 +28,10 @@ import { type ThemeColors, useColors } from "@/theme/colors";
 function filterCiqualPickerItems(items: PickerItem[], query: string): PickerItem[] {
   return rankByNameMatch(items, query, (item) => item.label);
 }
+
+// Assez long pour laisser le temps de lire le message ET de repérer le lien
+// "Annuler" avant qu'il disparaisse (4s jugées trop courtes en usage réel).
+const SAVED_MESSAGE_DURATION_MS = 8000;
 
 export default function WeighScreen() {
   const colors = useColors();
@@ -61,6 +65,7 @@ export default function WeighScreen() {
   const [ciqualQuickAddVisible, setCiqualQuickAddVisible] = useState(false);
   const [savedMessage, setSavedMessage] = useState<string | null>(null);
   const [lastWeighingId, setLastWeighingId] = useState<number | null>(null);
+  const savedMessageTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Sélectionne le premier ratio disponible par défaut, pour éviter un clic
   // supplémentaire quand une seule tranche horaire est configurée. Inutile
@@ -211,12 +216,18 @@ export default function WeighScreen() {
     setGrossWeight("");
     setSelectedFoodId(null);
     setCurrentGlycemia("");
-    setTimeout(() => setSavedMessage(null), 4000);
+    // Une pesée enregistrée avant l'expiration du délai précédent (plusieurs
+    // pesées rapprochées) ne doit pas voir SON message coupé prématurément
+    // par l'ancien minuteur : on annule celui-ci avant d'en programmer un
+    // nouveau, au lieu de laisser les deux courir en parallèle.
+    if (savedMessageTimeoutRef.current) clearTimeout(savedMessageTimeoutRef.current);
+    savedMessageTimeoutRef.current = setTimeout(() => setSavedMessage(null), SAVED_MESSAGE_DURATION_MS);
     refreshWidget();
   }
 
   async function handleUndoLastWeighing() {
     if (lastWeighingId == null) return;
+    if (savedMessageTimeoutRef.current) clearTimeout(savedMessageTimeoutRef.current);
     await deleteWeighing(lastWeighingId);
     setLastWeighingId(null);
     setSavedMessage(null);
