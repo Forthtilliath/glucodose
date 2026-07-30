@@ -11,7 +11,7 @@ import { db } from "@/db/client";
 import { createIngredient, deleteWeighing, recordWeighing } from "@/db/repository";
 import { containers, foods, insulinRatios, settings, weighings } from "@/db/schema";
 import { ALL_CIQUAL_FOODS, CIQUAL_PICKER_ITEMS, rankByNameMatch } from "@/lib/ciqual";
-import { getRecentFoodIds } from "@/lib/recentFoods";
+import { getMostRecentIds } from "@/lib/recentIds";
 import { getTodaySummary } from "@/widgets/dailySummary";
 import { WeighWidget } from "@/widgets/WeighWidget";
 import {
@@ -58,7 +58,7 @@ export default function WeighScreen() {
   // déduire les quelques aliments récents à mettre en avant dans le sélecteur.
   const { data: recentWeighings } = useLiveQuery(
     db
-      .select({ foodId: weighings.foodId, weighedAt: weighings.weighedAt })
+      .select({ id: weighings.foodId, weighedAt: weighings.weighedAt })
       .from(weighings)
       .orderBy(desc(weighings.weighedAt))
       .limit(30)
@@ -134,7 +134,7 @@ export default function WeighScreen() {
       })),
     [containerList]
   );
-  const recentFoodIds = useMemo(() => getRecentFoodIds(recentWeighings ?? []), [recentWeighings]);
+  const recentFoodIds = useMemo(() => getMostRecentIds(recentWeighings ?? []), [recentWeighings]);
 
   // Les aliments récemment pesés sont sortis de leur groupe habituel
   // (ingrédients/recettes) pour apparaître une seule fois, en tête de liste
