@@ -1,5 +1,10 @@
 "use no memo";
 
+// Widget désactivé pour l'instant (retiré de "widgets" dans app.json — le
+// texte des cases était tronqué, design pas encore satisfaisant) : code
+// conservé tel quel pour reprendre ce chantier plus tard, mais le provider
+// n'est plus généré côté natif tant que app.json ne le redéclare pas.
+
 import * as Linking from "expo-linking";
 import { FlexWidget, TextWidget } from "react-native-android-widget";
 

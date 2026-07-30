@@ -51,17 +51,7 @@
       [
         "react-native-android-widget",
         {
-          "widgets": [
-            {
-              "name": "WeighWidget",
-              "label": "Peser (GlucoDose)",
-              "description": "Récipient/aliment récents + raccourci vers l'écran de pesée.",
-              "minWidth": "180dp",
-              "minHeight": "110dp",
-              "resizeMode": "horizontal",
-              "updatePeriodMillis": 1800000
-            }
-          ]
+          "widgets": []
         }
       ],
       [
