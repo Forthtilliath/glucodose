@@ -9,6 +9,7 @@ import {
   fetchReleaseHistory,
   type ReleaseHistoryEntry,
 } from "@/lib/appUpdate";
+import { type ChangelogSegment, parseChangelogNotes } from "@/lib/changelogFormat";
 import { type ThemeColors, useColors } from "@/theme/colors";
 
 type UpdateState =
@@ -18,6 +19,51 @@ type UpdateState =
   | { status: "available"; version: string; notes: string; apkUrl: string }
   | { status: "downloading"; progress: number }
   | { status: "error"; message: string };
+
+function segmentsText(segments: ChangelogSegment[]): string {
+  return segments.map((segment) => segment.text).join("");
+}
+
+function renderSegments(segments: ChangelogSegment[], boldStyle: object) {
+  return segments.map((segment) => (
+    <Text key={segment.text} style={segment.bold ? boldStyle : undefined}>
+      {segment.text}
+    </Text>
+  ));
+}
+
+// Les notes de release contiennent du Markdown simple (### titres, listes,
+// gras) — voir parseChangelogNotes. Affiché tel quel, la syntaxe apparaissait
+// en clair au lieu d'un vrai titre/liste.
+function ChangelogNotes({ notes, styles }: { notes: string; styles: ReturnType<typeof createStyles> }) {
+  const blocks = useMemo(() => parseChangelogNotes(notes), [notes]);
+  return (
+    <>
+      {blocks.map((block) => {
+        if (block.type === "heading") {
+          return (
+            <Text key={block.text} style={styles.notesHeading}>
+              {block.text}
+            </Text>
+          );
+        }
+        if (block.type === "item") {
+          return (
+            <View key={segmentsText(block.segments)} style={styles.notesItemRow}>
+              <Text style={styles.notesBullet}>•</Text>
+              <Text style={styles.notesItemText}>{renderSegments(block.segments, styles.notesBold)}</Text>
+            </View>
+          );
+        }
+        return (
+          <Text key={segmentsText(block.segments)} style={styles.helpText}>
+            {renderSegments(block.segments, styles.notesBold)}
+          </Text>
+        );
+      })}
+    </>
+  );
+}
 
 export default function UpdateSettingsScreen() {
   const colors = useColors();
@@ -93,7 +139,7 @@ export default function UpdateSettingsScreen() {
       {updateState.status === "available" && (
         <View style={styles.updateAvailableBox}>
           <Text style={styles.updateAvailableTitle}>Version {updateState.version} disponible</Text>
-          {updateState.notes ? <Text style={styles.helpText}>{updateState.notes}</Text> : null}
+          {updateState.notes ? <ChangelogNotes notes={updateState.notes} styles={styles} /> : null}
           <Pressable
             style={styles.button}
             onPress={() => handleInstallUpdate(updateState.apkUrl)}
@@ -129,7 +175,7 @@ export default function UpdateSettingsScreen() {
                   </Text>
                 ) : null}
               </View>
-              {release.notes ? <Text style={styles.changelogNotes}>{release.notes}</Text> : null}
+              {release.notes ? <ChangelogNotes notes={release.notes} styles={styles} /> : null}
             </View>
           ))}
         </View>
@@ -186,6 +232,10 @@ function createStyles(colors: ThemeColors) {
     changelogEntryHeader: { flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
     changelogVersion: { fontSize: 14, fontWeight: "700", color: colors.text },
     changelogDate: { fontSize: 12, color: colors.textMuted },
-    changelogNotes: { fontSize: 13, color: colors.textMuted, marginTop: 6 },
+    notesHeading: { fontSize: 13, fontWeight: "700", color: colors.text, marginTop: 8 },
+    notesItemRow: { flexDirection: "row", gap: 6, marginTop: 4 },
+    notesBullet: { fontSize: 13, color: colors.textMuted },
+    notesItemText: { flex: 1, fontSize: 13, color: colors.textMuted },
+    notesBold: { fontWeight: "700", color: colors.text },
   });
 }
