@@ -8,7 +8,7 @@ import { requestWidgetUpdate } from "react-native-android-widget";
 
 import { PickerModal, type PickerItem } from "@/components/PickerModal";
 import { db } from "@/db/client";
-import { createIngredient, recordWeighing } from "@/db/repository";
+import { createIngredient, deleteWeighing, recordWeighing } from "@/db/repository";
 import { containers, foods, insulinRatios, settings } from "@/db/schema";
 import { ALL_CIQUAL_FOODS, CIQUAL_PICKER_ITEMS, rankByNameMatch } from "@/lib/ciqual";
 import { getTodaySummary } from "@/widgets/dailySummary";
@@ -60,6 +60,7 @@ export default function WeighScreen() {
   const [ratioPickerVisible, setRatioPickerVisible] = useState(false);
   const [ciqualQuickAddVisible, setCiqualQuickAddVisible] = useState(false);
   const [savedMessage, setSavedMessage] = useState<string | null>(null);
+  const [lastWeighingId, setLastWeighingId] = useState<number | null>(null);
 
   // Sélectionne le premier ratio disponible par défaut, pour éviter un clic
   // supplémentaire quand une seule tranche horaire est configurée. Inutile
@@ -177,9 +178,21 @@ export default function WeighScreen() {
           totalInsulinUnits: 0,
         };
 
+  // Rafraîchit le widget d'accueil tout de suite plutôt que d'attendre son
+  // cycle périodique (jusqu'à 30 min) — no-op silencieux sur iOS/sans widget
+  // posé (voir AndroidWidget.ts, module remplacé par un noop). Appelé après
+  // un enregistrement ET après une annulation, puisque les deux changent le
+  // total du jour affiché sur le widget.
+  function refreshWidget() {
+    requestWidgetUpdate({
+      widgetName: "WeighWidget",
+      renderWidget: async () => <WeighWidget summary={await getTodaySummary()} />,
+    }).catch(() => {});
+  }
+
   async function handleSave() {
     if (!selectedFood || (showInsulinDose && !selectedRatio)) return;
-    await recordWeighing({
+    const id = await recordWeighing({
       foodId: selectedFood.id,
       foodName: selectedFood.name,
       containerId: selectedContainer?.id ?? null,
@@ -194,17 +207,20 @@ export default function WeighScreen() {
       ? `Pesée enregistrée : ${formatInsulinUnits(totalInsulinUnits)} U pour ${selectedFood.name}`
       : `Pesée enregistrée : ${formatCarbs(carbsG)} de glucides pour ${selectedFood.name}`;
     setSavedMessage(savedText);
+    setLastWeighingId(id);
     setGrossWeight("");
     setSelectedFoodId(null);
     setCurrentGlycemia("");
     setTimeout(() => setSavedMessage(null), 4000);
-    // Rafraîchit le widget d'accueil tout de suite plutôt que d'attendre son
-    // cycle périodique (jusqu'à 30 min) — no-op silencieux sur iOS/sans
-    // widget posé (voir AndroidWidget.ts, module remplacé par un noop).
-    requestWidgetUpdate({
-      widgetName: "WeighWidget",
-      renderWidget: async () => <WeighWidget summary={await getTodaySummary()} />,
-    }).catch(() => {});
+    refreshWidget();
+  }
+
+  async function handleUndoLastWeighing() {
+    if (lastWeighingId == null) return;
+    await deleteWeighing(lastWeighingId);
+    setLastWeighingId(null);
+    setSavedMessage(null);
+    refreshWidget();
   }
 
   return (
@@ -355,9 +371,19 @@ export default function WeighScreen() {
       )}
 
       {savedMessage ? (
-        <Text style={styles.savedMessage} accessibilityLiveRegion="polite">
-          {savedMessage}
-        </Text>
+        <View style={styles.savedMessageRow}>
+          <Text style={styles.savedMessage} accessibilityLiveRegion="polite">
+            {savedMessage}
+          </Text>
+          <Pressable
+            onPress={handleUndoLastWeighing}
+            hitSlop={10}
+            accessibilityRole="button"
+            accessibilityLabel="Annuler cette pesée"
+          >
+            <Text style={styles.undoLink}>Annuler</Text>
+          </Pressable>
+        </View>
       ) : null}
 
       <Pressable
@@ -512,7 +538,15 @@ function createStyles(colors: ThemeColors) {
     resultLabel: { fontSize: 14, color: colors.textMuted, fontWeight: "600" },
     resultValue: { fontSize: 40, fontWeight: "800", color: colors.primary, marginTop: 4 },
     resultBreakdown: { fontSize: 12, color: colors.textMuted, marginTop: 6 },
-    savedMessage: { textAlign: "center", color: colors.success, marginTop: 12, fontSize: 14, fontWeight: "600" },
+    savedMessageRow: {
+      flexDirection: "row",
+      justifyContent: "center",
+      alignItems: "center",
+      gap: 10,
+      marginTop: 12,
+    },
+    savedMessage: { textAlign: "center", color: colors.success, fontSize: 14, fontWeight: "600" },
+    undoLink: { color: colors.danger, fontSize: 14, fontWeight: "700" },
     saveButton: {
       backgroundColor: colors.primary,
       borderRadius: 10,
