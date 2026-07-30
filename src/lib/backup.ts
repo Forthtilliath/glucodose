@@ -31,7 +31,7 @@ export async function exportAllData(): Promise<string> {
   };
 
   const dateStamp = data.exportedAt.slice(0, 10);
-  const file = new File(Paths.cache, `dose-insuline-sauvegarde-${dateStamp}.json`);
+  const file = new File(Paths.cache, `glucodose-sauvegarde-${dateStamp}.json`);
   if (file.exists) {
     file.delete();
   }
