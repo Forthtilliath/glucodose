@@ -14,6 +14,11 @@ Le format suit [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/), et le p
 ### Modifié
 - Le widget n'affiche plus le résumé du jour (glucides/dose totale) — remplacé par ce sélecteur rapide, jugé plus utile qu'un simple résumé.
 
+## [1.9.3] - 2026-07-30
+
+### Corrigé
+- Revenir sur l'onglet Aliments/Historique/Réglages après être passé sur un autre onglet restaurait la dernière sous-page visitée (ex. "Ratios") au lieu de l'écran principal, sans moyen simple de remonter dessus — l'onglet revient maintenant toujours sur son écran principal.
+
 ## [1.9.2] - 2026-07-30
 
 ### Corrigé

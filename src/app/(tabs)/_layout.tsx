@@ -1,10 +1,26 @@
 import { Ionicons } from "@expo/vector-icons";
-import { Tabs } from "expo-router";
+import { Tabs, useRouter } from "expo-router";
 
 import { useColors } from "@/theme/colors";
 
 export default function TabsLayout() {
   const colors = useColors();
+  const router = useRouter();
+
+  // Onglets à sous-navigation (Stack imbriqué) : sans ça, revenir sur l'onglet
+  // après en avoir quitté un autre restaure la dernière sous-page visitée
+  // plutôt que l'écran principal — et rien ne permet alors de remonter dessus
+  // facilement. `router.navigate` vers la racine du groupe saute directement
+  // sur cette route existante en dépilant le surplus, aussi bien en arrivant
+  // d'un autre onglet qu'en retapant sur l'onglet déjà actif.
+  function resetTabOnPress(rootPath: "/foods" | "/history" | "/settings") {
+    return {
+      tabPress: (e: { preventDefault: () => void }) => {
+        e.preventDefault();
+        router.navigate(rootPath);
+      },
+    };
+  }
 
   return (
     <Tabs
@@ -26,6 +42,7 @@ export default function TabsLayout() {
       />
       <Tabs.Screen
         name="foods"
+        listeners={resetTabOnPress("/foods")}
         options={{
           title: "Aliments",
           headerShown: false,
@@ -42,6 +59,7 @@ export default function TabsLayout() {
       />
       <Tabs.Screen
         name="history"
+        listeners={resetTabOnPress("/history")}
         options={{
           title: "Historique",
           headerShown: false,
@@ -50,6 +68,7 @@ export default function TabsLayout() {
       />
       <Tabs.Screen
         name="settings"
+        listeners={resetTabOnPress("/settings")}
         options={{
           title: "Réglages",
           headerShown: false,
