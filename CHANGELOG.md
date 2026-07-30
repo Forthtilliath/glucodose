@@ -6,6 +6,11 @@ Le format suit [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/), et le p
 
 ## [Unreleased]
 
+## [1.6.0] - 2026-07-30
+
+### Ajouté
+- Un lien "Annuler" apparaît à côté du message de confirmation après l'enregistrement d'une pesée sur l'écran Peser, pour supprimer immédiatement une pesée faite par erreur sans repasser par l'Historique.
+
 ## [1.5.0] - 2026-07-30
 
 ### Ajouté
