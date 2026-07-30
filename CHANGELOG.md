@@ -6,7 +6,11 @@ Le format suit [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/), et le p
 
 ## [Unreleased]
 
-## [1.9.0] - 2026-07-30
+## [1.9.1] - 2026-07-30
+
+### Corrigé
+- **Widget d'écran d'accueil qui ne s'affichait jamais** (probable cause réelle du bug "widget invisible" signalé précédemment) : le React Compiler (activé pour toute l'app) transformait le composant du widget, provoquant un crash silencieux au rendu ("Invalid Hook Call") — `react-native-android-widget` exige un composant non transformé par le compilateur.
+
 
 ### Ajouté
 - Le sélecteur d'aliment de l'écran Peser met désormais en avant, dans une section "Récents", les aliments/recettes pesés le plus récemment — en plus du tri ingrédients/recettes déjà en place, plutôt qu'une simple liste alphabétique.
