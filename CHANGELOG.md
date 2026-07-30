@@ -6,6 +6,11 @@ Le format suit [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/), et le p
 
 ## [Unreleased]
 
+## [1.9.0] - 2026-07-30
+
+### Ajouté
+- Le sélecteur d'aliment de l'écran Peser met désormais en avant, dans une section "Récents", les aliments/recettes pesés le plus récemment — en plus du tri ingrédients/recettes déjà en place, plutôt qu'une simple liste alphabétique.
+
 ## [1.8.0] - 2026-07-30
 
 ### Ajouté
