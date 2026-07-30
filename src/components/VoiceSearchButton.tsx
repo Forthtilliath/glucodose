@@ -1,7 +1,7 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Pressable } from "react-native";
-import { ExpoSpeechRecognitionModule, useSpeechRecognitionEvent } from "expo-speech-recognition";
 import { Ionicons } from "@expo/vector-icons";
+import { ExpoSpeechRecognitionModule, useSpeechRecognitionEvent } from "expo-speech-recognition";
 
 import { useColors } from "@/theme/colors";
 
@@ -10,17 +10,34 @@ type Props = {
   accessibilityLabel?: string;
 };
 
-// Bouton micro pour dicter une recherche au lieu de la taper. Un seul
-// composant à la fois doit être monté en écoute active : les événements de
-// reconnaissance sont globaux au module natif, pas propres à une instance.
+// Bouton micro pour dicter une recherche au lieu de la taper. Les événements
+// de reconnaissance sont globaux au module natif (pas propres à une
+// instance) : plusieurs boutons peuvent être montés en même temps (ex. champ
+// nom + sélecteur Ciqual sur le même écran). `requestedRef` distingue le
+// bouton qui a démarré CETTE session des autres instances montées, pour
+// qu'un seul reçoive le résultat au lieu de tous.
 export function VoiceSearchButton({ onResult, accessibilityLabel = "Recherche vocale" }: Props) {
   const colors = useColors();
   const [isListening, setIsListening] = useState(false);
+  const requestedRef = useRef(false);
 
-  useSpeechRecognitionEvent("start", () => setIsListening(true));
-  useSpeechRecognitionEvent("end", () => setIsListening(false));
-  useSpeechRecognitionEvent("error", () => setIsListening(false));
+  useSpeechRecognitionEvent("start", () => {
+    if (requestedRef.current) setIsListening(true);
+  });
+  useSpeechRecognitionEvent("end", () => {
+    if (requestedRef.current) {
+      setIsListening(false);
+      requestedRef.current = false;
+    }
+  });
+  useSpeechRecognitionEvent("error", () => {
+    if (requestedRef.current) {
+      setIsListening(false);
+      requestedRef.current = false;
+    }
+  });
   useSpeechRecognitionEvent("result", (event) => {
+    if (!requestedRef.current) return;
     const transcript = event.results[0]?.transcript;
     if (transcript) onResult(transcript);
   });
@@ -32,6 +49,7 @@ export function VoiceSearchButton({ onResult, accessibilityLabel = "Recherche vo
     }
     const permission = await ExpoSpeechRecognitionModule.requestPermissionsAsync();
     if (!permission.granted) return;
+    requestedRef.current = true;
     ExpoSpeechRecognitionModule.start({ lang: "fr-FR", interimResults: false });
   }
 
