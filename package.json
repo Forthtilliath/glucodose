@@ -5,6 +5,8 @@
   "dependencies": {
     "@expo/ui": "~57.0.8",
     "@expo/vector-icons": "^15.0.2",
+    "@forthtilliath/expo-release-updates": "^0.2.0",
+    "@forthtilliath/react-native-kit": "^0.2.0",
     "drizzle-orm": "^0.45.2",
     "expo": "~57.0.8",
     "expo-constants": "~57.0.6",
@@ -72,6 +74,11 @@
     ],
     "moduleNameMapper": {
       "^@/assets/(.*)$": "<rootDir>/assets/$1"
-    }
+    },
+    "transformIgnorePatterns": [
+      "/node_modules/(?!(.pnpm|react-native|@react-native|@react-native-community|@forthtilliath|expo|@expo|@expo-google-fonts|react-navigation|@react-navigation|@sentry/react-native|native-base|standard-navigation))",
+      "/node_modules/react-native-reanimated/plugin/",
+      "/node_modules/@react-native/babel-preset/"
+    ]
   }
 }
