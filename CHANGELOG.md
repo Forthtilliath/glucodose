@@ -6,6 +6,14 @@ Le format suit [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/), et le p
 
 ## [Unreleased]
 
+## [1.6.1] - 2026-07-30
+
+### Modifié
+- Le message de confirmation après une pesée (et le lien "Annuler" associé) reste affiché 8 secondes au lieu de 4, pour laisser le temps de le repérer et l'utiliser.
+
+### Corrigé
+- Deux pesées enregistrées rapprochées pouvaient voir le message de confirmation de la seconde disparaître prématurément, coupé par le minuteur de la première.
+
 ## [1.6.0] - 2026-07-30
 
 ### Ajouté

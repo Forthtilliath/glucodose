@@ -2,7 +2,7 @@
   "expo": {
     "name": "GlucoDose",
     "slug": "glucodose",
-    "version": "1.6.0",
+    "version": "1.6.1",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "glucodose",
@@ -19,7 +19,7 @@
       },
       "predictiveBackGestureEnabled": false,
       "package": "com.forth.glucodose",
-      "versionCode": 10600,
+      "versionCode": 10601,
       "permissions": [
         "android.permission.REQUEST_INSTALL_PACKAGES"
       ]
