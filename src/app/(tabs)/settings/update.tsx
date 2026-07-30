@@ -1,8 +1,14 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import Constants from "expo-constants";
 
-import { compareVersions, downloadAndInstallApk, fetchLatestRelease } from "@/lib/appUpdate";
+import {
+  compareVersions,
+  downloadAndInstallApk,
+  fetchLatestRelease,
+  fetchReleaseHistory,
+  type ReleaseHistoryEntry,
+} from "@/lib/appUpdate";
 import { type ThemeColors, useColors } from "@/theme/colors";
 
 type UpdateState =
@@ -18,6 +24,13 @@ export default function UpdateSettingsScreen() {
   const styles = useMemo(() => createStyles(colors), [colors]);
   const currentVersion = Constants.expoConfig?.version ?? "?";
   const [updateState, setUpdateState] = useState<UpdateState>({ status: "idle" });
+  const [releaseHistory, setReleaseHistory] = useState<ReleaseHistoryEntry[] | null>(null);
+
+  useEffect(() => {
+    fetchReleaseHistory()
+      .then(setReleaseHistory)
+      .catch(() => setReleaseHistory([]));
+  }, []);
 
   async function handleCheckForUpdate() {
     setUpdateState({ status: "checking" });
@@ -102,6 +115,25 @@ export default function UpdateSettingsScreen() {
           </Text>
         </View>
       )}
+
+      {releaseHistory && releaseHistory.length > 0 && (
+        <View style={styles.changelog}>
+          <Text style={styles.changelogTitle}>Historique des versions</Text>
+          {releaseHistory.map((release) => (
+            <View key={release.version} style={styles.changelogEntry}>
+              <View style={styles.changelogEntryHeader}>
+                <Text style={styles.changelogVersion}>v{release.version}</Text>
+                {release.publishedAt ? (
+                  <Text style={styles.changelogDate}>
+                    {new Date(release.publishedAt).toLocaleDateString("fr-FR")}
+                  </Text>
+                ) : null}
+              </View>
+              {release.notes ? <Text style={styles.changelogNotes}>{release.notes}</Text> : null}
+            </View>
+          ))}
+        </View>
+      )}
     </ScrollView>
   );
 }
@@ -141,5 +173,19 @@ function createStyles(colors: ThemeColors) {
       gap: 4,
     },
     updateAvailableTitle: { fontSize: 15, fontWeight: "700", color: colors.text },
+    changelog: { marginTop: 28 },
+    changelogTitle: { fontSize: 15, fontWeight: "700", color: colors.text, marginBottom: 8 },
+    changelogEntry: {
+      backgroundColor: colors.surface,
+      borderWidth: 1,
+      borderColor: colors.border,
+      borderRadius: 10,
+      padding: 14,
+      marginBottom: 8,
+    },
+    changelogEntryHeader: { flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
+    changelogVersion: { fontSize: 14, fontWeight: "700", color: colors.text },
+    changelogDate: { fontSize: 12, color: colors.textMuted },
+    changelogNotes: { fontSize: 13, color: colors.textMuted, marginTop: 6 },
   });
 }

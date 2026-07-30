@@ -1,5 +1,5 @@
 // Convertit la table Ciqual (Anses, licence ouverte Etalab) téléchargée
-// manuellement en assets/data/ciqual.json : juste {name, carbsPer100g},
+// manuellement en assets/data/ciqual.json : {name, carbsPer100g, group},
 // utilisé comme aide à la saisie dans le formulaire d'ajout d'ingrédient.
 // À relancer si Ciqual publie une nouvelle version (nouveau fichier XLS dans
 // scripts/ciqual-source/).
@@ -47,16 +47,29 @@ function findColumnIndexes(headerRow) {
   const normalized = headerRow.map(normalizeHeader);
   const nameIndex = normalized.findIndex((h) => h === "alim_nom_fr");
   const carbsIndex = normalized.findIndex((h) => h.includes("glucide") && !h.includes("sucre"));
+  const groupIndex = normalized.findIndex((h) => h === "alim_grp_nom_fr");
 
-  if (nameIndex === -1 || carbsIndex === -1) {
+  if (nameIndex === -1 || carbsIndex === -1 || groupIndex === -1) {
     throw new Error(
       "Colonnes attendues introuvables dans l'en-tête. " +
-        `Nom trouvé: ${nameIndex}, Glucides trouvé: ${carbsIndex}. En-têtes bruts: ${JSON.stringify(headerRow)}`
+        `Nom trouvé: ${nameIndex}, Glucides trouvé: ${carbsIndex}, Groupe trouvé: ${groupIndex}. ` +
+        `En-têtes bruts: ${JSON.stringify(headerRow)}`
     );
   }
   console.log(`Colonne nom: "${headerRow[nameIndex]}" (index ${nameIndex})`);
   console.log(`Colonne glucides: "${headerRow[carbsIndex]}" (index ${carbsIndex})`);
-  return { nameIndex, carbsIndex };
+  console.log(`Colonne groupe: "${headerRow[groupIndex]}" (index ${groupIndex})`);
+  return { nameIndex, carbsIndex, groupIndex };
+}
+
+// Les cellules Excel sont enveloppées sur plusieurs lignes ("entrées et
+// plats\ncomposés") : on aplatit en une seule ligne avant capitalisation.
+// Quelques lignes "aliment moyen" n'ont pas de groupe (agrégats), regroupées
+// sous "Autres" plutôt que de créer une section sans titre dans le picker.
+function cleanGroupName(raw) {
+  const flattened = String(raw).replace(/\s+/g, " ").trim();
+  if (!flattened) return "Autres";
+  return flattened.charAt(0).toUpperCase() + flattened.slice(1);
 }
 
 function parseCarbs(raw) {
@@ -76,7 +89,7 @@ function main() {
   const rows = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: "" });
 
   const [headerRow, ...dataRows] = rows;
-  const { nameIndex, carbsIndex } = findColumnIndexes(headerRow);
+  const { nameIndex, carbsIndex, groupIndex } = findColumnIndexes(headerRow);
 
   const seen = new Set();
   const entries = [];
@@ -96,7 +109,8 @@ function main() {
       continue;
     }
     seen.add(key);
-    entries.push({ name, carbsPer100g });
+    const group = cleanGroupName(row[groupIndex]);
+    entries.push({ name, carbsPer100g, group });
   }
 
   entries.sort((a, b) => a.name.localeCompare(b.name, "fr", { sensitivity: "base" }));
