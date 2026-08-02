@@ -1,5 +1,5 @@
-import { useEffect, useRef } from "react";
 import { useLiveQuery } from "drizzle-orm/expo-sqlite";
+import { useDebouncedChange } from "@forthtilliath/react-native-kit/useDebouncedChange";
 
 import { db } from "@/db/client";
 import { containers, foods, settings } from "@/db/schema";
@@ -18,26 +18,10 @@ export function useAutoBackup() {
   const { data: foodsData } = useLiveQuery(db.select().from(foods));
   const { data: settingsData } = useLiveQuery(db.select().from(settings));
 
-  // Devient true seulement une fois que les trois requêtes ont livré leur
-  // premier résultat : sans ça, chacune résolvant à un instant différent
-  // déclencherait à tort une sauvegarde dès le démarrage de l'app.
-  const hasInitialized = useRef(false);
-
-  useEffect(() => {
-    if (containersData === undefined || foodsData === undefined || settingsData === undefined) return;
-
-    if (!hasInitialized.current) {
-      hasInitialized.current = true;
-      return;
-    }
-
-    const timeout = setTimeout(() => {
-      runAutoBackup().catch(() => {
-        // Best effort : une sauvegarde automatique manquée n'est pas
-        // bloquante, l'export manuel reste disponible dans Réglages.
-      });
-    }, AUTO_BACKUP_DELAY_MS);
-
-    return () => clearTimeout(timeout);
-  }, [containersData, foodsData, settingsData]);
+  useDebouncedChange([containersData, foodsData, settingsData], AUTO_BACKUP_DELAY_MS, () => {
+    runAutoBackup().catch(() => {
+      // Best effort : une sauvegarde automatique manquée n'est pas
+      // bloquante, l'export manuel reste disponible dans Réglages.
+    });
+  });
 }
