@@ -1,55 +1,32 @@
+import {
+  createFakeExpoFileSystem,
+  type FakeExpoFileSystem,
+  getFakeExpoFileSystem,
+} from "@forthtilliath/expo-test-kit/createFakeExpoFileSystem";
+
 import { closeTestDb, createTestDb, mockDbClient, resetTestDb, type TestDb } from "@/db/testDb";
 import * as schema from "@/db/schema";
-
-type FakeFileSystem = {
-  store: Map<string, string>;
-};
 
 // Double léger d'expo-file-system : un simple magasin clé/valeur en mémoire,
 // suffisant pour vérifier ce que exportAllData/importAllData lisent et
 // écrivent, sans dépendre du système de fichiers natif (indisponible en Jest).
-jest.mock("expo-file-system", () => {
-  const store = new Map<string, string>();
-  (globalThis as unknown as { __fakeFs: FakeFileSystem }).__fakeFs = { store };
-
-  class FakeFile {
-    uri: string;
-    constructor(...parts: (string | { uri: string })[]) {
-      this.uri = parts.map((p) => (typeof p === "string" ? p : p.uri)).join("/");
-    }
-    get exists() {
-      return store.has(this.uri);
-    }
-    create() {
-      store.set(this.uri, "");
-    }
-    write(content: string) {
-      store.set(this.uri, content);
-    }
-    delete() {
-      store.delete(this.uri);
-    }
-    async text() {
-      const content = store.get(this.uri);
-      if (content === undefined) throw new Error(`Fake file not found: ${this.uri}`);
-      return content;
-    }
-  }
-
-  return { File: FakeFile, Paths: { cache: { uri: "cache" }, document: { uri: "document" } } };
-});
+// Le nom préfixé "mock" est requis : jest.mock() est hoisté avant les imports,
+// et babel-plugin-jest-hoist interdit toute référence hors-scope dans la
+// factory, sauf pour les identifiants préfixés "mock" (insensible à la casse).
+const mockCreateFakeExpoFileSystem = createFakeExpoFileSystem;
+jest.mock("expo-file-system", () => mockCreateFakeExpoFileSystem());
 
 type Backup = typeof import("./backup");
 
 let testDb: TestDb;
 let backup: Backup;
-let fakeFs: FakeFileSystem;
+let fakeFs: FakeExpoFileSystem;
 
 beforeAll(async () => {
   testDb = await createTestDb();
   mockDbClient("@/db/client", testDb);
   backup = require("./backup");
-  fakeFs = (globalThis as unknown as { __fakeFs: FakeFileSystem }).__fakeFs;
+  fakeFs = getFakeExpoFileSystem();
 });
 
 afterAll(() => {
