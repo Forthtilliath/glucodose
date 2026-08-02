@@ -7,8 +7,8 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import { db } from "@/db/client";
 import { createRatio, deleteRatio, updateRatio } from "@/db/repository";
 import { insulinRatios } from "@/db/schema";
-import { confirmDestructive } from "@/lib/confirmDelete";
-import { useSubmitGuard } from "@/lib/useSubmitGuard";
+import { confirmDestructive } from "@forthtilliath/react-native-kit/confirmDestructive";
+import { useSubmitGuard } from "@forthtilliath/react-native-kit/useSubmitGuard";
 import { type ThemeColors, useColors } from "@/theme/colors";
 
 export default function RatioFormScreen() {
