@@ -5,15 +5,15 @@ import { useLiveQuery } from "drizzle-orm/expo-sqlite";
 import { useRouter } from "expo-router";
 import * as Sharing from "expo-sharing";
 import { Ionicons } from "@expo/vector-icons";
+import { confirmDestructive } from "@forthtilliath/react-native-kit/confirmDestructive";
+import { normalizeForSearch } from "@forthtilliath/react-native-kit/utils/normalizeForSearch";
+import { getPeriodStartMs, type PeriodFilter } from "@forthtilliath/react-native-kit/utils/getPeriodStartMs";
+import { SwipeableRow } from "@forthtilliath/react-native-kit/SwipeableRow";
 
-import { SwipeableRow } from "@/components/SwipeableRow";
 import { db } from "@/db/client";
 import { deleteWeighing } from "@/db/repository";
 import { weighings } from "@/db/schema";
-import { normalizeForSearch } from "@/lib/ciqual";
-import { confirmDestructive } from "@/lib/confirmDelete";
 import { exportHistoryToCsv } from "@/lib/historyCsv";
-import { getPeriodStartMs, type PeriodFilter } from "@/lib/historyFilters";
 import { exportHistoryToPdf } from "@/lib/historyPdf";
 import { formatCarbs, formatInsulinUnits, formatWeight } from "@/lib/insulin";
 import { type ThemeColors, useColors } from "@/theme/colors";
@@ -188,6 +188,8 @@ export default function HistoryScreen() {
           <SwipeableRow
             onDelete={() => handleDelete(item.id)}
             deleteLabel={`Supprimer la pesée ${item.foodNameSnapshot}`}
+            deleteText="Supprimer"
+            styles={{ deleteAction: { backgroundColor: colors.danger } }}
           >
             <View
               style={styles.row}

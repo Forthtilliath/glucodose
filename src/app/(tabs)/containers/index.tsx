@@ -4,13 +4,13 @@ import { desc } from "drizzle-orm";
 import { useLiveQuery } from "drizzle-orm/expo-sqlite";
 import { FlatList, Pressable, StyleSheet, Text, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { confirmDestructive } from "@forthtilliath/react-native-kit/confirmDestructive";
+import { SwipeableRow } from "@forthtilliath/react-native-kit/SwipeableRow";
+import { Thumbnail } from "@forthtilliath/react-native-kit/Thumbnail";
 
-import { SwipeableRow } from "@/components/SwipeableRow";
-import { Thumbnail } from "@/components/Thumbnail";
 import { db } from "@/db/client";
 import { deleteContainer } from "@/db/repository";
 import { containers } from "@/db/schema";
-import { confirmDestructive } from "@/lib/confirmDelete";
 import { formatWeight } from "@/lib/insulin";
 import { type ThemeColors, useColors } from "@/theme/colors";
 
@@ -36,14 +36,27 @@ export default function ContainersScreen() {
           <Text style={styles.empty}>Aucun récipient enregistré pour l'instant.</Text>
         }
         renderItem={({ item }) => (
-          <SwipeableRow onDelete={() => handleDelete(item)} deleteLabel={`Supprimer le récipient ${item.name}`}>
+          <SwipeableRow
+            onDelete={() => handleDelete(item)}
+            deleteLabel={`Supprimer le récipient ${item.name}`}
+            deleteText="Supprimer"
+            styles={{ deleteAction: { backgroundColor: colors.danger } }}
+          >
             <Pressable
               style={styles.row}
               onPress={() => router.push(`/containers/${item.id}`)}
               accessibilityRole="button"
               accessibilityLabel={`Récipient ${item.name}, tare ${formatWeight(item.tareWeightG)}. Modifier.`}
             >
-              <Thumbnail photoUri={item.photoUri} placeholderIcon="cube-outline" />
+              <Thumbnail
+                photoUri={item.photoUri}
+                placeholderIcon="cube-outline"
+                styles={{
+                  thumbnail: { backgroundColor: colors.background },
+                  placeholder: { backgroundColor: colors.background },
+                  iconColor: colors.textMuted,
+                }}
+              />
               <View style={styles.rowMain}>
                 <Text style={styles.rowLabel}>{item.name}</Text>
                 {item.notes ? <Text style={styles.rowSubtitle}>{item.notes}</Text> : null}

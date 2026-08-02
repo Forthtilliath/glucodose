@@ -2,15 +2,6 @@ import { Alert } from "react-native";
 
 import { archiveFood, deleteFood, isFoodUsedInRecipes } from "@/db/repository";
 
-// Confirmation destructive générique (titre + "Cette action est définitive."
-// + Annuler/Supprimer), utilisée par les récipients, ratios et pesées.
-export function confirmDestructive(title: string, onConfirm: () => void) {
-  Alert.alert(title, "Cette action est définitive.", [
-    { text: "Annuler", style: "cancel" },
-    { text: "Supprimer", style: "destructive", onPress: onConfirm },
-  ]);
-}
-
 // Suppression d'un aliment (ingrédient ou recette) : si utilisé comme
 // composant d'une autre recette, propose l'archivage à la place (la
 // suppression directe est bloquée par la contrainte de clé étrangère).

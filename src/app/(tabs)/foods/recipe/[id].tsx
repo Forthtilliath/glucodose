@@ -4,16 +4,17 @@ import { and, eq, ne } from "drizzle-orm";
 import { useLiveQuery } from "drizzle-orm/expo-sqlite";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
+import { PhotoPicker } from "@forthtilliath/react-native-kit/PhotoPicker";
+import { PickerModal, type PickerItem } from "@forthtilliath/react-native-kit/PickerModal";
+import { useSubmitGuard } from "@forthtilliath/react-native-kit/useSubmitGuard";
 
-import { PhotoPicker } from "@/components/PhotoPicker";
-import { PickerModal, type PickerItem } from "@/components/PickerModal";
 import { db } from "@/db/client";
 import { saveRecipe } from "@/db/repository";
 import { foods, recipeComponents } from "@/db/schema";
 import { confirmDeleteOrArchiveFood } from "@/lib/confirmDelete";
 import { computeCarbsGrams, computeRecipeCarbsPer100g, formatCarbs, formatWeight, MAX_WEIGHT_G } from "@/lib/insulin";
 import { deletePhoto, saveFoodPhoto } from "@/lib/photos";
-import { useSubmitGuard } from "@/lib/useSubmitGuard";
+import { pickerModalStyles } from "@/lib/pickerModalStyles";
 import { type ThemeColors, useColors } from "@/theme/colors";
 
 type Row = { key: string; foodId: number; weightG: string };
@@ -21,6 +22,7 @@ type Row = { key: string; foodId: number; weightG: string };
 export default function RecipeFormScreen() {
   const colors = useColors();
   const styles = useMemo(() => createStyles(colors), [colors]);
+  const pickerStyles = useMemo(() => pickerModalStyles(colors), [colors]);
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const isNew = id === "new";
@@ -169,6 +171,13 @@ export default function RecipeFormScreen() {
         onChange={setPhotoUri}
         savePhoto={saveFoodPhoto}
         photoLabel="de la recette"
+        styles={{
+          photoPreview: { backgroundColor: colors.surface },
+          photoPlaceholder: { backgroundColor: colors.surface, borderColor: colors.border },
+          photoPlaceholderText: { color: colors.textMuted },
+          clearLink: { color: colors.primary },
+          iconColor: colors.textMuted,
+        }}
       />
 
       <Text style={styles.label}>Nom de la recette</Text>
@@ -276,6 +285,7 @@ export default function RecipeFormScreen() {
         onSelect={(item) => addRow(item.id)}
         onClose={() => setPickerVisible(false)}
         emptyMessage="Aucun aliment disponible. Crée d'abord un ingrédient."
+        styles={pickerStyles}
       />
     </ScrollView>
   );

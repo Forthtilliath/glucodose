@@ -4,9 +4,9 @@ import { desc, eq } from "drizzle-orm";
 import { useLiveQuery } from "drizzle-orm/expo-sqlite";
 import { FlatList, Pressable, StyleSheet, Text, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { SwipeableRow } from "@forthtilliath/react-native-kit/SwipeableRow";
+import { Thumbnail } from "@forthtilliath/react-native-kit/Thumbnail";
 
-import { SwipeableRow } from "@/components/SwipeableRow";
-import { Thumbnail } from "@/components/Thumbnail";
 import { db } from "@/db/client";
 import { foods } from "@/db/schema";
 import { confirmDeleteOrArchiveFood } from "@/lib/confirmDelete";
@@ -35,7 +35,12 @@ export default function FoodsScreen() {
           <Text style={styles.empty}>Aucun aliment enregistré pour l'instant.</Text>
         }
         renderItem={({ item }) => (
-          <SwipeableRow onDelete={() => handleDelete(item)} deleteLabel={`Supprimer l'aliment ${item.name}`}>
+          <SwipeableRow
+            onDelete={() => handleDelete(item)}
+            deleteLabel={`Supprimer l'aliment ${item.name}`}
+            deleteText="Supprimer"
+            styles={{ deleteAction: { backgroundColor: colors.danger } }}
+          >
             <Pressable
               style={styles.row}
               onPress={() =>
@@ -46,7 +51,15 @@ export default function FoodsScreen() {
               accessibilityRole="button"
               accessibilityLabel={`${item.type === "recipe" ? "Recette" : "Ingrédient"} ${item.name}, ${formatCarbs(item.carbsPer100g)} pour 100g. Modifier.`}
             >
-              <Thumbnail photoUri={item.photoUri} placeholderIcon="restaurant-outline" />
+              <Thumbnail
+                photoUri={item.photoUri}
+                placeholderIcon="restaurant-outline"
+                styles={{
+                  thumbnail: { backgroundColor: colors.background },
+                  placeholder: { backgroundColor: colors.background },
+                  iconColor: colors.textMuted,
+                }}
+              />
               <View style={styles.rowMain}>
                 <View style={[styles.badge, item.type === "recipe" ? styles.badgeRecipe : styles.badgeIngredient]}>
                   <Text style={styles.badgeText}>{item.type === "recipe" ? "Recette" : "Ingrédient"}</Text>

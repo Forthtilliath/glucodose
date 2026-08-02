@@ -3,15 +3,15 @@ import { Pressable, ScrollView, StyleSheet, Text, TextInput } from "react-native
 import { eq } from "drizzle-orm";
 import { useLiveQuery } from "drizzle-orm/expo-sqlite";
 import { useLocalSearchParams, useRouter } from "expo-router";
+import { confirmDestructive } from "@forthtilliath/react-native-kit/confirmDestructive";
+import { PhotoPicker } from "@forthtilliath/react-native-kit/PhotoPicker";
+import { useSubmitGuard } from "@forthtilliath/react-native-kit/useSubmitGuard";
 
-import { PhotoPicker } from "@/components/PhotoPicker";
 import { db } from "@/db/client";
 import { deleteContainer, createContainer, updateContainer } from "@/db/repository";
 import { containers } from "@/db/schema";
-import { confirmDestructive } from "@/lib/confirmDelete";
 import { formatWeight, MAX_WEIGHT_G } from "@/lib/insulin";
 import { deletePhoto, saveContainerPhoto } from "@/lib/photos";
-import { useSubmitGuard } from "@/lib/useSubmitGuard";
 import { type ThemeColors, useColors } from "@/theme/colors";
 
 export default function ContainerFormScreen() {
@@ -89,6 +89,13 @@ export default function ContainerFormScreen() {
         onChange={setPhotoUri}
         savePhoto={saveContainerPhoto}
         photoLabel="du récipient"
+        styles={{
+          photoPreview: { backgroundColor: colors.surface },
+          photoPlaceholder: { backgroundColor: colors.surface, borderColor: colors.border },
+          photoPlaceholderText: { color: colors.textMuted },
+          clearLink: { color: colors.primary },
+          iconColor: colors.textMuted,
+        }}
       />
 
       <Text style={styles.label}>Nom</Text>

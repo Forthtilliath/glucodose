@@ -4,13 +4,14 @@ import { desc, eq } from "drizzle-orm";
 import { useLiveQuery } from "drizzle-orm/expo-sqlite";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
+import { PickerModal, type PickerItem } from "@forthtilliath/react-native-kit/PickerModal";
+import { getMostRecentIds } from "@forthtilliath/react-native-kit/utils/getMostRecentIds";
+import { rankByNameMatch } from "@forthtilliath/react-native-kit/utils/rankByNameMatch";
 
-import { PickerModal, type PickerItem } from "@/components/PickerModal";
 import { db } from "@/db/client";
 import { createIngredient, deleteWeighing, recordWeighing } from "@/db/repository";
 import { containers, foods, insulinRatios, settings, weighings } from "@/db/schema";
-import { ALL_CIQUAL_FOODS, CIQUAL_PICKER_ITEMS, rankByNameMatch } from "@/lib/ciqual";
-import { getMostRecentIds } from "@/lib/recentIds";
+import { ALL_CIQUAL_FOODS, CIQUAL_PICKER_ITEMS } from "@/lib/ciqual";
 import {
   computeCarbsGrams,
   computeCorrectionInsulinUnits,
@@ -21,6 +22,7 @@ import {
   formatWeight,
   MAX_WEIGHT_G,
 } from "@/lib/insulin";
+import { pickerModalStyles } from "@/lib/pickerModalStyles";
 import { type ThemeColors, useColors } from "@/theme/colors";
 
 function filterCiqualPickerItems(items: PickerItem[], query: string): PickerItem[] {
@@ -44,6 +46,7 @@ const SAVED_MESSAGE_DURATION_MS = 8000;
 export default function WeighScreen() {
   const colors = useColors();
   const styles = useMemo(() => createStyles(colors), [colors]);
+  const pickerStyles = useMemo(() => pickerModalStyles(colors), [colors]);
   const {
     autoFocusWeight,
     containerId: containerIdParam,
@@ -59,7 +62,7 @@ export default function WeighScreen() {
   // déduire les quelques aliments récents à mettre en avant dans le sélecteur.
   const { data: recentWeighings } = useLiveQuery(
     db
-      .select({ id: weighings.foodId, weighedAt: weighings.weighedAt })
+      .select({ id: weighings.foodId, occurredAt: weighings.weighedAt })
       .from(weighings)
       .orderBy(desc(weighings.weighedAt))
       .limit(30)
@@ -446,6 +449,7 @@ export default function WeighScreen() {
             },
           },
         ]}
+        styles={pickerStyles}
       />
       <PickerModal
         visible={foodPickerVisible}
@@ -474,6 +478,7 @@ export default function WeighScreen() {
             },
           },
         ]}
+        styles={pickerStyles}
       />
       <PickerModal
         visible={ciqualQuickAddVisible}
@@ -483,6 +488,7 @@ export default function WeighScreen() {
         onSelect={handleSelectCiqualQuickAdd}
         onClose={() => setCiqualQuickAddVisible(false)}
         emptyMessage="Aucun aliment trouvé dans Ciqual."
+        styles={pickerStyles}
       />
       <PickerModal
         visible={ratioPickerVisible}
@@ -494,6 +500,7 @@ export default function WeighScreen() {
         }}
         onClose={() => setRatioPickerVisible(false)}
         emptyMessage="Aucun ratio enregistré."
+        styles={pickerStyles}
       />
     </ScrollView>
   );
