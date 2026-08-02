@@ -1,9 +1,9 @@
+import { getMostRecentIds } from "@forthtilliath/react-native-kit/utils/getMostRecentIds";
+import { nextInCycle } from "@forthtilliath/react-native-kit/utils/nextInCycle";
 import { desc, eq } from "drizzle-orm";
 
 import { db } from "@/db/client";
 import { containers, foods, settings, weighings } from "@/db/schema";
-import { nextInCycle } from "@/lib/cycleSelection";
-import { getMostRecentIds } from "@/lib/recentIds";
 
 export type WidgetSelection = {
   containerId: number | null;
@@ -27,7 +27,7 @@ async function getSettingsRow() {
 
 async function getRecentContainerIds(): Promise<number[]> {
   const rows = await db
-    .select({ id: weighings.containerId, weighedAt: weighings.weighedAt })
+    .select({ id: weighings.containerId, occurredAt: weighings.weighedAt })
     .from(weighings)
     .orderBy(desc(weighings.weighedAt))
     .limit(RECENT_QUERY_LIMIT);
@@ -36,7 +36,7 @@ async function getRecentContainerIds(): Promise<number[]> {
 
 async function getRecentFoodIds(): Promise<number[]> {
   const rows = await db
-    .select({ id: weighings.foodId, weighedAt: weighings.weighedAt })
+    .select({ id: weighings.foodId, occurredAt: weighings.weighedAt })
     .from(weighings)
     .orderBy(desc(weighings.weighedAt))
     .limit(RECENT_QUERY_LIMIT);

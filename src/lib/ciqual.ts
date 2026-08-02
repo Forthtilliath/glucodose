@@ -1,6 +1,9 @@
+import type { PickerItem } from "@forthtilliath/react-native-kit/PickerModal";
+import { normalizeForSearch } from "@forthtilliath/react-native-kit/utils/normalizeForSearch";
+import { rankByNameMatch } from "@forthtilliath/react-native-kit/utils/rankByNameMatch";
+
 import ciqualData from "@/assets/data/ciqual.json";
 import { formatCarbs } from "@/lib/insulin";
-import type { PickerItem } from "@/components/PickerModal";
 
 export type CiqualFood = { name: string; carbsPer100g: number; group: string };
 
@@ -18,57 +21,6 @@ export const CIQUAL_PICKER_ITEMS: PickerItem[] = ALL_CIQUAL_FOODS.map((food, ind
   subtitle: `${formatCarbs(food.carbsPer100g)} / 100 g`,
   group: food.group,
 }));
-
-// Les ligatures œ/æ ne se décomposent PAS via normalize("NFD") (contrairement
-// aux lettres accentuées) : ce sont des lettres Unicode à part entière, pas
-// une base + un signe combinant. Sans ce remplacement explicite, chercher
-// "Œuf" (avec la vraie ligature) ne trouve jamais "Oeuf" dans Ciqual, qui
-// l'orthographie sans ligature (comme la plupart des bases de données texte).
-function expandLigatures(text: string): string {
-  return text.replace(/[œŒ]/g, "oe").replace(/[æÆ]/g, "ae");
-}
-
-export function normalizeForSearch(text: string): string {
-  return expandLigatures(text)
-    .normalize("NFD")
-    .replace(/[̀-ͯ]/g, "")
-    .toLowerCase()
-    .trim();
-}
-
-// Cache le nom normalisé de chaque élément par référence d'objet : les
-// listes cherchées dans cette app (ALL_CIQUAL_FOODS, CIQUAL_PICKER_ITEMS)
-// sont des constantes de module figées, donc un élément donné a toujours le
-// même nom. Sans ce cache, rankByNameMatch renormaliserait les ~3300 noms
-// Ciqual (accents, casse) à chaque frappe clavier dans le champ de recherche.
-const normalizedNameCache = new WeakMap<object, string>();
-
-function getNormalizedName<T>(item: T, getName: (item: T) => string): string {
-  if (typeof item !== "object" || item === null) return normalizeForSearch(getName(item));
-  const cached = normalizedNameCache.get(item);
-  if (cached !== undefined) return cached;
-  const normalized = normalizeForSearch(getName(item));
-  normalizedNameCache.set(item, normalized);
-  return normalized;
-}
-
-// Classe des éléments par pertinence vis-à-vis d'une recherche texte :
-// position du match dans le nom (plus tôt = plus pertinent), puis longueur
-// du nom. Générique pour être réutilisable par n'importe quelle liste
-// d'éléments ayant un nom affichable (aliments Ciqual, PickerItem...), sans
-// dupliquer cette logique à chaque nouvel écran qui cherche dans Ciqual.
-export function rankByNameMatch<T>(items: T[], query: string, getName: (item: T) => string): T[] {
-  const normalizedQuery = normalizeForSearch(query);
-  const matches: { item: T; matchIndex: number }[] = [];
-  for (const item of items) {
-    const matchIndex = getNormalizedName(item, getName).indexOf(normalizedQuery);
-    if (matchIndex !== -1) {
-      matches.push({ item, matchIndex });
-    }
-  }
-  matches.sort((a, b) => a.matchIndex - b.matchIndex || getName(a.item).length - getName(b.item).length);
-  return matches.map((m) => m.item);
-}
 
 const MIN_QUERY_LENGTH = 2;
 const DEFAULT_LIMIT = 5;

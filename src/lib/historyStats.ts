@@ -1,4 +1,4 @@
-import { getPeriodStartMs, type PeriodFilter } from "./historyFilters";
+import { getPeriodStartMs, type PeriodFilter } from "@forthtilliath/react-native-kit/utils/getPeriodStartMs";
 
 export type HistoryStatsRow = { weighedAt: string; carbsG: number; foodNameSnapshot: string };
 

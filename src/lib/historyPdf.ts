@@ -1,4 +1,5 @@
 import * as Print from "expo-print";
+import { escapeHtml } from "@forthtilliath/react-native-kit/utils/escapeHtml";
 
 import { formatCarbs, formatInsulinUnits, formatWeight } from "./insulin";
 
@@ -10,10 +11,6 @@ export type HistoryPdfRow = {
   ratioLabelSnapshot: string | null;
   totalInsulinUnits: number;
 };
-
-function escapeHtml(text: string): string {
-  return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
-}
 
 // Générée séparément de l'appel à expo-print (natif, non testable) pour
 // pouvoir vérifier le contenu du rapport par un test unitaire.
