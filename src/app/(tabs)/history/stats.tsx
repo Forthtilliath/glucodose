@@ -5,7 +5,7 @@ import { useLocalSearchParams } from "expo-router";
 
 import { db } from "@/db/client";
 import { weighings } from "@/db/schema";
-import type { PeriodFilter } from "@/lib/historyFilters";
+import type { PeriodFilter } from "@forthtilliath/react-native-kit/utils/getPeriodStartMs";
 import { computeHistoryStats } from "@/lib/historyStats";
 import { formatCarbs } from "@/lib/insulin";
 import { type ThemeColors, useColors } from "@/theme/colors";

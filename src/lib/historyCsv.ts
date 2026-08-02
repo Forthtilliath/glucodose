@@ -1,4 +1,6 @@
 import { File, Paths } from "expo-file-system";
+import { escapeCsvField } from "@forthtilliath/react-native-kit/utils/escapeCsvField";
+import { formatCsvNumber } from "@forthtilliath/react-native-kit/utils/formatCsvNumber";
 
 export type HistoryCsvRow = {
   weighedAt: string;
@@ -10,18 +12,6 @@ export type HistoryCsvRow = {
 };
 
 const CSV_DELIMITER = ";"; // Excel FR ouvre correctement un CSV ";" avec virgule décimale.
-
-function escapeCsvField(value: string): string {
-  if (!/[";\n]/.test(value)) return value;
-  return `"${value.replace(/"/g, '""')}"`;
-}
-
-// Nombre brut (pas de suffixe d'unité) pour rester exploitable dans un
-// tableur (somme, moyenne...), avec la virgule décimale attendue par Excel
-// en locale française plutôt que le point de JS.
-function formatCsvNumber(value: number, decimals = 1): string {
-  return value.toFixed(decimals).replace(".", ",");
-}
 
 // Générée séparément de l'écriture du fichier (native, non testable) pour
 // pouvoir vérifier le contenu du CSV par un test unitaire, comme pour le PDF.
