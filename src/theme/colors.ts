@@ -1,4 +1,12 @@
-import { useColorScheme } from "react-native";
+import { createContext, useContext } from "react";
+import { type ThemePreference, useEffectiveColorScheme } from "@forthtilliath/react-native-kit/useEffectiveColorScheme";
+
+// Valeur par défaut "system" : tout composant rendu avant que
+// ThemePreferenceRunner (src/app/_layout.tsx) n'ait fini de charger le
+// réglage stocké en base (ou pendant le chargement/erreur de migration, où
+// ce provider n'est pas encore monté) suit simplement le thème du téléphone.
+const ThemePreferenceContext = createContext<ThemePreference>("system");
+export const ThemePreferenceProvider = ThemePreferenceContext.Provider;
 
 export type ThemeColors = {
   background: string;
@@ -49,10 +57,18 @@ const darkColors: ThemeColors = {
 // cas d'usage actuel, gardé pour compatibilité s'il en apparaît un).
 export const colors = lightColors;
 
+// Exposé séparément de useColors() pour src/app/_layout.tsx, qui a aussi
+// besoin du schéma effectif brut ("light"/"dark") pour choisir le thème du
+// ThemeProvider d'expo-router (Dark/DefaultTheme).
+export function useEffectiveScheme(): "light" | "dark" {
+  const preference = useContext(ThemePreferenceContext);
+  return useEffectiveColorScheme(preference);
+}
+
 // Chaque écran doit appeler ce hook plutôt qu'importer `colors` directement,
-// pour suivre le thème clair/sombre du système (userInterfaceStyle
-// "automatic" dans app.json).
+// pour suivre la préférence de thème (Réglages > Apparence, "system" suit le
+// thème du téléphone comme userInterfaceStyle "automatic" dans app.json).
 export function useColors(): ThemeColors {
-  const scheme = useColorScheme();
+  const scheme = useEffectiveScheme();
   return scheme === "dark" ? darkColors : lightColors;
 }
