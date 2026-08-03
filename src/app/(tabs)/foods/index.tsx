@@ -64,7 +64,9 @@ export default function FoodsScreen() {
                 <View style={[styles.badge, item.type === "recipe" ? styles.badgeRecipe : styles.badgeIngredient]}>
                   <Text style={styles.badgeText}>{item.type === "recipe" ? "Recette" : "Ingrédient"}</Text>
                 </View>
-                <Text style={styles.rowLabel}>{item.name}</Text>
+                <Text style={styles.rowLabel} numberOfLines={1} ellipsizeMode="tail">
+                  {item.name}
+                </Text>
               </View>
               <Text style={styles.rowValue}>{formatCarbs(item.carbsPer100g)}/100g</Text>
             </Pressable>
@@ -97,10 +99,10 @@ function createStyles(colors: ThemeColors) {
       padding: 16,
       marginBottom: 10,
     },
-    rowMain: { flex: 1, flexShrink: 1, flexDirection: "row", alignItems: "center", gap: 10 },
-    rowLabel: { fontSize: 16, fontWeight: "600", color: colors.text, flexShrink: 1 },
+    rowMain: { flex: 1, flexShrink: 1, gap: 4 },
+    rowLabel: { fontSize: 16, fontWeight: "600", color: colors.text },
     rowValue: { fontSize: 15, fontWeight: "700", color: colors.primary, flexShrink: 0 },
-    badge: { paddingHorizontal: 8, paddingVertical: 3, borderRadius: 6 },
+    badge: { alignSelf: "flex-start", paddingHorizontal: 8, paddingVertical: 3, borderRadius: 6 },
     badgeIngredient: { backgroundColor: colors.badgeIngredientBg },
     badgeRecipe: { backgroundColor: colors.badgeRecipeBg },
     badgeText: { fontSize: 11, fontWeight: "700", color: colors.badgeText },
