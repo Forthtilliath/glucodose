@@ -89,19 +89,21 @@ export default function UpdateSettingsScreen() {
         <Text style={styles.infoValue}>{currentVersion}</Text>
       </View>
 
-      <Pressable
-        style={[styles.button, isBusy && styles.buttonDisabled]}
-        onPress={handleCheckForUpdate}
-        disabled={isBusy}
-        accessibilityRole="button"
-        accessibilityLabel="Rechercher une mise à jour"
-      >
-        {updateState.status === "checking" ? (
-          <ActivityIndicator color={colors.primaryText} />
-        ) : (
-          <Text style={styles.buttonText}>Rechercher une mise à jour</Text>
-        )}
-      </Pressable>
+      {updateState.status !== "available" && updateState.status !== "downloading" && (
+        <Pressable
+          style={[styles.button, isBusy && styles.buttonDisabled]}
+          onPress={handleCheckForUpdate}
+          disabled={isBusy}
+          accessibilityRole="button"
+          accessibilityLabel="Rechercher une mise à jour"
+        >
+          {updateState.status === "checking" ? (
+            <ActivityIndicator color={colors.primaryText} />
+          ) : (
+            <Text style={styles.buttonText}>Rechercher une mise à jour</Text>
+          )}
+        </Pressable>
+      )}
 
       {updateState.status === "up-to-date" && (
         <Text style={styles.helpText}>Tu as déjà la dernière version.</Text>
