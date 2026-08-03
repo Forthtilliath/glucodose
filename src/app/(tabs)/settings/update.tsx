@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { ChangelogNotes } from "@forthtilliath/react-native-kit/ChangelogNotes";
 import Constants from "expo-constants";
@@ -44,7 +44,7 @@ export default function UpdateSettingsScreen() {
       .catch(() => setReleaseHistory([]));
   }, []);
 
-  async function handleCheckForUpdate() {
+  const handleCheckForUpdate = useCallback(async () => {
     setUpdateState({ status: "checking" });
     try {
       const release = await fetchLatestRelease();
@@ -61,7 +61,14 @@ export default function UpdateSettingsScreen() {
     } catch {
       setUpdateState({ status: "error", message: "Impossible de vérifier les mises à jour." });
     }
-  }
+  }, [currentVersion]);
+
+  // Vérifie automatiquement à l'ouverture de l'écran (au lieu d'attendre un
+  // tap sur "Rechercher une mise à jour") : la bannière de _layout.tsx a déjà
+  // pu prévenir qu'une mise à jour existe, inutile de faire recliquer.
+  useEffect(() => {
+    void handleCheckForUpdate();
+  }, [handleCheckForUpdate]);
 
   async function handleInstallUpdate(apkUrl: string) {
     setUpdateState({ status: "downloading", progress: 0 });
