@@ -47,9 +47,10 @@ export default function ThemeSettingsScreen() {
           handleChange(preference).catch(() => {});
         }}
         styles={{
-          option: { backgroundColor: colors.surface, borderColor: colors.border },
+          container: styles.toggleContainer,
+          option: [styles.toggleOption, { backgroundColor: colors.surface, borderColor: colors.border }],
           optionActive: { backgroundColor: colors.primary, borderColor: colors.primary },
-          optionText: { color: colors.text },
+          optionText: [styles.toggleOptionText, { color: colors.text }],
           optionTextActive: { color: colors.primaryText },
         }}
       />
@@ -63,5 +64,14 @@ function createStyles(colors: ThemeColors) {
     content: { padding: 16, paddingBottom: 48, gap: 4 },
     sectionTitle: { fontSize: 15, fontWeight: "700", color: colors.text, marginTop: 8 },
     helpText: { fontSize: 12, color: colors.textMuted, marginTop: 4, marginBottom: 12 },
+    toggleContainer: { flexDirection: "row", gap: 10 },
+    toggleOption: {
+      flex: 1,
+      borderWidth: 1,
+      borderRadius: 10,
+      paddingVertical: 12,
+      alignItems: "center",
+    },
+    toggleOptionText: { fontSize: 15, fontWeight: "600" },
   });
 }
