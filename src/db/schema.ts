@@ -100,6 +100,17 @@ export const settings = sqliteTable("settings", {
   // le traitant comme "aucune sélection".
   widgetSelectedContainerId: integer("widget_selected_container_id"),
   widgetSelectedFoodId: integer("widget_selected_food_id"),
+  // Préférence de thème, indépendante du thème du téléphone ("system" suit
+  // ce dernier, comme le comportement historique avant que ce réglage
+  // n'existe).
+  themePreference: text("theme_preference", { enum: ["light", "dark", "system"] })
+    .notNull()
+    .default("system"),
+  // Horodatage (ms epoch) de la dernière vérification de mise à jour
+  // GitHub, et version dont l'utilisateur a fermé la bannière sans
+  // l'installer (pour ne pas le renotifier pour cette même version).
+  lastUpdateCheckAt: integer("last_update_check_at"),
+  dismissedUpdateVersion: text("dismissed_update_version"),
   updatedAt: text("updated_at")
     .notNull()
     .default(sql`(current_timestamp)`),
