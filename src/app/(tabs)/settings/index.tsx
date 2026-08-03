@@ -49,6 +49,16 @@ export default function SettingsScreen() {
       <Text style={[styles.sectionTitle, styles.sectionSpacing]}>App</Text>
       <Pressable
         style={styles.row}
+        onPress={() => router.push("/settings/theme")}
+        accessibilityRole="button"
+        accessibilityLabel="Apparence"
+      >
+        <Ionicons name="contrast-outline" size={20} color={colors.text} />
+        <Text style={styles.rowText}>Apparence</Text>
+        <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />
+      </Pressable>
+      <Pressable
+        style={styles.row}
         onPress={() => router.push("/settings/update")}
         accessibilityRole="button"
         accessibilityLabel="Mises à jour"
