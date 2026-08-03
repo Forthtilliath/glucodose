@@ -74,6 +74,12 @@ function UpdateNotifier() {
         notes={update.release.notes}
         onPress={() => {
           router.push("/settings/update");
+          // Ferme la bannière sans mémoriser de version "fermée" en base :
+          // l'écran Mises à jour refait sa propre vérification à l'ouverture,
+          // et si l'utilisateur revient sans installer, la bannière peut
+          // réapparaître au prochain lancement (comportement voulu, distinct
+          // d'un vrai "Fermer").
+          update.dismiss();
         }}
         onDismiss={() => {
           dismissUpdateVersion(update.release.version).catch(() => {});
