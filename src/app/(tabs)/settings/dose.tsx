@@ -47,6 +47,7 @@ export default function DoseSettingsScreen() {
       targetGlycemia: targetGlycemia.trim() ? parseFloat(targetGlycemia) : null,
       sensitivityFactor: sensitivityFactor.trim() ? parseFloat(sensitivityFactor) : null,
       showInsulinDose: showInsulinDoseOverride,
+      themePreference: currentSettings?.themePreference ?? "system",
     });
   }
 

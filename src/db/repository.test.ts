@@ -234,6 +234,7 @@ describe("réglages", () => {
       targetGlycemia: 6,
       sensitivityFactor: 3,
       showInsulinDose: true,
+      themePreference: "system",
     });
 
     const rows = await testDb.select().from(schema.settings);
@@ -247,18 +248,40 @@ describe("réglages", () => {
       targetGlycemia: 6,
       sensitivityFactor: 3,
       showInsulinDose: true,
+      themePreference: "system",
     });
     await repo.updateSettings({
       glycemiaUnit: "g/L",
       targetGlycemia: 1.1,
       sensitivityFactor: 0.5,
       showInsulinDose: false,
+      themePreference: "dark",
     });
 
     const rows = await testDb.select().from(schema.settings);
     expect(rows).toHaveLength(1);
     expect(rows[0].glycemiaUnit).toBe("g/L");
     expect(rows[0].showInsulinDose).toBe(false);
+    expect(rows[0].themePreference).toBe("dark");
+  });
+
+  it("recordUpdateCheck et dismissUpdateVersion ciblent chacun leur champ sans écraser les autres réglages", async () => {
+    await repo.updateSettings({
+      glycemiaUnit: "mmol/L",
+      targetGlycemia: 6,
+      sensitivityFactor: 3,
+      showInsulinDose: true,
+      themePreference: "dark",
+    });
+
+    await repo.recordUpdateCheck(1_700_000_000_000);
+    await repo.dismissUpdateVersion("1.12.0");
+
+    const rows = await testDb.select().from(schema.settings);
+    expect(rows).toHaveLength(1);
+    expect(rows[0].lastUpdateCheckAt).toBe(1_700_000_000_000);
+    expect(rows[0].dismissedUpdateVersion).toBe("1.12.0");
+    expect(rows[0].themePreference).toBe("dark");
   });
 });
 

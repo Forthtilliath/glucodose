@@ -213,6 +213,7 @@ export async function updateSettings(input: {
   targetGlycemia: number | null;
   sensitivityFactor: number | null;
   showInsulinDose: boolean;
+  themePreference: "light" | "dark" | "system";
 }) {
   await db
     .insert(settings)
@@ -222,6 +223,7 @@ export async function updateSettings(input: {
       targetGlycemia: input.targetGlycemia,
       sensitivityFactor: input.sensitivityFactor,
       showInsulinDose: input.showInsulinDose,
+      themePreference: input.themePreference,
     })
     .onConflictDoUpdate({
       target: settings.id,
@@ -230,8 +232,34 @@ export async function updateSettings(input: {
         targetGlycemia: input.targetGlycemia,
         sensitivityFactor: input.sensitivityFactor,
         showInsulinDose: input.showInsulinDose,
+        themePreference: input.themePreference,
         updatedAt: new Date().toISOString(),
       },
+    });
+}
+
+// Vérification de mise à jour en tâche de fond (voir useUpdateCheck du
+// package @forthtilliath/react-native-kit) : deux champs ciblés, séparés
+// d'updateSettings() pour ne pas obliger l'appelant (un composant monté à la
+// racine de l'app, sans accès à l'état du formulaire Réglages) à connaître ni
+// reporter les autres champs du réglage.
+export async function recordUpdateCheck(lastCheckedAt: number) {
+  await db
+    .insert(settings)
+    .values({ id: 1, lastUpdateCheckAt: lastCheckedAt })
+    .onConflictDoUpdate({
+      target: settings.id,
+      set: { lastUpdateCheckAt: lastCheckedAt, updatedAt: new Date().toISOString() },
+    });
+}
+
+export async function dismissUpdateVersion(version: string) {
+  await db
+    .insert(settings)
+    .values({ id: 1, dismissedUpdateVersion: version })
+    .onConflictDoUpdate({
+      target: settings.id,
+      set: { dismissedUpdateVersion: version, updatedAt: new Date().toISOString() },
     });
 }
 
