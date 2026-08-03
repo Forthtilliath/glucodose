@@ -6,6 +6,15 @@ Le format suit [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/), et le p
 
 ## [Unreleased]
 
+## [1.12.0] - 2026-08-04
+
+### Ajouté
+- Réglages → Apparence : choix du thème clair, sombre ou système (au lieu de suivre uniquement le thème du téléphone).
+- Notification au lancement de l'app quand une nouvelle version est disponible, avec un aperçu de son contenu — en plus de la vérification manuelle déjà possible dans Réglages → Mises à jour.
+
+### Corrigé
+- Les noms longs sur l'écran Aliments (ex. entrées Ciqual) cassaient la mise en page de la ligne au lieu d'être tronqués.
+
 ## [1.11.0] - 2026-07-30
 
 ### Ajouté
@@ -145,7 +154,8 @@ Première version suivie. L'app était déjà fonctionnelle avant cette date (hi
 ### Corrigé
 - Validation des valeurs négatives (poids, glucides, glycémie), contraintes de clé étrangère SQLite activées, permission microphone superflue retirée.
 
-[Unreleased]: https://github.com/Forthtilliath/glucodose/compare/v1.2.3...HEAD
+[Unreleased]: https://github.com/Forthtilliath/glucodose/compare/v1.12.0...HEAD
+[1.12.0]: https://github.com/Forthtilliath/glucodose/releases/tag/v1.12.0
 [1.2.3]: https://github.com/Forthtilliath/glucodose/releases/tag/v1.2.3
 [1.2.2]: https://github.com/Forthtilliath/glucodose/releases/tag/v1.2.2
 [1.2.1]: https://github.com/Forthtilliath/glucodose/releases/tag/v1.2.1

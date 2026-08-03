@@ -1,12 +1,12 @@
 {
   "name": "glucodose",
   "main": "./index.js",
-  "version": "1.2.3",
+  "version": "1.12.0",
   "dependencies": {
     "@expo/ui": "~57.0.8",
     "@expo/vector-icons": "^15.0.2",
     "@forthtilliath/expo-release-updates": "^0.2.0",
-    "@forthtilliath/react-native-kit": "^0.7.1",
+    "@forthtilliath/react-native-kit": "^0.7.2",
     "drizzle-orm": "^0.45.2",
     "expo": "~57.0.8",
     "expo-constants": "~57.0.6",
