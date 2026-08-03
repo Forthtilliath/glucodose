@@ -15,7 +15,20 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 // à la racine, sans laquelle le swipe-to-delete des listes ne fonctionne pas
 // du tout (régression déjà survenue une fois : le wrapper avait été considéré
 // comme ajouté sans jamais l'être réellement).
-jest.mock("@/db/client", () => ({ db: {} }));
+jest.mock("@/db/client", () => ({
+  db: { select: () => ({ from: () => ({ where: () => ({}) }) }) },
+}));
+jest.mock("drizzle-orm/expo-sqlite", () => ({
+  useLiveQuery: () => ({ data: [] }),
+}));
+jest.mock("@/db/repository", () => ({
+  recordUpdateCheck: () => Promise.resolve(),
+  dismissUpdateVersion: () => Promise.resolve(),
+}));
+jest.mock("@/lib/appUpdate", () => ({
+  fetchLatestRelease: () => Promise.resolve(null),
+  compareVersions: () => 0,
+}));
 jest.mock("../../drizzle/migrations", () => ({}));
 jest.mock("drizzle-orm/expo-sqlite/migrator", () => ({
   useMigrations: () => ({ success: true, error: null }),

@@ -1,15 +1,24 @@
+import type { ReactNode } from "react";
 import { useEffect, useMemo } from "react";
-import { ActivityIndicator, StyleSheet, Text, useColorScheme, View } from "react-native";
+import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
-import { DarkTheme, DefaultTheme, Stack, ThemeProvider, useRouter } from "expo-router";
+import { DarkTheme, DefaultTheme, Stack, ThemeProvider as RouterThemeProvider, useRouter } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import * as QuickActions from "expo-quick-actions";
+import Constants from "expo-constants";
+import { eq } from "drizzle-orm";
+import { useLiveQuery } from "drizzle-orm/expo-sqlite";
 import { useMigrations } from "drizzle-orm/expo-sqlite/migrator";
+import { UpdateAvailableBanner } from "@forthtilliath/react-native-kit/UpdateAvailableBanner";
+import { useUpdateCheck } from "@forthtilliath/react-native-kit/useUpdateCheck";
 
 import { db } from "@/db/client";
+import { dismissUpdateVersion, recordUpdateCheck } from "@/db/repository";
+import { settings } from "@/db/schema";
+import { compareVersions, fetchLatestRelease } from "@/lib/appUpdate";
 import { QUICK_ACTIONS, routeForQuickAction } from "@/lib/quickActions";
 import { useAutoBackup } from "@/lib/useAutoBackup";
-import { useColors } from "@/theme/colors";
+import { ThemePreferenceProvider, useColors, useEffectiveScheme } from "@/theme/colors";
 import migrations from "../../drizzle/migrations";
 
 SplashScreen.preventAutoHideAsync();
@@ -23,9 +32,77 @@ function AutoBackupRunner() {
   return null;
 }
 
+// Même contrainte que AutoBackupRunner (monté seulement après succès des
+// migrations) : lit la préférence de thème stockée et la fournit au reste de
+// l'app via le contexte de src/theme/colors.ts.
+function ThemePreferenceRunner({ children }: { children: ReactNode }) {
+  const { data: settingsRows } = useLiveQuery(db.select().from(settings).where(eq(settings.id, 1)));
+  const preference = settingsRows?.[0]?.themePreference ?? "system";
+  return <ThemePreferenceProvider value={preference}>{children}</ThemePreferenceProvider>;
+}
+
+// Vérifie une fois par lancement si une nouvelle version est disponible sur
+// GitHub (voir useUpdateCheck de @forthtilliath/react-native-kit), et
+// affiche une bannière fermable si oui. "Voir" ouvre l'écran Mises à jour
+// existant, qui garde toute la logique de téléchargement/installation — pas
+// de duplication ici. "Fermer" ne renotifie plus pour cette version précise,
+// mais renotifiera si une version encore plus récente sort.
+function UpdateNotifier() {
+  const router = useRouter();
+  const { data: settingsRows } = useLiveQuery(db.select().from(settings).where(eq(settings.id, 1)));
+  const currentSettings = settingsRows?.[0];
+
+  const update = useUpdateCheck({
+    currentVersion: Constants.expoConfig?.version ?? "0.0.0",
+    checkForUpdate: fetchLatestRelease,
+    compareVersions,
+    getLastCheck: () => ({
+      lastCheckedAt: currentSettings?.lastUpdateCheckAt ?? null,
+      dismissedVersion: currentSettings?.dismissedUpdateVersion ?? null,
+    }),
+    onChecked: (lastCheckedAt) => {
+      recordUpdateCheck(lastCheckedAt).catch(() => {});
+    },
+  });
+
+  if (update.status !== "available") return null;
+
+  return (
+    <View style={updateNotifierStyles.container}>
+      <UpdateAvailableBanner
+        version={update.release.version}
+        notes={update.release.notes}
+        onPress={() => {
+          router.push("/settings/update");
+        }}
+        onDismiss={() => {
+          dismissUpdateVersion(update.release.version).catch(() => {});
+          update.dismiss();
+        }}
+      />
+    </View>
+  );
+}
+
+// Regroupe tout ce qui a besoin de la préférence de thème effective
+// (contenu de l'app + thème du ThemeProvider d'expo-router), rendu à
+// l'intérieur de ThemePreferenceRunner.
+function AppShell() {
+  const scheme = useEffectiveScheme();
+
+  return (
+    <RouterThemeProvider value={scheme === "dark" ? DarkTheme : DefaultTheme}>
+      <AutoBackupRunner />
+      <UpdateNotifier />
+      <Stack screenOptions={{ headerTitleAlign: "center" }}>
+        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+      </Stack>
+    </RouterThemeProvider>
+  );
+}
+
 export default function RootLayout() {
   const { success, error } = useMigrations(db, migrations);
-  const scheme = useColorScheme();
   const colors = useColors();
   const styles = useMemo(() => createStyles(colors), [colors]);
   const router = useRouter();
@@ -85,15 +162,16 @@ export default function RootLayout() {
 
   return (
     <GestureHandlerRootView style={styles.flex}>
-      <ThemeProvider value={scheme === "dark" ? DarkTheme : DefaultTheme}>
-        <AutoBackupRunner />
-        <Stack screenOptions={{ headerTitleAlign: "center" }}>
-          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        </Stack>
-      </ThemeProvider>
+      <ThemePreferenceRunner>
+        <AppShell />
+      </ThemePreferenceRunner>
     </GestureHandlerRootView>
   );
 }
+
+const updateNotifierStyles = StyleSheet.create({
+  container: { position: "absolute", top: 56, left: 16, right: 16, zIndex: 10 },
+});
 
 function createStyles(colors: ReturnType<typeof useColors>) {
   return StyleSheet.create({
