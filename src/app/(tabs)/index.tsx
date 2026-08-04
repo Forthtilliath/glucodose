@@ -94,6 +94,7 @@ export default function WeighScreen() {
   // Pré-remplit récipient/aliment quand on arrive depuis le widget d'accueil
   // (sélection faite là-bas, sans avoir à la refaire dans l'app).
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- one-off pre-fill from route params on arrival, not a derived value
     if (containerIdParam) setSelectedContainerId(Number(containerIdParam));
     if (foodIdParam) setSelectedFoodId(Number(foodIdParam));
   }, [containerIdParam, foodIdParam]);
@@ -103,6 +104,7 @@ export default function WeighScreen() {
   // (et faussement rassurant) si le calcul de dose est désactivé.
   useEffect(() => {
     if (showInsulinDose && selectedRatioId == null && ratioList && ratioList.length > 0) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- one-off default pick once the ratio list has loaded, not a derived value
       setSelectedRatioId(ratioList[0].id);
     }
   }, [ratioList, selectedRatioId, showInsulinDose]);
@@ -381,7 +383,7 @@ export default function WeighScreen() {
           accessible
           accessibilityLabel={`Dose d'insuline totale : ${formatInsulinUnits(totalInsulinUnits)} unités`}
         >
-          <Text style={styles.resultLabel}>Dose d'insuline totale</Text>
+          <Text style={styles.resultLabel}>Dose d’insuline totale</Text>
           <Text style={styles.resultValue}>{formatInsulinUnits(totalInsulinUnits)} U</Text>
           {correctionInsulinUnits > 0 && (
             <Text style={styles.resultBreakdown}>

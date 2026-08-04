@@ -18,8 +18,12 @@ export default function ThemeSettingsScreen() {
 
   const [themePreference, setThemePreference] = useState<ThemePreference>("system");
 
+  // Hydrates local state from the async-loaded settings, once they arrive —
+  // not derived directly, so a settings refresh mid-interaction doesn't
+  // override a change the user just made that hasn't persisted yet.
   useEffect(() => {
     if (currentSettings) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setThemePreference(currentSettings.themePreference);
     }
   }, [currentSettings]);
@@ -39,8 +43,8 @@ export default function ThemeSettingsScreen() {
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-      <Text style={styles.sectionTitle}>Thème de l'app</Text>
-      <Text style={styles.helpText}>"Système" suit le réglage clair/sombre de ton téléphone.</Text>
+      <Text style={styles.sectionTitle}>Thème de l’app</Text>
+      <Text style={styles.helpText}>« Système » suit le réglage clair/sombre de ton téléphone.</Text>
       <ThemeOptionList
         value={themePreference}
         onChange={(preference) => {

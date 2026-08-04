@@ -26,8 +26,13 @@ export default function RatioFormScreen() {
   const [carbsGramsPerUnit, setCarbsGramsPerUnit] = useState("");
   const { isSaving, guard } = useSubmitGuard();
 
+  // Hydrates the editable draft from the async-loaded record, once it
+  // arrives. Deliberately not derived directly from `existing` — the form
+  // state needs to stay a local draft the user can edit without a live-query
+  // refresh overwriting it.
   useEffect(() => {
     if (existing) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setLabel(existing.label);
       setCarbsGramsPerUnit(String(existing.carbsGramsPerUnit));
     }
@@ -65,7 +70,7 @@ export default function RatioFormScreen() {
         accessibilityLabel="Nom du ratio"
       />
 
-      <Text style={styles.label}>1 unité d'insuline couvre combien de grammes de glucides ?</Text>
+      <Text style={styles.label}>1 unité d’insuline couvre combien de grammes de glucides ?</Text>
       <TextInput
         style={styles.input}
         placeholder="ex: 10"

@@ -32,7 +32,7 @@ export default function FoodsScreen() {
         keyExtractor={(item) => String(item.id)}
         contentContainerStyle={styles.list}
         ListEmptyComponent={
-          <Text style={styles.empty}>Aucun aliment enregistré pour l'instant.</Text>
+          <Text style={styles.empty}>Aucun aliment enregistré pour l’instant.</Text>
         }
         renderItem={({ item }) => (
           <SwipeableRow

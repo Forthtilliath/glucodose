@@ -25,6 +25,10 @@ let fakeFs: FakeExpoFileSystem;
 beforeAll(async () => {
   testDb = await createTestDb();
   mockDbClient("@/db/client", testDb);
+  // require(), not import(): must run after mockDbClient, synchronously, so
+  // this gets a fresh module instance built against the mocked db client
+  // instead of the one already cached from the top-level import graph.
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
   backup = require("./backup");
   fakeFs = getFakeExpoFileSystem();
 });

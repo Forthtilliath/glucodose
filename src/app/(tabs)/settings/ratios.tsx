@@ -18,7 +18,7 @@ export default function RatiosScreen() {
   return (
     <View style={styles.container}>
       <Text style={styles.helpText}>
-        Combien de grammes de glucides sont couverts par 1 unité d'insuline. Peut varier selon le repas
+        Combien de grammes de glucides sont couverts par 1 unité d’insuline. Peut varier selon le repas
         (petit-déjeuner, déjeuner...).
       </Text>
 
@@ -26,7 +26,7 @@ export default function RatiosScreen() {
         data={ratios}
         keyExtractor={(item) => String(item.id)}
         contentContainerStyle={styles.list}
-        ListEmptyComponent={<Text style={styles.empty}>Aucun ratio enregistré pour l'instant.</Text>}
+        ListEmptyComponent={<Text style={styles.empty}>Aucun ratio enregistré pour l’instant.</Text>}
         renderItem={({ item }) => (
           <Pressable
             style={styles.ratioRow}

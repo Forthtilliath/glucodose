@@ -1,6 +1,8 @@
 import { Alert } from "react-native";
 import { fireEvent, render } from "@testing-library/react-native";
 
+import ContainersScreen from "@/app/(tabs)/containers/index";
+
 // IMPORTANT : ce test doit rester en dehors de src/app/ (voir
 // glucodose-no-tests-in-app-dir en mémoire) — Expo Router scanne ce dossier
 // pour générer les routes, et un fichier de test qui s'y trouverait serait
@@ -31,8 +33,6 @@ const mockDeleteContainer = jest.fn();
 jest.mock("@/db/repository", () => ({
   deleteContainer: (...args: unknown[]) => mockDeleteContainer(...args),
 }));
-
-import ContainersScreen from "@/app/(tabs)/containers/index";
 
 describe("ContainersScreen", () => {
   beforeEach(() => {

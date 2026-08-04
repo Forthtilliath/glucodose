@@ -77,8 +77,13 @@ export default function IngredientFormScreen() {
     setIsCiqualPickerVisible(false);
   }
 
+  // Hydrates the editable draft from the async-loaded record, once it
+  // arrives. Deliberately not derived directly from `existing` — the form
+  // state needs to stay a local draft the user can edit without a live-query
+  // refresh overwriting it.
   useEffect(() => {
     if (existing) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setName(existing.name);
       setCarbsPer100g(String(existing.carbsPer100g));
       setSource(existing.source ?? "");
@@ -226,7 +231,7 @@ export default function IngredientFormScreen() {
         accessibilityLabel="Glucides pour 100 grammes"
       />
       {!Number.isNaN(parsedCarbsPer100g) && parsedCarbsPer100g > MAX_CARBS_PER_100G && (
-        <Text style={styles.errorText}>100g d'aliment ne peuvent pas contenir plus de 100g de glucides.</Text>
+        <Text style={styles.errorText}>100g d’aliment ne peuvent pas contenir plus de 100g de glucides.</Text>
       )}
 
       <Text style={styles.label}>Source (optionnel)</Text>
@@ -265,9 +270,9 @@ export default function IngredientFormScreen() {
           style={styles.deleteButton}
           onPress={handleDelete}
           accessibilityRole="button"
-          accessibilityLabel="Supprimer l'ingrédient"
+          accessibilityLabel="Supprimer l’ingrédient"
         >
-          <Text style={styles.deleteButtonText}>Supprimer l'ingrédient</Text>
+          <Text style={styles.deleteButtonText}>Supprimer l’ingrédient</Text>
         </Pressable>
       )}
 

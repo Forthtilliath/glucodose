@@ -33,8 +33,13 @@ export default function ContainerFormScreen() {
   const [photoUri, setPhotoUri] = useState<string | null>(null);
   const { isSaving, guard } = useSubmitGuard();
 
+  // Hydrates the editable draft from the async-loaded record, once it
+  // arrives. Deliberately not derived directly from `existing` — the form
+  // state needs to stay a local draft the user can edit without every
+  // live-query refresh (e.g. the ratio recalculated elsewhere) overwriting it.
   useEffect(() => {
     if (existing) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setName(existing.name);
       setTareWeight(String(existing.tareWeightG));
       setNotes(existing.notes ?? "");

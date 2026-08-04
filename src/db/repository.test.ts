@@ -14,8 +14,13 @@ let deletePhotoMock: jest.Mock;
 beforeAll(async () => {
   testDb = await createTestDb();
   mockDbClient("./client", testDb);
+  // require(), not import(): must run after mockDbClient, synchronously, so
+  // this gets a fresh module instance built against the mocked db client
+  // instead of the one already cached from the top-level import graph.
+  /* eslint-disable @typescript-eslint/no-require-imports */
   repo = require("./repository");
   deletePhotoMock = require("@/lib/photos").deletePhoto;
+  /* eslint-enable @typescript-eslint/no-require-imports */
 });
 
 afterAll(() => {

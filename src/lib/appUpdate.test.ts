@@ -4,6 +4,8 @@ import {
   fetchReleaseHistory as fetchReleaseHistoryBase,
 } from "@forthtilliath/expo-release-updates/githubReleases";
 
+import { downloadAndInstallApk, fetchLatestRelease, fetchReleaseHistory } from "./appUpdate";
+
 jest.mock("@forthtilliath/expo-release-updates/githubReleases", () => ({
   fetchLatestRelease: jest.fn(),
   fetchReleaseHistory: jest.fn(),
@@ -11,8 +13,6 @@ jest.mock("@forthtilliath/expo-release-updates/githubReleases", () => ({
 jest.mock("@forthtilliath/expo-release-updates/downloadAndInstallApk", () => ({
   downloadAndInstallApk: jest.fn(),
 }));
-
-import { downloadAndInstallApk, fetchLatestRelease, fetchReleaseHistory } from "./appUpdate";
 
 const REPO = { owner: "Forthtilliath", repo: "glucodose" };
 

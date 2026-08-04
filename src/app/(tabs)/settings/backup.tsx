@@ -103,7 +103,7 @@ export default function BackupScreen() {
       <Text style={[styles.sectionTitle, styles.importTitle]}>Importer</Text>
       <Text style={styles.helpText}>
         Restaure une sauvegarde exportée précédemment. Remplace entièrement les données actuelles — il
-        n'y a pas de fusion.
+        n’y a pas de fusion.
       </Text>
       <Pressable
         style={[styles.button, styles.buttonDanger, busy != null && styles.buttonDisabled]}

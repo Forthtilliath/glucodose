@@ -19,8 +19,13 @@ export default function DoseSettingsScreen() {
   const [sensitivityFactor, setSensitivityFactor] = useState("");
   const [showInsulinDose, setShowInsulinDose] = useState(true);
 
+  // Hydrates the editable draft from the async-loaded settings, once they
+  // arrive. Deliberately not derived directly from `currentSettings` — the
+  // form state needs to stay a local draft the user can edit without a
+  // settings refresh overwriting it.
   useEffect(() => {
     if (currentSettings) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setGlycemiaUnit(currentSettings.glycemiaUnit);
       setTargetGlycemia(currentSettings.targetGlycemia != null ? String(currentSettings.targetGlycemia) : "");
       setSensitivityFactor(
@@ -68,22 +73,22 @@ export default function DoseSettingsScreen() {
       <Text style={styles.sectionTitle}>Calcul de dose</Text>
       <View style={styles.toggleRow}>
         <View style={styles.toggleRowText}>
-          <Text style={styles.toggleRowLabel}>Afficher le calcul de dose d'insuline</Text>
+          <Text style={styles.toggleRowLabel}>Afficher le calcul de dose d’insuline</Text>
           <Text style={styles.helpText}>
-            Désactive pour t'arrêter au calcul des glucides (étape 3), sans ratio ni dose d'insuline.
+            Désactive pour t’arrêter au calcul des glucides (étape 3), sans ratio ni dose d’insuline.
           </Text>
         </View>
         <Switch
           value={showInsulinDose}
           onValueChange={handleToggleShowInsulinDose}
           trackColor={{ true: colors.primary }}
-          accessibilityLabel="Afficher le calcul de dose d'insuline"
+          accessibilityLabel="Afficher le calcul de dose d’insuline"
         />
       </View>
 
-      <Text style={[styles.sectionTitle, styles.sectionSpacing]}>Correction d'hyperglycémie</Text>
+      <Text style={[styles.sectionTitle, styles.sectionSpacing]}>Correction d’hyperglycémie</Text>
       <Text style={styles.helpText}>
-        Optionnel. Renseigné, l'écran Peser proposera d'ajouter une dose de correction en plus de la dose
+        Optionnel. Renseigné, l’écran Peser proposera d’ajouter une dose de correction en plus de la dose
         repas, selon ta glycémie actuelle.
       </Text>
 
@@ -126,7 +131,7 @@ export default function DoseSettingsScreen() {
 
       <Text style={styles.label}>Facteur de sensibilité</Text>
       <Text style={styles.helpText}>
-        Baisse de glycémie provoquée par 1 unité d'insuline, en {glycemiaUnit}.
+        Baisse de glycémie provoquée par 1 unité d’insuline, en {glycemiaUnit}.
       </Text>
       <TextInput
         style={styles.input}
