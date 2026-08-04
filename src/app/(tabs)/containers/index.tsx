@@ -4,9 +4,9 @@ import { desc } from "drizzle-orm";
 import { useLiveQuery } from "drizzle-orm/expo-sqlite";
 import { FlatList, Pressable, StyleSheet, Text, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { confirmDestructive } from "@forthtilliath/react-native-kit/confirmDestructive";
-import { SwipeableRow } from "@forthtilliath/react-native-kit/SwipeableRow";
-import { Thumbnail } from "@forthtilliath/react-native-kit/Thumbnail";
+import { confirmDestructive } from "@forthtilliath/react-native-kit/utils/helpers/confirmDestructive";
+import { SwipeableRow } from "@forthtilliath/react-native-kit/components/list/SwipeableRow";
+import { Thumbnail } from "@forthtilliath/react-native-kit/components/list/Thumbnail";
 
 import { db } from "@/db/client";
 import { deleteContainer } from "@/db/repository";

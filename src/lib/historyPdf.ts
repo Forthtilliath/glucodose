@@ -1,5 +1,5 @@
 import * as Print from "expo-print";
-import { escapeHtml } from "@forthtilliath/react-native-kit/utils/escapeHtml";
+import { escapeHtml } from "@forthtilliath/react-native-kit/utils/format/escapeHtml";
 
 import { formatCarbs, formatInsulinUnits, formatWeight } from "./insulin";
 

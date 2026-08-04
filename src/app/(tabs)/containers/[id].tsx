@@ -3,9 +3,9 @@ import { Pressable, ScrollView, StyleSheet, Text, TextInput } from "react-native
 import { eq } from "drizzle-orm";
 import { useLiveQuery } from "drizzle-orm/expo-sqlite";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { confirmDestructive } from "@forthtilliath/react-native-kit/confirmDestructive";
-import { PhotoPicker } from "@forthtilliath/react-native-kit/PhotoPicker";
-import { useSubmitGuard } from "@forthtilliath/react-native-kit/useSubmitGuard";
+import { confirmDestructive } from "@forthtilliath/react-native-kit/utils/helpers/confirmDestructive";
+import { PhotoPicker } from "@forthtilliath/react-native-kit/components/picker/PhotoPicker";
+import { useSubmitGuard } from "@forthtilliath/react-native-kit/hooks/useSubmitGuard";
 
 import { db } from "@/db/client";
 import { deleteContainer, createContainer, updateContainer } from "@/db/repository";

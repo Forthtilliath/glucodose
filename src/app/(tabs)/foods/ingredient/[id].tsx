@@ -4,11 +4,11 @@ import { eq } from "drizzle-orm";
 import { useLiveQuery } from "drizzle-orm/expo-sqlite";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
-import { PhotoPicker } from "@forthtilliath/react-native-kit/PhotoPicker";
-import { PickerModal, type PickerItem } from "@forthtilliath/react-native-kit/PickerModal";
-import { rankByNameMatch } from "@forthtilliath/react-native-kit/utils/rankByNameMatch";
-import { useSubmitGuard } from "@forthtilliath/react-native-kit/useSubmitGuard";
-import { VoiceSearchButton } from "@forthtilliath/react-native-kit/VoiceSearchButton";
+import { PhotoPicker } from "@forthtilliath/react-native-kit/components/picker/PhotoPicker";
+import { PickerModal, type PickerItem } from "@forthtilliath/react-native-kit/components/picker/PickerModal";
+import { rankByNameMatch } from "@forthtilliath/react-native-kit/utils/helpers/rankByNameMatch";
+import { useSubmitGuard } from "@forthtilliath/react-native-kit/hooks/useSubmitGuard";
+import { VoiceSearchButton } from "@forthtilliath/react-native-kit/components/picker/VoiceSearchButton";
 
 import { db } from "@/db/client";
 import { createIngredient, updateIngredient } from "@/db/repository";

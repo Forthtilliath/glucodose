@@ -2,8 +2,8 @@ import { useEffect, useMemo, useState } from "react";
 import { ScrollView, StyleSheet, Text } from "react-native";
 import { eq } from "drizzle-orm";
 import { useLiveQuery } from "drizzle-orm/expo-sqlite";
-import { ThemeOptionList } from "@forthtilliath/react-native-kit/ThemeOptionList";
-import type { ThemePreference } from "@forthtilliath/react-native-kit/useEffectiveColorScheme";
+import { ThemeOptionList } from "@forthtilliath/react-native-kit/components/theme/ThemeOptionList";
+import type { ThemePreference } from "@forthtilliath/react-native-kit/hooks/useEffectiveColorScheme";
 
 import { db } from "@/db/client";
 import { updateSettings } from "@/db/repository";

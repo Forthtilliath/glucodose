@@ -1,5 +1,5 @@
 import { useLiveQuery } from "drizzle-orm/expo-sqlite";
-import { useDebouncedChange } from "@forthtilliath/react-native-kit/useDebouncedChange";
+import { useDebouncedChange } from "@forthtilliath/react-native-kit/hooks/useDebouncedChange";
 
 import { db } from "@/db/client";
 import { containers, foods, settings } from "@/db/schema";

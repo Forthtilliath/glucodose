@@ -4,8 +4,8 @@ import { desc, eq } from "drizzle-orm";
 import { useLiveQuery } from "drizzle-orm/expo-sqlite";
 import { FlatList, Pressable, StyleSheet, Text, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { SwipeableRow } from "@forthtilliath/react-native-kit/SwipeableRow";
-import { Thumbnail } from "@forthtilliath/react-native-kit/Thumbnail";
+import { SwipeableRow } from "@forthtilliath/react-native-kit/components/list/SwipeableRow";
+import { Thumbnail } from "@forthtilliath/react-native-kit/components/list/Thumbnail";
 
 import { db } from "@/db/client";
 import { foods } from "@/db/schema";

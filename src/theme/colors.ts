@@ -1,5 +1,5 @@
 import { createContext, useContext } from "react";
-import { type ThemePreference, useEffectiveColorScheme } from "@forthtilliath/react-native-kit/useEffectiveColorScheme";
+import { type ThemePreference, useEffectiveColorScheme } from "@forthtilliath/react-native-kit/hooks/useEffectiveColorScheme";
 
 // Valeur par défaut "system" : tout composant rendu avant que
 // ThemePreferenceRunner (src/app/_layout.tsx) n'ait fini de charger le

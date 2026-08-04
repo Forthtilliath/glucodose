@@ -4,9 +4,9 @@ import { desc, eq } from "drizzle-orm";
 import { useLiveQuery } from "drizzle-orm/expo-sqlite";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
-import { PickerModal, type PickerItem } from "@forthtilliath/react-native-kit/PickerModal";
-import { getMostRecentIds } from "@forthtilliath/react-native-kit/utils/getMostRecentIds";
-import { rankByNameMatch } from "@forthtilliath/react-native-kit/utils/rankByNameMatch";
+import { PickerModal, type PickerItem } from "@forthtilliath/react-native-kit/components/picker/PickerModal";
+import { getMostRecentIds } from "@forthtilliath/react-native-kit/utils/helpers/getMostRecentIds";
+import { rankByNameMatch } from "@forthtilliath/react-native-kit/utils/helpers/rankByNameMatch";
 
 import { db } from "@/db/client";
 import { createIngredient, deleteWeighing, recordWeighing } from "@/db/repository";
