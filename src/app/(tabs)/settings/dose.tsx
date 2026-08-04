@@ -19,8 +19,13 @@ export default function DoseSettingsScreen() {
   const [sensitivityFactor, setSensitivityFactor] = useState("");
   const [showInsulinDose, setShowInsulinDose] = useState(true);
 
+  // Hydrates the editable draft from the async-loaded settings, once they
+  // arrive. Deliberately not derived directly from `currentSettings` — the
+  // form state needs to stay a local draft the user can edit without a
+  // settings refresh overwriting it.
   useEffect(() => {
     if (currentSettings) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setGlycemiaUnit(currentSettings.glycemiaUnit);
       setTargetGlycemia(currentSettings.targetGlycemia != null ? String(currentSettings.targetGlycemia) : "");
       setSensitivityFactor(

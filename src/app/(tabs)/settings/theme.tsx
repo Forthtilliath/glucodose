@@ -18,8 +18,12 @@ export default function ThemeSettingsScreen() {
 
   const [themePreference, setThemePreference] = useState<ThemePreference>("system");
 
+  // Hydrates local state from the async-loaded settings, once they arrive —
+  // not derived directly, so a settings refresh mid-interaction doesn't
+  // override a change the user just made that hasn't persisted yet.
   useEffect(() => {
     if (currentSettings) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setThemePreference(currentSettings.themePreference);
     }
   }, [currentSettings]);

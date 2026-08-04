@@ -67,6 +67,7 @@ export default function UpdateSettingsScreen() {
   // tap sur "Rechercher une mise à jour") : la bannière de _layout.tsx a déjà
   // pu prévenir qu'une mise à jour existe, inutile de faire recliquer.
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- fetch-on-mount, handleCheckForUpdate's first line sets a "checking" status
     void handleCheckForUpdate();
   }, [handleCheckForUpdate]);
 

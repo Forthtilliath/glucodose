@@ -77,8 +77,13 @@ export default function IngredientFormScreen() {
     setIsCiqualPickerVisible(false);
   }
 
+  // Hydrates the editable draft from the async-loaded record, once it
+  // arrives. Deliberately not derived directly from `existing` — the form
+  // state needs to stay a local draft the user can edit without a live-query
+  // refresh overwriting it.
   useEffect(() => {
     if (existing) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setName(existing.name);
       setCarbsPer100g(String(existing.carbsPer100g));
       setSource(existing.source ?? "");
