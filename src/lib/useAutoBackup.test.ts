@@ -1,5 +1,7 @@
 import { renderHook } from "@testing-library/react-native";
 
+import { useAutoBackup } from "./useAutoBackup";
+
 const mockUseLiveQuery = jest.fn();
 jest.mock("drizzle-orm/expo-sqlite", () => ({
   useLiveQuery: (...args: unknown[]) => mockUseLiveQuery(...args),
@@ -10,8 +12,6 @@ jest.mock("@/lib/backup", () => ({ runAutoBackup: () => mockRunAutoBackup() }));
 
 jest.mock("@/db/client", () => ({ db: { select: () => ({ from: () => "query" }) } }));
 jest.mock("@/db/schema", () => ({ containers: {}, foods: {}, settings: {} }));
-
-import { useAutoBackup } from "./useAutoBackup";
 
 const FIVE_MINUTES_MS = 5 * 60 * 1000;
 

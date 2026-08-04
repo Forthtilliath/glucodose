@@ -1,6 +1,8 @@
 import renderer, { act } from "react-test-renderer";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 
+import RootLayout from "../app/_layout";
+
 // IMPORTANT : ce test doit rester en dehors de src/app/ — Expo Router scanne
 // récursivement ce dossier pour générer les routes, et un fichier de test qui
 // y traînerait serait chargé comme une route dans le bundle de PRODUCTION,
@@ -53,8 +55,6 @@ jest.mock("expo-router", () => ({
     { Screen: () => null }
   ),
 }));
-
-import RootLayout from "../app/_layout";
 
 describe("RootLayout", () => {
   it("est enveloppé dans un GestureHandlerRootView, requis pour le swipe-to-delete", () => {
