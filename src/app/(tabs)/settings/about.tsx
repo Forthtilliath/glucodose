@@ -15,20 +15,20 @@ export default function AboutScreen() {
       <Text style={styles.version}>Version {version}</Text>
 
       <Text style={styles.paragraph}>
-        GlucoDose est un outil personnel d'aide au calcul de dose d'insuline au repas : pesée,
+        GlucoDose est un outil personnel d’aide au calcul de dose d’insuline au repas : pesée,
         aliments, recettes et correction, sans calculette.
       </Text>
       <Text style={styles.paragraph}>
         Toutes les données (récipients, aliments, recettes, ratios, réglages, historique) restent
-        uniquement sur cet appareil, dans une base locale. Rien n'est envoyé sur un serveur.
+        uniquement sur cet appareil, dans une base locale. Rien n’est envoyé sur un serveur.
       </Text>
 
       <Text style={styles.sectionTitle}>Avertissement médical</Text>
       <Text style={styles.paragraph}>
-        Ceci n'est pas un dispositif médical. C'est un outil personnel d'aide au calcul, construit pour un
+        Ceci n’est pas un dispositif médical. C’est un outil personnel d’aide au calcul, construit pour un
         usage individuel. Les ratios insuline/glucides, le facteur de sensibilité et les valeurs
         glucidiques saisies doivent provenir de ton équipe soignante (diététicien·ne, diabétologue).
-        Vérifie toujours une dose avant de l'injecter. En cas de doute, fie-toi à ton jugement clinique et
+        Vérifie toujours une dose avant de l’injecter. En cas de doute, fie-toi à ton jugement clinique et
         à celui de ton équipe de soins, jamais uniquement à cette application.
       </Text>
     </ScrollView>

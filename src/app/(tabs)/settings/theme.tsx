@@ -39,8 +39,8 @@ export default function ThemeSettingsScreen() {
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-      <Text style={styles.sectionTitle}>Thème de l'app</Text>
-      <Text style={styles.helpText}>"Système" suit le réglage clair/sombre de ton téléphone.</Text>
+      <Text style={styles.sectionTitle}>Thème de l’app</Text>
+      <Text style={styles.helpText}>« Système » suit le réglage clair/sombre de ton téléphone.</Text>
       <ThemeOptionList
         value={themePreference}
         onChange={(preference) => {

@@ -33,7 +33,7 @@ export default function ContainersScreen() {
         keyExtractor={(item) => String(item.id)}
         contentContainerStyle={styles.list}
         ListEmptyComponent={
-          <Text style={styles.empty}>Aucun récipient enregistré pour l'instant.</Text>
+          <Text style={styles.empty}>Aucun récipient enregistré pour l’instant.</Text>
         }
         renderItem={({ item }) => (
           <SwipeableRow

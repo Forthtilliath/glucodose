@@ -33,8 +33,8 @@ export default function ContactScreen() {
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
       <Text style={styles.helpText}>
-        Une question, un bug à signaler, une idée d'amélioration ? Ou juste envie de faire connaître
-        l'app à quelqu'un ?
+        Une question, un bug à signaler, une idée d’amélioration ? Ou juste envie de faire connaître
+        l’app à quelqu’un ?
       </Text>
 
       <Pressable
@@ -52,10 +52,10 @@ export default function ContactScreen() {
         style={styles.row}
         onPress={handleShare}
         accessibilityRole="button"
-        accessibilityLabel="Partager l'app"
+        accessibilityLabel="Partager l’app"
       >
         <Ionicons name="share-social-outline" size={20} color={colors.text} />
-        <Text style={styles.rowText}>Partager l'app</Text>
+        <Text style={styles.rowText}>Partager l’app</Text>
         <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />
       </Pressable>
     </ScrollView>

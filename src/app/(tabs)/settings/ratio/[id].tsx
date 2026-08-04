@@ -65,7 +65,7 @@ export default function RatioFormScreen() {
         accessibilityLabel="Nom du ratio"
       />
 
-      <Text style={styles.label}>1 unité d'insuline couvre combien de grammes de glucides ?</Text>
+      <Text style={styles.label}>1 unité d’insuline couvre combien de grammes de glucides ?</Text>
       <TextInput
         style={styles.input}
         placeholder="ex: 10"

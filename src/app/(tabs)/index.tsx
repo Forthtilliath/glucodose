@@ -381,7 +381,7 @@ export default function WeighScreen() {
           accessible
           accessibilityLabel={`Dose d'insuline totale : ${formatInsulinUnits(totalInsulinUnits)} unités`}
         >
-          <Text style={styles.resultLabel}>Dose d'insuline totale</Text>
+          <Text style={styles.resultLabel}>Dose d’insuline totale</Text>
           <Text style={styles.resultValue}>{formatInsulinUnits(totalInsulinUnits)} U</Text>
           {correctionInsulinUnits > 0 && (
             <Text style={styles.resultBreakdown}>

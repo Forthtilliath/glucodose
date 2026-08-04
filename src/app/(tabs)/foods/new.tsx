@@ -22,7 +22,7 @@ export default function NewFoodScreen() {
         <View style={styles.optionText}>
           <Text style={styles.optionTitle}>Ingrédient simple</Text>
           <Text style={styles.optionSubtitle}>
-            Un aliment unique avec une valeur d'insuline pour 100g connue.
+            Un aliment unique avec une valeur d’insuline pour 100g connue.
           </Text>
         </View>
       </Pressable>
