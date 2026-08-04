@@ -1,5 +1,5 @@
-import { getMostRecentIds } from "@forthtilliath/react-native-kit/utils/getMostRecentIds";
-import { nextInCycle } from "@forthtilliath/react-native-kit/utils/nextInCycle";
+import { getMostRecentIds } from "@forthtilliath/react-native-kit/utils/helpers/getMostRecentIds";
+import { nextInCycle } from "@forthtilliath/react-native-kit/utils/helpers/nextInCycle";
 import { desc, eq } from "drizzle-orm";
 
 import { db } from "@/db/client";

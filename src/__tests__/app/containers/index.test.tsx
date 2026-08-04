@@ -40,26 +40,26 @@ describe("ContainersScreen", () => {
     mockDeleteContainer.mockClear();
   });
 
-  it("affiche chaque récipient avec son nom et sa tare", () => {
-    const { getByText } = render(<ContainersScreen />);
+  it("affiche chaque récipient avec son nom et sa tare", async () => {
+    const { getByText } = await render(<ContainersScreen />);
     expect(getByText("Bol bleu")).toBeTruthy();
     expect(getByText("Grand bol")).toBeTruthy();
     expect(getByText("120 g")).toBeTruthy();
   });
 
-  it("navigue vers l'édition au tap sur une ligne", () => {
-    const { getByLabelText } = render(<ContainersScreen />);
+  it("navigue vers l'édition au tap sur une ligne", async () => {
+    const { getByLabelText } = await render(<ContainersScreen />);
     fireEvent.press(getByLabelText("Récipient Bol bleu, tare 120 g. Modifier."));
     expect(mockPush).toHaveBeenCalledWith("/containers/1");
   });
 
-  it("demande confirmation puis supprime au swipe + confirmation", () => {
+  it("demande confirmation puis supprime au swipe + confirmation", async () => {
     const alertSpy = jest.spyOn(Alert, "alert").mockImplementation((_title, _msg, buttons) => {
       const confirmButton = buttons?.find((b) => b.text === "Supprimer");
       confirmButton?.onPress?.();
     });
 
-    const { getByLabelText } = render(<ContainersScreen />);
+    const { getByLabelText } = await render(<ContainersScreen />);
     fireEvent.press(getByLabelText("Supprimer le récipient Bol bleu"));
 
     expect(alertSpy).toHaveBeenCalledWith(
@@ -72,8 +72,8 @@ describe("ContainersScreen", () => {
     alertSpy.mockRestore();
   });
 
-  it("affiche le bouton d'ajout d'un récipient", () => {
-    const { getByLabelText } = render(<ContainersScreen />);
+  it("affiche le bouton d'ajout d'un récipient", async () => {
+    const { getByLabelText } = await render(<ContainersScreen />);
     expect(getByLabelText("Ajouter un récipient")).toBeTruthy();
   });
 });

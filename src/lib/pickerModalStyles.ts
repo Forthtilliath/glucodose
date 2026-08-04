@@ -1,4 +1,4 @@
-import type { PickerModalStyles } from "@forthtilliath/react-native-kit/PickerModal";
+import type { PickerModalStyles } from "@forthtilliath/react-native-kit/components/picker/PickerModal";
 
 import type { ThemeColors } from "@/theme/colors";
 

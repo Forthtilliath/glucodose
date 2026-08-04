@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
-import { ChangelogNotes } from "@forthtilliath/react-native-kit/ChangelogNotes";
+import { ChangelogNotes } from "@forthtilliath/react-native-kit/components/update/ChangelogNotes";
 import Constants from "expo-constants";
 
 import {

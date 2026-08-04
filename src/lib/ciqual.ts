@@ -1,6 +1,6 @@
-import type { PickerItem } from "@forthtilliath/react-native-kit/PickerModal";
-import { normalizeForSearch } from "@forthtilliath/react-native-kit/utils/normalizeForSearch";
-import { rankByNameMatch } from "@forthtilliath/react-native-kit/utils/rankByNameMatch";
+import type { PickerItem } from "@forthtilliath/react-native-kit/components/picker/PickerModal";
+import { normalizeForSearch } from "@forthtilliath/react-native-kit/utils/helpers/normalizeForSearch";
+import { rankByNameMatch } from "@forthtilliath/react-native-kit/utils/helpers/rankByNameMatch";
 
 import ciqualData from "@/assets/data/ciqual.json";
 import { formatCarbs } from "@/lib/insulin";

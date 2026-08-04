@@ -9,8 +9,8 @@ import Constants from "expo-constants";
 import { eq } from "drizzle-orm";
 import { useLiveQuery } from "drizzle-orm/expo-sqlite";
 import { useMigrations } from "drizzle-orm/expo-sqlite/migrator";
-import { UpdateAvailableBanner } from "@forthtilliath/react-native-kit/UpdateAvailableBanner";
-import { useUpdateCheck } from "@forthtilliath/react-native-kit/useUpdateCheck";
+import { UpdateAvailableBanner } from "@forthtilliath/react-native-kit/components/update/UpdateAvailableBanner";
+import { useUpdateCheck } from "@forthtilliath/react-native-kit/hooks/useUpdateCheck";
 
 import { db } from "@/db/client";
 import { dismissUpdateVersion, recordUpdateCheck } from "@/db/repository";

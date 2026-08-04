@@ -1,6 +1,6 @@
 import { File, Paths } from "expo-file-system";
-import { escapeCsvField } from "@forthtilliath/react-native-kit/utils/escapeCsvField";
-import { formatCsvNumber } from "@forthtilliath/react-native-kit/utils/formatCsvNumber";
+import { escapeCsvField } from "@forthtilliath/react-native-kit/utils/format/escapeCsvField";
+import { formatCsvNumber } from "@forthtilliath/react-native-kit/utils/format/formatCsvNumber";
 
 export type HistoryCsvRow = {
   weighedAt: string;
