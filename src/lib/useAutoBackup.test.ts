@@ -33,28 +33,28 @@ describe("useAutoBackup", () => {
     jest.useRealTimers();
   });
 
-  it("ne déclenche rien tant que les 3 requêtes n'ont pas toutes livré leur premier résultat", () => {
+  it("ne déclenche rien tant que les 3 requêtes n'ont pas toutes livré leur premier résultat", async () => {
     setData(undefined, undefined, undefined);
-    renderHook(() => useAutoBackup());
+    await renderHook(() => useAutoBackup());
 
     jest.advanceTimersByTime(FIVE_MINUTES_MS);
     expect(mockRunAutoBackup).not.toHaveBeenCalled();
   });
 
-  it("ne déclenche pas de sauvegarde au premier rendu une fois les données chargées", () => {
+  it("ne déclenche pas de sauvegarde au premier rendu une fois les données chargées", async () => {
     setData([], [], []);
-    renderHook(() => useAutoBackup());
+    await renderHook(() => useAutoBackup());
 
     jest.advanceTimersByTime(FIVE_MINUTES_MS);
     expect(mockRunAutoBackup).not.toHaveBeenCalled();
   });
 
-  it("déclenche une sauvegarde 5 minutes après un changement de données", () => {
+  it("déclenche une sauvegarde 5 minutes après un changement de données", async () => {
     setData([], [], []);
-    const { rerender } = renderHook(() => useAutoBackup());
+    const { rerender } = await renderHook(() => useAutoBackup());
 
     setData([{ id: 1 }], [], []);
-    rerender({});
+    await rerender({});
 
     jest.advanceTimersByTime(FIVE_MINUTES_MS - 1);
     expect(mockRunAutoBackup).not.toHaveBeenCalled();
@@ -63,16 +63,16 @@ describe("useAutoBackup", () => {
     expect(mockRunAutoBackup).toHaveBeenCalledTimes(1);
   });
 
-  it("repousse la sauvegarde si un nouveau changement survient avant les 5 minutes", () => {
+  it("repousse la sauvegarde si un nouveau changement survient avant les 5 minutes", async () => {
     setData([], [], []);
-    const { rerender } = renderHook(() => useAutoBackup());
+    const { rerender } = await renderHook(() => useAutoBackup());
 
     setData([{ id: 1 }], [], []);
-    rerender({});
+    await rerender({});
     jest.advanceTimersByTime(4 * 60 * 1000);
 
     setData([{ id: 1 }, { id: 2 }], [], []);
-    rerender({});
+    await rerender({});
     jest.advanceTimersByTime(4 * 60 * 1000);
     expect(mockRunAutoBackup).not.toHaveBeenCalled();
 
