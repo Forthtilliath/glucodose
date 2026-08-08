@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
 import { desc, eq } from "drizzle-orm";
 import { useLiveQuery } from "drizzle-orm/expo-sqlite";
@@ -9,7 +9,7 @@ import { getMostRecentIds } from "@forthtilliath/react-native-kit/utils/helpers/
 import { rankByNameMatch } from "@forthtilliath/react-native-kit/utils/helpers/rankByNameMatch";
 
 import { db } from "@/db/client";
-import { createIngredient, deleteWeighing, recordWeighing } from "@/db/repository";
+import { createIngredient, recordWeighing } from "@/db/repository";
 import { containers, foods, insulinRatios, settings, weighings } from "@/db/schema";
 import { ALL_CIQUAL_FOODS, CIQUAL_PICKER_ITEMS } from "@/lib/ciqual";
 import {
@@ -38,10 +38,6 @@ function toFoodItem(f: typeof foods.$inferSelect, group: string): PickerItem {
     group,
   };
 }
-
-// Assez long pour laisser le temps de lire le message ET de repérer le lien
-// "Annuler" avant qu'il disparaisse (4s jugées trop courtes en usage réel).
-const SAVED_MESSAGE_DURATION_MS = 8000;
 
 export default function WeighScreen() {
   const colors = useColors();
@@ -87,9 +83,6 @@ export default function WeighScreen() {
   const [foodPickerVisible, setFoodPickerVisible] = useState(false);
   const [ratioPickerVisible, setRatioPickerVisible] = useState(false);
   const [ciqualQuickAddVisible, setCiqualQuickAddVisible] = useState(false);
-  const [savedMessage, setSavedMessage] = useState<string | null>(null);
-  const [lastWeighingId, setLastWeighingId] = useState<number | null>(null);
-  const savedMessageTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Pré-remplit récipient/aliment quand on arrive depuis le widget d'accueil
   // (sélection faite là-bas, sans avoir à la refaire dans l'app).
@@ -234,28 +227,10 @@ export default function WeighScreen() {
       carbsG,
       ...insulinFields,
     });
-    const savedText = showInsulinDose
-      ? `Pesée enregistrée : ${formatInsulinUnits(totalInsulinUnits)} U pour ${selectedFood.name}`
-      : `Pesée enregistrée : ${formatCarbs(carbsG)} de glucides pour ${selectedFood.name}`;
-    setSavedMessage(savedText);
-    setLastWeighingId(id);
     setGrossWeight("");
     setSelectedFoodId(null);
     setCurrentGlycemia("");
-    // Une pesée enregistrée avant l'expiration du délai précédent (plusieurs
-    // pesées rapprochées) ne doit pas voir SON message coupé prématurément
-    // par l'ancien minuteur : on annule celui-ci avant d'en programmer un
-    // nouveau, au lieu de laisser les deux courir en parallèle.
-    if (savedMessageTimeoutRef.current) clearTimeout(savedMessageTimeoutRef.current);
-    savedMessageTimeoutRef.current = setTimeout(() => setSavedMessage(null), SAVED_MESSAGE_DURATION_MS);
-  }
-
-  async function handleUndoLastWeighing() {
-    if (lastWeighingId == null) return;
-    if (savedMessageTimeoutRef.current) clearTimeout(savedMessageTimeoutRef.current);
-    await deleteWeighing(lastWeighingId);
-    setLastWeighingId(null);
-    setSavedMessage(null);
+    router.push(`/weighing-result/${id}`);
   }
 
   return (
@@ -404,22 +379,6 @@ export default function WeighScreen() {
           </View>
         )
       )}
-
-      {savedMessage ? (
-        <View style={styles.savedMessageRow}>
-          <Text style={styles.savedMessage} accessibilityLiveRegion="polite">
-            {savedMessage}
-          </Text>
-          <Pressable
-            onPress={handleUndoLastWeighing}
-            hitSlop={10}
-            accessibilityRole="button"
-            accessibilityLabel="Annuler cette pesée"
-          >
-            <Text style={styles.undoLink}>Annuler</Text>
-          </Pressable>
-        </View>
-      ) : null}
 
       <Pressable
         style={[styles.saveButton, !canSave && styles.saveButtonDisabled]}
@@ -578,15 +537,6 @@ function createStyles(colors: ThemeColors) {
     resultLabel: { fontSize: 14, color: colors.textMuted, fontWeight: "600" },
     resultValue: { fontSize: 40, fontWeight: "800", color: colors.primary, marginTop: 4 },
     resultBreakdown: { fontSize: 12, color: colors.textMuted, marginTop: 6 },
-    savedMessageRow: {
-      flexDirection: "row",
-      justifyContent: "center",
-      alignItems: "center",
-      gap: 10,
-      marginTop: 12,
-    },
-    savedMessage: { textAlign: "center", color: colors.success, fontSize: 14, fontWeight: "600" },
-    undoLink: { color: colors.danger, fontSize: 14, fontWeight: "700" },
     saveButton: {
       backgroundColor: colors.primary,
       borderRadius: 10,
