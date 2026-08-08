@@ -102,6 +102,10 @@ function AppShell() {
       <UpdateNotifier />
       <Stack screenOptions={{ headerTitleAlign: "center" }}>
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+        <Stack.Screen
+          name="weighing-result/[id]"
+          options={{ title: "Résultat de la pesée", presentation: "modal" }}
+        />
       </Stack>
     </RouterThemeProvider>
   );
