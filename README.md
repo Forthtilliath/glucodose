@@ -10,6 +10,7 @@
 ![SQLite](https://img.shields.io/badge/SQLite-Drizzle%20ORM-003B57?logo=sqlite&logoColor=white)
 ![Platform](https://img.shields.io/badge/Plateforme-Android%20%7C%20iOS-lightgrey)
 ![Local first](https://img.shields.io/badge/Données-100%25%20locales-16a34a)
+[![Buy Me a Coffee](https://img.shields.io/badge/Buy%20Me%20a%20Coffee-soutenir%20le%20projet-FFDD00?logo=buymeacoffee&logoColor=black)](https://buymeacoffee.com/forthtilliath)
 
 </div>
 
@@ -17,6 +18,20 @@
 
 > [!CAUTION]
 > **Ceci n'est pas un dispositif médical.** C'est un outil personnel d'aide au calcul, construit pour un usage individuel. Les ratios insuline/glucides, le facteur de sensibilité et les valeurs glucidiques saisies doivent provenir de ton équipe soignante (diététicien·ne, diabétologue). Vérifie toujours une dose avant de l'injecter. En cas de doute, fie-toi à ton jugement clinique et à celui de ton équipe de soins, jamais uniquement à cette application.
+
+## Captures d'écran
+
+<div align="center">
+<table>
+<tr>
+<td align="center" width="20%"><img src="./docs/screenshots/peser.png" width="200" alt="Écran Peser : sélection du récipient, poids net, aliment, ratio et dose calculée en direct" /><br/><sub><b>Peser</b></sub></td>
+<td align="center" width="20%"><img src="./docs/screenshots/aliments.png" width="200" alt="Écran Aliments : liste des ingrédients et recettes avec leur taux de glucides" /><br/><sub><b>Aliments</b></sub></td>
+<td align="center" width="20%"><img src="./docs/screenshots/recipients.png" width="200" alt="Écran Récipients : liste des récipients avec leur poids à vide" /><br/><sub><b>Récipients</b></sub></td>
+<td align="center" width="20%"><img src="./docs/screenshots/historique.png" width="200" alt="Écran Historique : journal des pesées avec le détail des doses" /><br/><sub><b>Historique</b></sub></td>
+<td align="center" width="20%"><img src="./docs/screenshots/reglages.png" width="200" alt="Écran Réglages : dose et correction, ratios, sauvegarde, apparence" /><br/><sub><b>Réglages</b></sub></td>
+</tr>
+</table>
+</div>
 
 ## Pourquoi cette app
 
@@ -33,15 +48,15 @@ Cette app remplace la calculette : elle mémorise les poids de récipients, les 
 
 | Écran | Rôle |
 |---|---|
-| **⚖️ Peser** | Flux principal : choisir un récipient (ou une tare manuelle) → peser → poids net automatique → choisir l'aliment → choisir le ratio → dose repas + correction optionnelle affichées en direct, avant enregistrement dans l'historique. Un réglage permet de s'arrêter au calcul des glucides, sans dose (voir Réglages) |
+| **⚖️ Peser** | Flux principal : choisir un récipient (ou une tare manuelle) → peser → poids net automatique (avec avertissement si le poids saisi est inférieur à la tare) → choisir l'aliment → choisir le ratio → dose repas + correction optionnelle affichées en direct. Un écran de résultat confirme l'enregistrement et permet d'**annuler** la pesée en un tap. Un réglage permet de s'arrêter au calcul des glucides, sans dose (voir Réglages) |
 | **🍽️ Aliments** | CRUD des ingrédients simples (glucides/100g) et des recettes composées, chacun avec une **photo** optionnelle. Une recette calcule ses glucides/100g à partir de ses composants pesés, puis devient réutilisable **exactement comme un ingrédient** dans l'écran Peser. Suggestions automatiques depuis la table **Ciqual** (Anses) pendant la frappe, avec une recherche complète accessible en un tap |
 | **📦 Récipients** | CRUD des récipients avec leur poids à vide, et une **photo** (prise ou choisie en galerie) pour les repérer d'un coup d'œil dans le sélecteur |
-| **⚙️ Réglages** | Activer/désactiver le calcul de dose (mode "glucides seuls"), ratios insuline/glucides (un ou plusieurs, ex. un par repas), glycémie cible et facteur de sensibilité pour la dose de correction, unité (mmol/L ou g/L), export/import JSON complet de la base, vérification des mises à jour, Aide / Contact / À propos / Mentions légales |
-| **🕘 Historique** | Journal des pesées enregistrées avec le détail dose repas / dose de correction, filtrable par nom d'aliment et par période, exportable en **PDF** pour être partagé (ex. avec ton équipe soignante) |
+| **⚙️ Réglages** | Activer/désactiver le calcul de dose (mode "glucides seuls"), ratios insuline/glucides (un ou plusieurs, ex. un par repas), glycémie cible et facteur de sensibilité pour la dose de correction, unité (mmol/L ou g/L), apparence (clair/sombre/système), sauvegarde/restauration JSON complète de la base (+ sauvegarde automatique silencieuse), vérification des mises à jour, Aide / Contact / À propos / Mentions légales |
+| **🕘 Historique** | Journal des pesées enregistrées avec le détail dose repas / dose de correction, filtrable par nom d'aliment et par période, exportable en **PDF** (pour être partagé, ex. avec ton équipe soignante) ou **CSV** (pour analyser dans un tableur). Sous-écran **Statistiques** : moyenne de glucides/jour, pesées/semaine, aliments les plus utilisés |
 
-Depuis l'écran Peser, les sheets de sélection récipient/aliment permettent aussi d'**ajouter directement** un nouveau récipient, un nouvel aliment/recette, ou un aliment trouvé dans **Ciqual** (créé et sélectionné en un tap, sans quitter l'écran).
+Depuis l'écran Peser, les sheets de sélection récipient/aliment permettent aussi d'**ajouter directement** un nouveau récipient, un nouvel aliment/recette, ou un aliment trouvé dans **Ciqual** (créé et sélectionné en un tap, sans quitter l'écran). Tous les champs de recherche (récipient, aliment, ratio, Ciqual) supportent aussi la **recherche vocale**.
 
-Un appui long sur l'icône de l'app propose aussi des **raccourcis directs** : Peser, Nouveau récipient, Nouvel aliment. Un **widget d'écran d'accueil** Android propose le même raccourci vers Peser.
+Un appui long sur l'icône de l'app propose aussi des **raccourcis directs** : Peser, Nouveau récipient, Nouvel aliment.
 
 ### La méthode de calcul
 
@@ -174,7 +189,7 @@ npx expo start
 Scanner le QR code affiché avec Expo Go, ou lancer un simulateur iOS (`i`) / émulateur Android (`a`) depuis le terminal.
 
 > [!IMPORTANT]
-> Certaines fonctionnalités utilisent des modules natifs avec plugin de config : la photo des récipients (`expo-image-picker`) et les raccourcis d'icône (`expo-quick-actions`, appui long sur l'icône de l'app pour accéder directement à Peser / Nouveau récipient / Nouvel aliment). **Expo Go seul ne suffit pas** pour tester ces fonctionnalités — il faut un build de développement (`npx expo run:android`, ou `eas build --profile development`). Le reste de l'app fonctionne normalement dans Expo Go.
+> Le projet utilise plusieurs modules natifs avec plugin de config : la photo des récipients/aliments (`expo-image-picker`), la recherche vocale (`expo-speech-recognition`, présente sur tous les champs de recherche) et les raccourcis d'icône (`expo-quick-actions`). **Expo Go seul ne suffit pas** — la recherche vocale étant importée sans garde dans le sélecteur partagé, son absence fait planter l'écran Peser (et tout écran avec un sélecteur) dès l'ouverture, pas seulement les fonctionnalités qui en dépendent directement. Il faut un build de développement (`npx expo run:android`, ou `eas build --profile development`).
 
 ### Scripts disponibles
 
@@ -205,9 +220,7 @@ génère un fichier SQL dans `drizzle/`, appliqué automatiquement au démarrage
 
 ## Idées pour la suite
 
-- Export PDF de l'historique, pensé pour être montré à un·e soignant·e
-- Photos également sur les aliments/recettes
-- Historique filtrable par aliment ou par période
+- Rappel optionnel pour peser un repas à une heure donnée (notification locale, pas de serveur)
 
 ## Licence
 
