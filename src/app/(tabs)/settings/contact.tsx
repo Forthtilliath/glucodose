@@ -5,6 +5,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { type ThemeColors, useColors } from "@/theme/colors";
 
 const CONTACT_EMAIL = "vincent.lisita+diab@gmail.com";
+const COFFEE_URL = "https://buymeacoffee.com/forthtilliath";
 
 export default function ContactScreen() {
   const colors = useColors();
@@ -28,6 +29,10 @@ export default function ContactScreen() {
     } catch {
       // L'utilisateur a annulé le partage, rien à faire.
     }
+  }
+
+  async function handleCoffee() {
+    await Linking.openURL(COFFEE_URL);
   }
 
   return (
@@ -56,6 +61,17 @@ export default function ContactScreen() {
       >
         <Ionicons name="share-social-outline" size={20} color={colors.text} />
         <Text style={styles.rowText}>Partager l’app</Text>
+        <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />
+      </Pressable>
+
+      <Pressable
+        style={styles.row}
+        onPress={handleCoffee}
+        accessibilityRole="button"
+        accessibilityLabel="M'offrir un café sur Buy Me a Coffee"
+      >
+        <Ionicons name="cafe-outline" size={20} color={colors.text} />
+        <Text style={styles.rowText}>M’offrir un café</Text>
         <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />
       </Pressable>
     </ScrollView>
