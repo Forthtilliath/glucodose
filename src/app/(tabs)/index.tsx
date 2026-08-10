@@ -119,6 +119,8 @@ export default function WeighScreen() {
   const grossWeightNumber = parseFloat(grossWeight);
   const grossWeightValid = !Number.isNaN(grossWeightNumber) && grossWeightNumber <= MAX_WEIGHT_G;
   const grossWeightOutOfRange = grossWeightNumber > MAX_WEIGHT_G;
+  const grossWeightBelowTare =
+    grossWeightValid && tareWeightG > 0 && grossWeightNumber > 0 && grossWeightNumber < tareWeightG;
   const netWeightG = Number.isNaN(grossWeightNumber) ? 0 : computeNetWeight(grossWeightNumber, tareWeightG);
   const carbsG = selectedFood ? computeCarbsGrams(netWeightG, selectedFood.carbsPer100g) : 0;
   const mealInsulinUnits = selectedRatio ? computeMealInsulinUnits(carbsG, selectedRatio.carbsGramsPerUnit) : 0;
@@ -288,6 +290,11 @@ export default function WeighScreen() {
       />
       {grossWeightOutOfRange && (
         <Text style={styles.errorText}>Poids invraisemblable (max {formatWeight(MAX_WEIGHT_G)}).</Text>
+      )}
+      {grossWeightBelowTare && (
+        <Text style={styles.errorText}>
+          Poids brut inférieur à la tare ({formatWeight(tareWeightG)}) : vérifie le récipient ou la pesée.
+        </Text>
       )}
       <Text style={styles.netWeightHint}>Poids net : {formatWeight(netWeightG)}</Text>
 
