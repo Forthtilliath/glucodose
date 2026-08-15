@@ -1,5 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import { Tabs, useRouter } from "expo-router";
+import { Pressable } from "react-native";
 
 import { useColors } from "@/theme/colors";
 
@@ -31,6 +32,13 @@ export default function TabsLayout() {
         headerStyle: { backgroundColor: colors.surface },
         headerTintColor: colors.text,
         headerTitleAlign: "center",
+        // Le ripple Android par défaut de la barre d'onglets est "borderless" :
+        // son rayon peut dépasser la hauteur de l'onglet et se faire tronquer
+        // par le haut de l'écran au lieu de rester contenu dedans. On le
+        // contraint aux limites de l'onglet, comme un ripple Material classique.
+        tabBarButton: ({ ref: _ref, ...props }) => (
+          <Pressable {...props} android_ripple={{ borderless: false, color: `${colors.primary}33` }} />
+        ),
       }}
     >
       <Tabs.Screen
