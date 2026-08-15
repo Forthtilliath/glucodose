@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { ScrollView, StyleSheet, Text } from "react-native";
 import { eq } from "drizzle-orm";
 import { useLiveQuery } from "drizzle-orm/expo-sqlite";
-import { ThemeOptionList } from "@forthtilliath/react-native-kit/components/theme/ThemeOptionList";
+import { ThemeSettingsScreen } from "@forthtilliath/react-native-kit/components/settings/ThemeSettingsScreen";
 import type { ThemePreference } from "@forthtilliath/react-native-kit/hooks/useEffectiveColorScheme";
 
 import { db } from "@/db/client";
@@ -10,7 +10,7 @@ import { updateSettings } from "@/db/repository";
 import { settings } from "@/db/schema";
 import { type ThemeColors, useColors } from "@/theme/colors";
 
-export default function ThemeSettingsScreen() {
+export default function ThemeSettingsPage() {
   const colors = useColors();
   const styles = useMemo(() => createStyles(colors), [colors]);
   const { data: settingsRows } = useLiveQuery(db.select().from(settings).where(eq(settings.id, 1)));
@@ -44,13 +44,15 @@ export default function ThemeSettingsScreen() {
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
       <Text style={styles.sectionTitle}>Thème de l’app</Text>
-      <Text style={styles.helpText}>« Système » suit le réglage clair/sombre de ton téléphone.</Text>
-      <ThemeOptionList
+      <ThemeSettingsScreen
+        variant="icon"
         value={themePreference}
         onChange={(preference) => {
           handleChange(preference).catch(() => {});
         }}
+        labels={{ hint: "« Système » suit le réglage clair/sombre de ton téléphone." }}
         styles={{
+          hint: { color: colors.textMuted },
           container: styles.optionsContainer,
           row: [styles.row, { backgroundColor: colors.surface, borderColor: colors.border }],
           rowActive: { borderColor: colors.primary, backgroundColor: `${colors.primary}1a` },
@@ -70,7 +72,6 @@ function createStyles(colors: ThemeColors) {
     container: { flex: 1, backgroundColor: colors.background },
     content: { padding: 16, paddingBottom: 48, gap: 4 },
     sectionTitle: { fontSize: 15, fontWeight: "700", color: colors.text, marginTop: 8 },
-    helpText: { fontSize: 12, color: colors.textMuted, marginTop: 4, marginBottom: 12 },
     optionsContainer: { gap: 8, marginTop: 8 },
     row: { borderRadius: 10, padding: 14 },
   });
