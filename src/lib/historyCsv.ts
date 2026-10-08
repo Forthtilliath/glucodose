@@ -2,6 +2,8 @@ import { File, Paths } from "expo-file-system";
 import { escapeCsvField } from "@forthtilliath/react-native-kit/utils/format/escapeCsvField";
 import { formatCsvNumber } from "@forthtilliath/react-native-kit/utils/format/formatCsvNumber";
 
+import { buildExportFileName } from "./exportFileName";
+
 export type HistoryCsvRow = {
   weighedAt: string;
   foodNameSnapshot: string;
@@ -35,8 +37,7 @@ export function buildHistoryCsv(rows: HistoryCsvRow[]): string {
 
 export async function exportHistoryToCsv(rows: HistoryCsvRow[]): Promise<string> {
   const csv = buildHistoryCsv(rows);
-  const dateStamp = new Date().toISOString().slice(0, 10);
-  const file = new File(Paths.cache, `glucodose-historique-${dateStamp}.csv`);
+  const file = new File(Paths.cache, buildExportFileName("historique", "csv"));
   if (file.exists) file.delete();
   file.create();
   file.write(csv);

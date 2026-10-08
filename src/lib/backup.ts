@@ -3,11 +3,16 @@ import { File, Paths } from "expo-file-system";
 import { db } from "@/db/client";
 import { containers, foods, insulinRatios, recipeComponents, settings, weighings } from "@/db/schema";
 
+import { buildExportFileName, getAppVersion } from "./exportFileName";
+
 const SCHEMA_VERSION = 1;
 
 type ExportedData = {
   schemaVersion: number;
   exportedAt: string;
+  // Version de l'app ayant produit le fichier (absente des anciennes
+  // sauvegardes) : informative, non utilisée à l'import.
+  appVersion?: string;
   containers: (typeof containers.$inferSelect)[];
   foods: (typeof foods.$inferSelect)[];
   recipeComponents: (typeof recipeComponents.$inferSelect)[];
@@ -20,6 +25,7 @@ async function buildExportedData(): Promise<ExportedData> {
   return {
     schemaVersion: SCHEMA_VERSION,
     exportedAt: new Date().toISOString(),
+    appVersion: getAppVersion(),
     containers: await db.select().from(containers),
     foods: await db.select().from(foods),
     recipeComponents: await db.select().from(recipeComponents),
@@ -34,8 +40,7 @@ async function buildExportedData(): Promise<ExportedData> {
 export async function exportAllData(): Promise<string> {
   const data = await buildExportedData();
 
-  const dateStamp = data.exportedAt.slice(0, 10);
-  const file = new File(Paths.cache, `glucodose-sauvegarde-${dateStamp}.json`);
+  const file = new File(Paths.cache, buildExportFileName("sauvegarde", "json", new Date(data.exportedAt)));
   if (file.exists) {
     file.delete();
   }

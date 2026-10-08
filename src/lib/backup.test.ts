@@ -54,6 +54,14 @@ describe("exportAllData", () => {
     expect(content.containers[0].name).toBe("Bol");
     expect(content.foods).toEqual([]);
   });
+
+  it("nomme le fichier avec le type, la date et la version, et note la version dans le contenu", async () => {
+    const uri = await backup.exportAllData();
+    const content = JSON.parse(fakeFs.store.get(uri) as string);
+
+    expect(uri).toMatch(/glucodose-sauvegarde-\d{8}-\d{4}-v\d+\.\d+\.\d+\.json$/);
+    expect(content.appVersion).toMatch(/^\d+\.\d+\.\d+$/);
+  });
 });
 
 describe("importAllData", () => {
