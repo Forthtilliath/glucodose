@@ -133,7 +133,7 @@ function createStyles(colors: ThemeColors) {
       paddingVertical: 12,
       paddingHorizontal: 16,
     },
-    toastText: { color: colors.primaryText, fontSize: 15, fontWeight: "700" },
+    toastText: { flexShrink: 1, color: colors.primaryText, fontSize: 15, fontWeight: "700" },
     foodName: { fontSize: 22, fontWeight: "700", color: colors.text, textAlign: "center" },
     subtitle: { fontSize: 13, color: colors.textMuted, marginTop: 4, textAlign: "center" },
     resultBox: {
