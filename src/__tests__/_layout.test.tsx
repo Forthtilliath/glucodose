@@ -30,6 +30,7 @@ jest.mock("@/db/repository", () => ({
 jest.mock("@/lib/appUpdate", () => ({
   fetchLatestRelease: () => Promise.resolve(null),
   compareVersions: () => 0,
+  downloadAndInstallApk: jest.fn(),
 }));
 jest.mock("../../drizzle/migrations", () => ({}));
 jest.mock("drizzle-orm/expo-sqlite/migrator", () => ({
@@ -57,9 +58,12 @@ jest.mock("expo-router", () => ({
 }));
 
 describe("RootLayout", () => {
-  it("est enveloppé dans un GestureHandlerRootView, requis pour le swipe-to-delete", () => {
+  it("est enveloppé dans un GestureHandlerRootView, requis pour le swipe-to-delete", async () => {
     let tree: renderer.ReactTestRenderer | undefined;
-    act(() => {
+    // act asynchrone : laisse la vérification de mise à jour (UpdateNotifier)
+    // se terminer avant la fin du test, sinon son re-rendu arrive après le
+    // démontage de l'environnement Jest.
+    await act(async () => {
       tree = renderer.create(<RootLayout />);
     });
     expect(() => tree?.root.findByType(GestureHandlerRootView)).not.toThrow();
