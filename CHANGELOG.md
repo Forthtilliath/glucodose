@@ -6,6 +6,12 @@ Le format suit [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/), et le p
 
 ## [Unreleased]
 
+### Modifié
+- Après l'enregistrement d'une pesée, un écran de résultat dédié affiche la dose/les glucides avec une notification « Pesée enregistrée », et le lien « Annuler cette pesée » est placé sous le résultat (il n'est plus collé au message de confirmation).
+
+### Corrigé
+- Les noms longs (aliment, récipient, ratio) repoussaient hors de l'écran la flèche du sélecteur sur l'écran de pesée, et collaient à la valeur affichée à droite dans l'Historique et la liste des ratios.
+
 ## [1.12.0] - 2026-08-04
 
 ### Ajouté
