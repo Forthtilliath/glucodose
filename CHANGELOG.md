@@ -6,11 +6,20 @@ Le format suit [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/), et le p
 
 ## [Unreleased]
 
+## [1.13.0] - 2026-10-08
+
+### Ajouté
+- Avertissement sur l'écran de pesée quand le poids brut saisi est inférieur à la tare du récipient.
+- Lien « Buy me a coffee » dans Réglages → Contact pour soutenir le projet.
+
 ### Modifié
+- Écrans de Réglages (menu, thème, mises à jour, sauvegarde, contact, à propos, confidentialité) harmonisés avec une présentation commune.
 - Après l'enregistrement d'une pesée, un écran de résultat dédié affiche la dose/les glucides avec une notification « Pesée enregistrée », et le lien « Annuler cette pesée » est placé sous le résultat (il n'est plus collé au message de confirmation).
 
 ### Corrigé
 - Les noms longs (aliment, récipient, ratio) repoussaient hors de l'écran la flèche du sélecteur sur l'écran de pesée, et collaient à la valeur affichée à droite dans l'Historique et la liste des ratios.
+- La bannière de nouvelle version se ferme au toucher, et l'écran Mises à jour lance la vérification automatiquement (le bouton de recherche disparaît une fois une mise à jour trouvée).
+- L'effet de toucher sur les onglets du bas débordait de leur zone sur Android.
 
 ## [1.12.0] - 2026-08-04
 
@@ -160,7 +169,8 @@ Première version suivie. L'app était déjà fonctionnelle avant cette date (hi
 ### Corrigé
 - Validation des valeurs négatives (poids, glucides, glycémie), contraintes de clé étrangère SQLite activées, permission microphone superflue retirée.
 
-[Unreleased]: https://github.com/Forthtilliath/glucodose/compare/v1.12.0...HEAD
+[Unreleased]: https://github.com/Forthtilliath/glucodose/compare/v1.13.0...HEAD
+[1.13.0]: https://github.com/Forthtilliath/glucodose/releases/tag/v1.13.0
 [1.12.0]: https://github.com/Forthtilliath/glucodose/releases/tag/v1.12.0
 [1.2.3]: https://github.com/Forthtilliath/glucodose/releases/tag/v1.2.3
 [1.2.2]: https://github.com/Forthtilliath/glucodose/releases/tag/v1.2.2
