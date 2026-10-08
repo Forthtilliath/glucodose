@@ -6,6 +6,10 @@ Le format suit [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/), et le p
 
 ## [Unreleased]
 
+### Modifié
+- Les fichiers exportés (sauvegarde JSON, historique PDF et CSV) portent un nom parlant avec le type, la date, l'heure et la version de l'app, ex. `glucodose-sauvegarde-20261008-0902-v1.13.1.json`. Le PDF n'est plus nommé par un identifiant aléatoire, et la date suit l'heure locale.
+- La sauvegarde JSON indique la version de l'app qui l'a produite.
+
 ## [1.13.1] - 2026-10-08
 
 ### Modifié
