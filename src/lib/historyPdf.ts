@@ -1,6 +1,8 @@
+import { File, Paths } from "expo-file-system";
 import * as Print from "expo-print";
 import { escapeHtml } from "@forthtilliath/react-native-kit/utils/format/escapeHtml";
 
+import { buildExportFileName } from "./exportFileName";
 import { formatCarbs, formatInsulinUnits, formatWeight } from "./insulin";
 
 export type HistoryPdfRow = {
@@ -61,5 +63,10 @@ export function buildHistoryHtml(rows: HistoryPdfRow[], title = "Historique des 
 export async function exportHistoryToPdf(rows: HistoryPdfRow[], title?: string): Promise<string> {
   const html = buildHistoryHtml(rows, title);
   const { uri } = await Print.printToFileAsync({ html });
-  return uri;
+  // expo-print nomme le fichier avec un UUID : renommé pour que le nom soit
+  // parlant une fois partagé (Drive, mail, Téléchargements…).
+  const destination = new File(Paths.cache, buildExportFileName("historique", "pdf"));
+  if (destination.exists) destination.delete();
+  await new File(uri).move(destination);
+  return destination.uri;
 }
