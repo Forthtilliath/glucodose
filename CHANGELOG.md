@@ -6,6 +6,8 @@ Le format suit [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/), et le p
 
 ## [Unreleased]
 
+## [1.13.1] - 2026-10-08
+
 ### Modifié
 - La bannière de nouvelle version propose « Installer » et « Ignorer » : « Installer » ferme la bannière et lance directement le téléchargement (avec sa progression), sans passer par l'écran Mises à jour.
 
@@ -172,7 +174,8 @@ Première version suivie. L'app était déjà fonctionnelle avant cette date (hi
 ### Corrigé
 - Validation des valeurs négatives (poids, glucides, glycémie), contraintes de clé étrangère SQLite activées, permission microphone superflue retirée.
 
-[Unreleased]: https://github.com/Forthtilliath/glucodose/compare/v1.13.0...HEAD
+[Unreleased]: https://github.com/Forthtilliath/glucodose/compare/v1.13.1...HEAD
+[1.13.1]: https://github.com/Forthtilliath/glucodose/releases/tag/v1.13.1
 [1.13.0]: https://github.com/Forthtilliath/glucodose/releases/tag/v1.13.0
 [1.12.0]: https://github.com/Forthtilliath/glucodose/releases/tag/v1.12.0
 [1.2.3]: https://github.com/Forthtilliath/glucodose/releases/tag/v1.2.3
