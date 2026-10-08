@@ -283,6 +283,7 @@ function createStyles(colors: ThemeColors) {
     row: {
       flexDirection: "row",
       alignItems: "center",
+      gap: 12,
       backgroundColor: colors.surface,
       borderWidth: 1,
       borderColor: colors.border,
