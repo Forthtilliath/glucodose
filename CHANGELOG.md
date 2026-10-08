@@ -6,6 +6,9 @@ Le format suit [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/), et le p
 
 ## [Unreleased]
 
+### Modifié
+- La bannière de nouvelle version propose « Installer » et « Ignorer » : « Installer » ferme la bannière et lance directement le téléchargement (avec sa progression), sans passer par l'écran Mises à jour.
+
 ## [1.13.0] - 2026-10-08
 
 ### Ajouté
