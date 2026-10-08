@@ -32,7 +32,7 @@ function findSourceFile() {
   if (!existsSync(SOURCE_DIR)) {
     throw new Error(
       `Dossier ${SOURCE_DIR} introuvable. Télécharge le fichier Ciqual (XLS/XLSX) depuis ` +
-        "https://www.data.gouv.fr/datasets/table-de-composition-nutritionnelle-des-aliments-ciqual/ " +
+        "https://doi.org/10.57745/RDMHWY " +
         `et place-le dans ${SOURCE_DIR}/.`
     );
   }
