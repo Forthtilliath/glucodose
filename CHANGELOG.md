@@ -6,8 +6,10 @@ Le format suit [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/), et le p
 
 ## [Unreleased]
 
+## [1.14.0] - 2026-10-09
+
 ### Modifié
-- Les fichiers exportés (sauvegarde JSON, historique PDF et CSV) portent un nom parlant avec le type, la date, l'heure et la version de l'app, ex. `glucodose-sauvegarde-20261008-0902-v1.13.1.json`. Le PDF n'est plus nommé par un identifiant aléatoire, et la date suit l'heure locale.
+- Les fichiers exportés (sauvegarde JSON, historique PDF et CSV) portent un nom parlant avec le type, la date, l'heure et la version de l'app, ex. `glucodose-sauvegarde-20261008-0902-v1.14.0.json`. Le PDF n'est plus nommé par un identifiant aléatoire, et la date suit l'heure locale.
 - La sauvegarde JSON indique la version de l'app qui l'a produite.
 
 ### Corrigé
@@ -181,7 +183,8 @@ Première version suivie. L'app était déjà fonctionnelle avant cette date (hi
 ### Corrigé
 - Validation des valeurs négatives (poids, glucides, glycémie), contraintes de clé étrangère SQLite activées, permission microphone superflue retirée.
 
-[Unreleased]: https://github.com/Forthtilliath/glucodose/compare/v1.13.1...HEAD
+[Unreleased]: https://github.com/Forthtilliath/glucodose/compare/v1.14.0...HEAD
+[1.14.0]: https://github.com/Forthtilliath/glucodose/releases/tag/v1.14.0
 [1.13.1]: https://github.com/Forthtilliath/glucodose/releases/tag/v1.13.1
 [1.13.0]: https://github.com/Forthtilliath/glucodose/releases/tag/v1.13.0
 [1.12.0]: https://github.com/Forthtilliath/glucodose/releases/tag/v1.12.0
