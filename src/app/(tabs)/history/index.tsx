@@ -13,6 +13,7 @@ import { SwipeableRow } from "@forthtilliath/react-native-kit/components/list/Sw
 import { db } from "@/db/client";
 import { deleteWeighing } from "@/db/repository";
 import { weighings } from "@/db/schema";
+import { parseDbDate } from "@/lib/dbDate";
 import { exportHistoryToCsv } from "@/lib/historyCsv";
 import { exportHistoryToPdf } from "@/lib/historyPdf";
 import { formatCarbs, formatInsulinUnits, formatWeight } from "@/lib/insulin";
@@ -41,7 +42,7 @@ export default function HistoryScreen() {
     const periodStartMs = getPeriodStartMs(periodFilter);
     const normalizedQuery = normalizeForSearch(searchQuery);
     return data.filter((item) => {
-      if (periodStartMs != null && new Date(item.weighedAt).getTime() < periodStartMs) return false;
+      if (periodStartMs != null && parseDbDate(item.weighedAt).getTime() < periodStartMs) return false;
       if (normalizedQuery && !normalizeForSearch(item.foodNameSnapshot).includes(normalizedQuery)) return false;
       return true;
     });
@@ -196,14 +197,14 @@ export default function HistoryScreen() {
               accessible
               accessibilityLabel={
                 item.ratioLabelSnapshot
-                  ? `${item.foodNameSnapshot}, le ${new Date(item.weighedAt).toLocaleString("fr-FR")}, dose totale ${formatInsulinUnits(item.totalInsulinUnits)} unités`
-                  : `${item.foodNameSnapshot}, le ${new Date(item.weighedAt).toLocaleString("fr-FR")}, ${formatCarbs(item.carbsG)} de glucides`
+                  ? `${item.foodNameSnapshot}, le ${parseDbDate(item.weighedAt).toLocaleString("fr-FR")}, dose totale ${formatInsulinUnits(item.totalInsulinUnits)} unités`
+                  : `${item.foodNameSnapshot}, le ${parseDbDate(item.weighedAt).toLocaleString("fr-FR")}, ${formatCarbs(item.carbsG)} de glucides`
               }
             >
               <View style={styles.rowMain}>
                 <Text style={styles.rowLabel}>{item.foodNameSnapshot}</Text>
                 <Text style={styles.rowSubtitle}>
-                  {new Date(item.weighedAt).toLocaleString("fr-FR")} · {formatWeight(item.netWeightG)} net ·{" "}
+                  {parseDbDate(item.weighedAt).toLocaleString("fr-FR")} · {formatWeight(item.netWeightG)} net ·{" "}
                   {item.carbsG.toFixed(1)} g glucides
                   {item.ratioLabelSnapshot ? ` · ${item.ratioLabelSnapshot}` : ""}
                 </Text>
