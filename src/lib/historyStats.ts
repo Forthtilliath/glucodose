@@ -1,5 +1,7 @@
 import { getPeriodStartMs, type PeriodFilter } from "@forthtilliath/react-native-kit/utils/helpers/getPeriodStartMs";
 
+import { parseDbDate } from "./dbDate";
+
 export type HistoryStatsRow = { weighedAt: string; carbsG: number; foodNameSnapshot: string };
 
 export type HistoryStats = {
@@ -20,7 +22,7 @@ function periodDays(period: PeriodFilter, rowsInPeriod: HistoryStatsRow[], now: 
   if (period === "7d") return 7;
   if (period === "30d") return 30;
   if (rowsInPeriod.length === 0) return 0;
-  const earliestMs = Math.min(...rowsInPeriod.map((row) => new Date(row.weighedAt).getTime()));
+  const earliestMs = Math.min(...rowsInPeriod.map((row) => parseDbDate(row.weighedAt).getTime()));
   // +1 pour un compte inclusif : une pesée aujourd'hui et une il y a 9 jours
   // couvrent 10 jours calendaires distincts, pas 9 (l'écart brut en ms).
   return Math.max(1, Math.floor((now.getTime() - earliestMs) / DAY_MS) + 1);
@@ -33,7 +35,7 @@ export function computeHistoryStats(
 ): HistoryStats {
   const startMs = getPeriodStartMs(period, now);
   const rowsInPeriod =
-    startMs == null ? rows : rows.filter((row) => new Date(row.weighedAt).getTime() >= startMs);
+    startMs == null ? rows : rows.filter((row) => parseDbDate(row.weighedAt).getTime() >= startMs);
 
   const days = periodDays(period, rowsInPeriod, now);
   const totalCarbs = rowsInPeriod.reduce((sum, row) => sum + row.carbsG, 0);

@@ -8,6 +8,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { db } from "@/db/client";
 import { deleteWeighing } from "@/db/repository";
 import { weighings } from "@/db/schema";
+import { parseDbDate } from "@/lib/dbDate";
 import { formatCarbs, formatInsulinUnits, formatWeight } from "@/lib/insulin";
 import { type ThemeColors, useColors } from "@/theme/colors";
 
@@ -67,7 +68,7 @@ export default function WeighingResultScreen() {
       <ScrollView contentContainerStyle={styles.content}>
         <Text style={styles.foodName}>{weighing.foodNameSnapshot}</Text>
         <Text style={styles.subtitle}>
-          {new Date(weighing.weighedAt).toLocaleString("fr-FR")} · {formatWeight(weighing.netWeightG)} net
+          {parseDbDate(weighing.weighedAt).toLocaleString("fr-FR")} · {formatWeight(weighing.netWeightG)} net
         </Text>
 
         {hasInsulinDose ? (

@@ -2,6 +2,7 @@ import { File, Paths } from "expo-file-system";
 import { escapeCsvField } from "@forthtilliath/react-native-kit/utils/format/escapeCsvField";
 import { formatCsvNumber } from "@forthtilliath/react-native-kit/utils/format/formatCsvNumber";
 
+import { parseDbDate } from "./dbDate";
 import { buildExportFileName } from "./exportFileName";
 
 export type HistoryCsvRow = {
@@ -23,7 +24,7 @@ export function buildHistoryCsv(rows: HistoryCsvRow[]): string {
   );
   const lines = rows.map((row) =>
     [
-      escapeCsvField(new Date(row.weighedAt).toLocaleString("fr-FR")),
+      escapeCsvField(parseDbDate(row.weighedAt).toLocaleString("fr-FR")),
       escapeCsvField(row.foodNameSnapshot),
       formatCsvNumber(row.netWeightG, 0),
       formatCsvNumber(row.carbsG),

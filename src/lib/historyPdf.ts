@@ -2,6 +2,7 @@ import { File, Paths } from "expo-file-system";
 import * as Print from "expo-print";
 import { escapeHtml } from "@forthtilliath/react-native-kit/utils/format/escapeHtml";
 
+import { parseDbDate } from "./dbDate";
 import { buildExportFileName } from "./exportFileName";
 import { formatCarbs, formatInsulinUnits, formatWeight } from "./insulin";
 
@@ -21,7 +22,7 @@ export function buildHistoryHtml(rows: HistoryPdfRow[], title = "Historique des 
     .map(
       (row) => `
         <tr>
-          <td>${escapeHtml(new Date(row.weighedAt).toLocaleString("fr-FR"))}</td>
+          <td>${escapeHtml(parseDbDate(row.weighedAt).toLocaleString("fr-FR"))}</td>
           <td>${escapeHtml(row.foodNameSnapshot)}</td>
           <td>${escapeHtml(formatWeight(row.netWeightG))}</td>
           <td>${escapeHtml(formatCarbs(row.carbsG))}</td>
