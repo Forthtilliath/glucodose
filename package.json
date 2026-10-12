@@ -7,9 +7,11 @@
     "@expo/vector-icons": "^15.0.2",
     "@forthtilliath/expo-release-updates": "^0.2.0",
     "@forthtilliath/react-native-kit": "^0.12.0",
+    "@react-native-google-signin/google-signin": "^16.1.5",
     "drizzle-orm": "^0.45.2",
     "expo": "~57.0.8",
     "expo-constants": "~57.0.6",
+    "expo-crypto": "~57.0.4",
     "expo-document-picker": "~57.0.1",
     "expo-file-system": "~57.0.1",
     "expo-font": "~57.0.1",
@@ -20,6 +22,7 @@
     "expo-print": "~57.0.1",
     "expo-quick-actions": "^6.0.2",
     "expo-router": "~57.0.9",
+    "expo-secure-store": "~57.0.4",
     "expo-sharing": "~57.0.8",
     "expo-speech-recognition": "^56.0.1",
     "expo-splash-screen": "~57.0.5",
@@ -80,7 +83,7 @@
       "^@/assets/(.*)$": "<rootDir>/assets/$1"
     },
     "transformIgnorePatterns": [
-      "/node_modules/(?!(.pnpm|react-native|@react-native|@react-native-community|@forthtilliath|expo|@expo|@expo-google-fonts|react-navigation|@react-navigation|@sentry/react-native|native-base|standard-navigation))",
+      "/node_modules/(?!(.pnpm|react-native|@react-native|@react-native-community|@forthtilliath|@noble|@scure|expo|@expo|@expo-google-fonts|react-navigation|@react-navigation|@sentry/react-native|native-base|standard-navigation))",
       "/node_modules/react-native-reanimated/plugin/",
       "/node_modules/@react-native/babel-preset/"
     ]
