@@ -213,6 +213,29 @@ npx drizzle-kit generate
 
 génère un fichier SQL dans `drizzle/`, appliqué automatiquement au démarrage de l'app (écran de chargement le temps de la migration). Les migrations sont versionnées avec le code — ne jamais les modifier a posteriori une fois publiées, toujours en générer de nouvelles.
 
+### Signer l'APK de release
+
+L'APK de release est signé avec une clé propre à GlucoDose, jamais avec le `debug.keystore` public de React Native (plugin [`plugins/withReleaseSigning.js`](./plugins/withReleaseSigning.js)). Sans cette clé, `gradlew assembleRelease` échoue (« Keystore file not set »).
+
+1. Générer la clé une seule fois, **hors du dépôt**, et la sauvegarder (gestionnaire de mots de passe) : la perdre empêche toute mise à jour de l'app installée.
+
+   ```powershell
+   keytool -genkeypair -v -storetype PKCS12 -keyalg RSA -keysize 2048 -validity 10000 -alias glucodose-upload -keystore "$env:USERPROFILE\keys\glucodose-upload.keystore"
+   ```
+
+2. Déclarer son emplacement et son mot de passe dans `~/.gradle/gradle.properties` (jamais dans `android/`, régénéré par `expo prebuild`) :
+
+   ```properties
+   GLUCODOSE_UPLOAD_STORE_FILE=C:/Users/<toi>/keys/glucodose-upload.keystore
+   GLUCODOSE_UPLOAD_STORE_PASSWORD=...
+   GLUCODOSE_UPLOAD_KEY_ALIAS=glucodose-upload
+   GLUCODOSE_UPLOAD_KEY_PASSWORD=...
+   ```
+
+3. Vérifier avec `cd android && ./gradlew :app:signingReport` (section `Variant: release`).
+
+L'APK n'embarque que le code natif des téléphones ARM (plugin [`plugins/withAndroidAbis.js`](./plugins/withAndroidAbis.js)) ; `npx expo run:android` cible de toute façon l'architecture de l'appareil branché, émulateur compris.
+
 ## Versioning & contribution
 
 - Le suivi des changements se fait dans [`CHANGELOG.md`](./CHANGELOG.md) (format [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/)), avec des versions [semver](https://semver.org/lang/fr/) (`version` dans `package.json`/`app.json`).
