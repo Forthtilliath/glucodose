@@ -60,6 +60,12 @@
           "microphonePermission": "L'app utilise le micro pour la recherche vocale d'aliment.",
           "speechRecognitionPermission": "L'app utilise la reconnaissance vocale pour la recherche d'aliment."
         }
+      ],
+      [
+        "./plugins/withReleaseSigning",
+        {
+          "propertyPrefix": "GLUCODOSE"
+        }
       ]
     ],
     "experiments": {
