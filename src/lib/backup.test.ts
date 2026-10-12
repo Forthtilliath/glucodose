@@ -1,26 +1,18 @@
 import {
-  createFakeExpoFileSystem,
-  type FakeExpoFileSystem,
-  getFakeExpoFileSystem,
-} from "@forthtilliath/expo-test-kit/createFakeExpoFileSystem";
+  decryptBackup,
+  emptyKeyring,
+  encryptBackup,
+  ensureCurrentKey,
+  getCurrentKey,
+} from "@forthtilliath/backup-crypto";
 
 import { closeTestDb, createTestDb, mockDbClient, resetTestDb, type TestDb } from "@/db/testDb";
 import * as schema from "@/db/schema";
-
-// Double léger d'expo-file-system : un simple magasin clé/valeur en mémoire,
-// suffisant pour vérifier ce que exportAllData/importAllData lisent et
-// écrivent, sans dépendre du système de fichiers natif (indisponible en Jest).
-// Le nom préfixé "mock" est requis : jest.mock() est hoisté avant les imports,
-// et babel-plugin-jest-hoist interdit toute référence hors-scope dans la
-// factory, sauf pour les identifiants préfixés "mock" (insensible à la casse).
-const mockCreateFakeExpoFileSystem = createFakeExpoFileSystem;
-jest.mock("expo-file-system", () => mockCreateFakeExpoFileSystem());
 
 type Backup = typeof import("./backup");
 
 let testDb: TestDb;
 let backup: Backup;
-let fakeFs: FakeExpoFileSystem;
 
 beforeAll(async () => {
   testDb = await createTestDb();
@@ -30,7 +22,6 @@ beforeAll(async () => {
   // instead of the one already cached from the top-level import graph.
   // eslint-disable-next-line @typescript-eslint/no-require-imports
   backup = require("./backup");
-  fakeFs = getFakeExpoFileSystem();
 });
 
 afterAll(() => {
@@ -39,164 +30,128 @@ afterAll(() => {
 
 beforeEach(async () => {
   await resetTestDb(testDb);
-  fakeFs.store.clear();
 });
 
-describe("exportAllData", () => {
-  it("exporte toutes les tables dans un fichier JSON et retourne son uri", async () => {
+function backupText(overrides: Record<string, unknown> = {}) {
+  return JSON.stringify({
+    schemaVersion: 1,
+    containers: [],
+    foods: [],
+    recipeComponents: [],
+    insulinRatios: [],
+    settings: [],
+    weighings: [],
+    ...overrides,
+  });
+}
+
+async function seed() {
+  await testDb.insert(schema.containers).values({ name: "Bol", tareWeightG: 100 });
+  const [food] = await testDb
+    .insert(schema.foods)
+    .values({ name: "Riz", type: "ingredient", carbsPer100g: 28 })
+    .returning();
+  const [ratio] = await testDb
+    .insert(schema.insulinRatios)
+    .values({ label: "Midi", carbsGramsPerUnit: 10 })
+    .returning();
+  await testDb.insert(schema.settings).values({ id: 1, targetGlycemia: 1.2, sensitivityFactor: 0.4 });
+  await testDb.insert(schema.weighings).values({
+    foodId: food.id, foodNameSnapshot: "Riz", grossWeightG: 300, netWeightG: 200,
+    carbsPer100gSnapshot: 28, carbsG: 56, ratioId: ratio.id, mealInsulinUnits: 5.6, totalInsulinUnits: 5.6,
+  });
+}
+
+describe("buildExportedData", () => {
+  it("exporte toutes les tables avec la version du schéma et de l'app", async () => {
     await testDb.insert(schema.containers).values({ name: "Bol", tareWeightG: 100 });
 
-    const uri = await backup.exportAllData();
-    const content = JSON.parse(fakeFs.store.get(uri) as string);
+    const data = await backup.buildExportedData();
 
-    expect(content.schemaVersion).toBe(1);
-    expect(content.containers).toHaveLength(1);
-    expect(content.containers[0].name).toBe("Bol");
-    expect(content.foods).toEqual([]);
-  });
-
-  it("nomme le fichier avec le type, la date et la version, et note la version dans le contenu", async () => {
-    const uri = await backup.exportAllData();
-    const content = JSON.parse(fakeFs.store.get(uri) as string);
-
-    expect(uri).toMatch(/glucodose-sauvegarde-\d{8}-\d{4}-v\d+\.\d+\.\d+\.json$/);
-    expect(content.appVersion).toMatch(/^\d+\.\d+\.\d+$/);
+    expect(data.schemaVersion).toBe(1);
+    expect(data.appVersion).toMatch(/^\d+\.\d+\.\d+$/);
+    expect(data.containers).toHaveLength(1);
+    expect(data.containers[0].name).toBe("Bol");
+    expect(data.foods).toEqual([]);
   });
 });
 
-describe("importAllData", () => {
-  it("rejette un fichier qui n'est pas du JSON valide", async () => {
-    fakeFs.store.set("bad.json", "ceci n'est pas du json");
-    await expect(backup.importAllData("bad.json")).rejects.toThrow(backup.InvalidBackupFileError);
+describe("parseBackup", () => {
+  it("rejette un texte qui n'est pas du JSON valide", () => {
+    expect(() => backup.parseBackup("ceci n'est pas du json")).toThrow(backup.InvalidBackupFileError);
   });
 
-  it("rejette un JSON qui ne ressemble pas à une sauvegarde", async () => {
-    fakeFs.store.set("bad.json", JSON.stringify({ hello: "world" }));
-    await expect(backup.importAllData("bad.json")).rejects.toThrow(backup.InvalidBackupFileError);
-  });
-
-  it("rejette une sauvegarde d'une version de schéma plus récente que celle supportée", async () => {
-    fakeFs.store.set(
-      "future.json",
-      JSON.stringify({
-        schemaVersion: 999,
-        containers: [],
-        foods: [],
-        recipeComponents: [],
-        insulinRatios: [],
-        settings: [],
-        weighings: [],
-      })
+  it("rejette un JSON qui ne ressemble pas à une sauvegarde", () => {
+    expect(() => backup.parseBackup(JSON.stringify({ hello: "world" }))).toThrow(
+      backup.InvalidBackupFileError
     );
-    await expect(backup.importAllData("future.json")).rejects.toThrow(backup.InvalidBackupFileError);
   });
 
-  it("remplace entièrement les données existantes par celles du fichier importé", async () => {
-    // Donnée existante avant import, qui doit disparaître après import.
+  it("rejette une sauvegarde d'une version de schéma plus récente que celle supportée", () => {
+    expect(() => backup.parseBackup(backupText({ schemaVersion: 999 }))).toThrow(
+      backup.InvalidBackupFileError
+    );
+  });
+
+  it("rejette un ratio d'insuline invalide avec un message affichable", () => {
+    const tampered = backupText({ insulinRatios: [{ id: 1, label: "Midi", carbsGramsPerUnit: -1 }] });
+    expect(() => backup.parseBackup(tampered)).toThrow(/données invalides/);
+  });
+
+  it("garde la date d'export et la version de l'app", () => {
+    const data = backup.parseBackup(
+      backupText({ exportedAt: "2026-10-12T10:00:00.000Z", appVersion: "1.14.0" })
+    );
+    expect(data).toMatchObject({ exportedAt: "2026-10-12T10:00:00.000Z", appVersion: "1.14.0" });
+  });
+});
+
+describe("replaceAllData", () => {
+  it("remplace entièrement les données existantes", async () => {
     await testDb.insert(schema.containers).values({ name: "Ancien bol", tareWeightG: 50 });
 
-    fakeFs.store.set(
-      "backup.json",
-      JSON.stringify({
-        schemaVersion: 1,
-        containers: [{ id: 1, name: "Bol importé", tareWeightG: 120, photoUri: null, notes: null }],
-        foods: [],
-        recipeComponents: [],
-        insulinRatios: [],
-        settings: [],
-        weighings: [],
-      })
+    await backup.replaceAllData(
+      backup.parseBackup(
+        backupText({
+          containers: [{ id: 1, name: "Bol importé", tareWeightG: 120, photoUri: null, notes: null }],
+        })
+      )
     );
-
-    await backup.importAllData("backup.json");
 
     const containers = await testDb.select().from(schema.containers);
     expect(containers).toHaveLength(1);
     expect(containers[0].name).toBe("Bol importé");
   });
 
-  it("rejette un ratio d'insuline invalide sans toucher aux données existantes", async () => {
-    await testDb.insert(schema.insulinRatios).values({ label: "Midi", carbsGramsPerUnit: 10 });
-    fakeFs.store.set(
-      "tampered.json",
-      JSON.stringify({
-        schemaVersion: 1,
-        containers: [],
-        foods: [],
-        recipeComponents: [],
-        insulinRatios: [{ id: 1, label: "Midi", carbsGramsPerUnit: -1 }],
-        settings: [],
-        weighings: [],
-      })
-    );
-
-    await expect(backup.importAllData("tampered.json")).rejects.toThrow(/données invalides/);
-    const ratios = await testDb.select().from(schema.insulinRatios);
-    expect(ratios[0].carbsGramsPerUnit).toBe(10);
-  });
-
-  it("réimporte sans erreur une sauvegarde exportée par l'app", async () => {
-    await testDb.insert(schema.containers).values({ name: "Bol", tareWeightG: 100 });
-    const [food] = await testDb
-      .insert(schema.foods)
-      .values({ name: "Riz", type: "ingredient", carbsPer100g: 28 })
-      .returning();
-    const [ratio] = await testDb
-      .insert(schema.insulinRatios)
-      .values({ label: "Midi", carbsGramsPerUnit: 10 })
-      .returning();
-    await testDb.insert(schema.settings).values({ id: 1, targetGlycemia: 1.2, sensitivityFactor: 0.4 });
-    await testDb.insert(schema.weighings).values({
-      foodId: food.id, foodNameSnapshot: "Riz", grossWeightG: 300, netWeightG: 200,
-      carbsPer100gSnapshot: 28, carbsG: 56, ratioId: ratio.id, mealInsulinUnits: 5.6, totalInsulinUnits: 5.6,
+  it("restaure une sauvegarde exportée par l'app, même chiffrée puis déchiffrée", async () => {
+    await seed();
+    const key = getCurrentKey(ensureCurrentKey(emptyKeyring))!.key;
+    const encrypted = encryptBackup(JSON.stringify(await backup.buildExportedData()), key, {
+      app: "glucodose",
     });
+    expect(encrypted).not.toContain("Riz");
 
-    const uri = await backup.exportAllData();
-    await backup.importAllData(uri);
+    await resetTestDb(testDb);
+    await backup.replaceAllData(backup.parseBackup(decryptBackup(encrypted, key)));
 
     expect(await testDb.select().from(schema.weighings)).toHaveLength(1);
     expect((await testDb.select().from(schema.settings))[0].sensitivityFactor).toBe(0.4);
   });
 });
 
-describe("runAutoBackup / getAutoBackupSavedAt", () => {
-  it("retourne null tant qu'aucune sauvegarde automatique n'a eu lieu", async () => {
-    expect(await backup.getAutoBackupSavedAt()).toBeNull();
+describe("isBackupEmpty / describeBackup", () => {
+  it("ignore les réglages par défaut pour juger une sauvegarde vide", async () => {
+    await testDb.insert(schema.settings).values({ id: 1 });
+    expect(backup.isBackupEmpty(await backup.buildExportedData())).toBe(true);
+    await resetTestDb(testDb);
+    await seed();
+    expect(backup.isBackupEmpty(await backup.buildExportedData())).toBe(false);
   });
 
-  it("écrit la sauvegarde dans un fichier au nom fixe, écrasé à chaque appel", async () => {
-    await testDb.insert(schema.containers).values({ name: "Bol", tareWeightG: 100 });
-    await backup.runAutoBackup();
-
-    const savedAt = await backup.getAutoBackupSavedAt();
-    expect(savedAt).not.toBeNull();
-
-    // Un fichier fixe (pas horodaté comme l'export manuel) : un seul fichier
-    // dans le magasin après plusieurs sauvegardes successives.
-    await backup.runAutoBackup();
-    const filesAfterTwoRuns = [...fakeFs.store.keys()].filter((uri) => uri.includes("sauvegarde-auto"));
-    expect(filesAfterTwoRuns).toHaveLength(1);
-  });
-
-  it("contient les mêmes données que l'export manuel", async () => {
-    await testDb.insert(schema.containers).values({ name: "Bol", tareWeightG: 100 });
-    await backup.runAutoBackup();
-
-    const autoFile = [...fakeFs.store.keys()].find((uri) => uri.includes("sauvegarde-auto"));
-    const content = JSON.parse(fakeFs.store.get(autoFile as string) as string);
-    expect(content.containers).toHaveLength(1);
-    expect(content.containers[0].name).toBe("Bol");
-  });
-});
-
-describe("cleanupExportedFile", () => {
-  it("supprime le fichier s'il existe", () => {
-    fakeFs.store.set("to-delete.json", "{}");
-    backup.cleanupExportedFile("to-delete.json");
-    expect(fakeFs.store.has("to-delete.json")).toBe(false);
-  });
-
-  it("ne lève pas d'erreur si le fichier n'existe pas", () => {
-    expect(() => backup.cleanupExportedFile("does-not-exist.json")).not.toThrow();
+  it("résume le contenu d'une sauvegarde", async () => {
+    await seed();
+    expect(backup.describeBackup(await backup.buildExportedData())).toMatch(
+      /^1 aliment\(s\), 1 récipient\(s\), 1 ratio\(s\), 1 pesée\(s\) du /
+    );
   });
 });

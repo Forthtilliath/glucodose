@@ -1,28 +1,22 @@
-import { File, Paths } from "expo-file-system";
-
 import { db } from "@/db/client";
 import { containers, foods, insulinRatios, recipeComponents, settings, weighings } from "@/db/schema";
 
 import { BackupValidationError, validateBackupRows, type ValidatedBackup } from "./backupValidation";
-import { buildExportFileName, getAppVersion } from "./exportFileName";
+import { getAppVersion } from "./exportFileName";
 
 const SCHEMA_VERSION = 1;
 
-type ExportedData = {
+// Contenu d'une sauvegarde (fichier exporté ou copie Google Drive), une fois
+// déchiffré : toutes les tables, plus quelques métadonnées.
+export type BackupData = ValidatedBackup & {
   schemaVersion: number;
-  exportedAt: string;
+  exportedAt?: string;
   // Version de l'app ayant produit le fichier (absente des anciennes
   // sauvegardes) : informative, non utilisée à l'import.
   appVersion?: string;
-  containers: (typeof containers.$inferSelect)[];
-  foods: (typeof foods.$inferSelect)[];
-  recipeComponents: (typeof recipeComponents.$inferSelect)[];
-  insulinRatios: (typeof insulinRatios.$inferSelect)[];
-  settings: (typeof settings.$inferSelect)[];
-  weighings: (typeof weighings.$inferSelect)[];
 };
 
-async function buildExportedData(): Promise<ExportedData> {
+export async function buildExportedData(): Promise<BackupData> {
   return {
     schemaVersion: SCHEMA_VERSION,
     exportedAt: new Date().toISOString(),
@@ -36,49 +30,13 @@ async function buildExportedData(): Promise<ExportedData> {
   };
 }
 
-// Écrit un export JSON complet dans un fichier temporaire et retourne son
-// URI, prêt à être partagé (voir Sharing.shareAsync côté écran).
-export async function exportAllData(): Promise<string> {
-  const data = await buildExportedData();
+export class InvalidBackupFileError extends Error {}
 
-  const file = new File(Paths.cache, buildExportFileName("sauvegarde", "json", new Date(data.exportedAt)));
-  if (file.exists) {
-    file.delete();
-  }
-  file.create();
-  file.write(JSON.stringify(data, null, 2));
-  return file.uri;
-}
+type BackupTable = keyof ValidatedBackup;
 
-// Nom fixe (écrasé à chaque sauvegarde) plutôt qu'horodaté comme l'export
-// manuel : ce fichier est un filet de sécurité qui ne garde que le dernier
-// état, pas un historique de versions. Dans Paths.document (pas .cache) pour
-// ne pas être supprimé par le système en cas de stockage bas.
-const AUTO_BACKUP_FILENAME = "glucodose-sauvegarde-auto.json";
-
-// Sauvegarde silencieuse déclenchée après une période d'inactivité sur les
-// réglages/aliments/récipients (voir useAutoBackup) — filet de sécurité en
-// cas d'oubli d'export manuel, pas une alternative à la restauration.
-export async function runAutoBackup(): Promise<void> {
-  const data = await buildExportedData();
-  const file = new File(Paths.document, AUTO_BACKUP_FILENAME);
-  if (file.exists) file.delete();
-  file.create();
-  file.write(JSON.stringify(data, null, 2));
-}
-
-export async function getAutoBackupSavedAt(): Promise<string | null> {
-  const file = new File(Paths.document, AUTO_BACKUP_FILENAME);
-  if (!file.exists) return null;
-  try {
-    const data = JSON.parse(await file.text()) as Partial<ExportedData>;
-    return data.exportedAt ?? null;
-  } catch {
-    return null;
-  }
-}
-
-function isExportedData(value: unknown): value is ExportedData {
+function hasBackupShape(
+  value: unknown
+): value is Record<string, unknown> & Record<BackupTable, unknown> & { schemaVersion: number } {
   if (typeof value !== "object" || value === null) return false;
   const v = value as Record<string, unknown>;
   return (
@@ -92,15 +50,10 @@ function isExportedData(value: unknown): value is ExportedData {
   );
 }
 
-export class InvalidBackupFileError extends Error {}
-
-// Remplace entièrement les données actuelles par celles du fichier importé.
-// L'appelant doit avoir confirmé explicitement avec l'utilisateur avant
-// d'appeler cette fonction : c'est une opération destructive, pas une fusion.
-export async function importAllData(sourceUri: string): Promise<void> {
-  const source = new File(sourceUri);
-  const text = await source.text();
-
+// Valide le texte (déjà déchiffré) d'une sauvegarde. Lève une
+// InvalidBackupFileError au message affichable tel quel par l'écran de
+// sauvegarde : rien n'est importé tant que tout le fichier n'est pas valide.
+export function parseBackup(text: string): BackupData {
   let parsed: unknown;
   try {
     parsed = JSON.parse(text);
@@ -108,20 +61,29 @@ export async function importAllData(sourceUri: string): Promise<void> {
     throw new InvalidBackupFileError("Ce fichier n'est pas un JSON valide.");
   }
 
-  if (!isExportedData(parsed) || parsed.schemaVersion > SCHEMA_VERSION) {
+  if (!hasBackupShape(parsed) || parsed.schemaVersion > SCHEMA_VERSION) {
     throw new InvalidBackupFileError("Ce fichier ne ressemble pas à une sauvegarde valide de l'app.");
   }
 
-  let data: ValidatedBackup;
   try {
-    data = validateBackupRows(parsed);
+    return {
+      schemaVersion: parsed.schemaVersion,
+      exportedAt: typeof parsed.exportedAt === "string" ? parsed.exportedAt : undefined,
+      appVersion: typeof parsed.appVersion === "string" ? parsed.appVersion : undefined,
+      ...validateBackupRows(parsed),
+    };
   } catch (error) {
     if (!(error instanceof BackupValidationError)) throw error;
     throw new InvalidBackupFileError(
       `Ce fichier contient des données invalides (${error.message}) : rien n'a été importé.`
     );
   }
+}
 
+// Remplace entièrement les données actuelles (pas de fusion). La confirmation
+// et la sauvegarde de secours de l'état actuel sont faites en amont par le
+// gestionnaire de sauvegarde (voir backupManager.ts).
+export async function replaceAllData(data: BackupData): Promise<void> {
   await db.transaction(async (tx) => {
     // Ordre de suppression sûr vis-à-vis des clés étrangères : les tables
     // qui référencent les autres d'abord.
@@ -143,14 +105,22 @@ export async function importAllData(sourceUri: string): Promise<void> {
   });
 }
 
-export function cleanupExportedFile(uri: string) {
-  try {
-    const file = new File(uri);
-    if (file.exists) {
-      file.delete();
-    }
-  } catch {
-    // Best effort.
-  }
+// Une sauvegarde sans aucune donnée saisie (les réglages par défaut ne
+// comptent pas) : relier Google Drive peut alors envoyer celles du téléphone
+// sans demander laquelle garder.
+export function isBackupEmpty(data: BackupData): boolean {
+  return (
+    data.containers.length + data.foods.length + data.insulinRatios.length + data.weighings.length === 0
+  );
 }
 
+export function describeBackup(data: BackupData): string {
+  const parts = [
+    `${data.foods.length} aliment(s)`,
+    `${data.containers.length} récipient(s)`,
+    `${data.insulinRatios.length} ratio(s)`,
+    `${data.weighings.length} pesée(s)`,
+  ];
+  const date = data.exportedAt ? ` du ${new Date(data.exportedAt).toLocaleString("fr-FR")}` : "";
+  return `${parts.join(", ")}${date}`;
+}
