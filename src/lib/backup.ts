@@ -3,6 +3,7 @@ import { File, Paths } from "expo-file-system";
 import { db } from "@/db/client";
 import { containers, foods, insulinRatios, recipeComponents, settings, weighings } from "@/db/schema";
 
+import { BackupValidationError, validateBackupRows, type ValidatedBackup } from "./backupValidation";
 import { buildExportFileName, getAppVersion } from "./exportFileName";
 
 const SCHEMA_VERSION = 1;
@@ -111,7 +112,15 @@ export async function importAllData(sourceUri: string): Promise<void> {
     throw new InvalidBackupFileError("Ce fichier ne ressemble pas à une sauvegarde valide de l'app.");
   }
 
-  const data = parsed;
+  let data: ValidatedBackup;
+  try {
+    data = validateBackupRows(parsed);
+  } catch (error) {
+    if (!(error instanceof BackupValidationError)) throw error;
+    throw new InvalidBackupFileError(
+      `Ce fichier contient des données invalides (${error.message}) : rien n'a été importé.`
+    );
+  }
 
   await db.transaction(async (tx) => {
     // Ordre de suppression sûr vis-à-vis des clés étrangères : les tables
