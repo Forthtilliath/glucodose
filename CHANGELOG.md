@@ -9,8 +9,18 @@ Le format suit [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/), et le p
 ### Sécurité
 - L'APK est désormais signé avec une clé propre à GlucoDose, et non plus avec la clé de debug publique commune à toutes les apps React Native (avec laquelle n'importe qui pouvait signer une fausse mise à jour). **Mise à jour impossible par-dessus l'ancienne version** : exporter une sauvegarde (Réglages → Sauvegarde), désinstaller l'app, installer la nouvelle version puis importer la sauvegarde.
 
+- Les sauvegardes sont chiffrées (fichiers exportés et copie Google Drive) avec une clé générée par l'app : rien à retenir. Les anciens exports en clair restent importables.
+- La sauvegarde automatique d'Android est désactivée : elle copiait la base en clair hors du téléphone.
+- Un fichier de sauvegarde modifié ou corrompu est rejeté en entier (chaque ligne est validée), sans rien importer.
+
+### Ajouté
+- Sauvegarde automatique sur Google Drive (dossier privé de l'app) après chaque modification, et restauration depuis Drive sur un nouveau téléphone.
+- Annulation de la dernière restauration.
+- Clé de secours, pour relire un fichier exporté sur un autre téléphone sans Google Drive.
+
 ### Modifié
 - APK plus léger : il n'embarque plus le code natif des émulateurs (x86), seulement celui des téléphones (ARM).
+- L'ancienne sauvegarde automatique locale (fichier en clair dans l'app) est remplacée par la sauvegarde Drive chiffrée, et supprimée.
 
 ## [1.14.0] - 2026-10-09
 
