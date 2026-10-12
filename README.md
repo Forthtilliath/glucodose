@@ -51,7 +51,7 @@ Cette app remplace la calculette : elle mémorise les poids de récipients, les 
 | **⚖️ Peser** | Flux principal : choisir un récipient (ou une tare manuelle) → peser → poids net automatique (avec avertissement si le poids saisi est inférieur à la tare) → choisir l'aliment → choisir le ratio → dose repas + correction optionnelle affichées en direct. Un écran de résultat confirme l'enregistrement et permet d'**annuler** la pesée en un tap. Un réglage permet de s'arrêter au calcul des glucides, sans dose (voir Réglages) |
 | **🍽️ Aliments** | CRUD des ingrédients simples (glucides/100g) et des recettes composées, chacun avec une **photo** optionnelle. Une recette calcule ses glucides/100g à partir de ses composants pesés, puis devient réutilisable **exactement comme un ingrédient** dans l'écran Peser. Suggestions automatiques depuis la table **Ciqual** (Anses) pendant la frappe, avec une recherche complète accessible en un tap |
 | **📦 Récipients** | CRUD des récipients avec leur poids à vide, et une **photo** (prise ou choisie en galerie) pour les repérer d'un coup d'œil dans le sélecteur |
-| **⚙️ Réglages** | Activer/désactiver le calcul de dose (mode "glucides seuls"), ratios insuline/glucides (un ou plusieurs, ex. un par repas), glycémie cible et facteur de sensibilité pour la dose de correction, unité (mmol/L ou g/L), apparence (clair/sombre/système), sauvegarde/restauration JSON complète de la base (+ sauvegarde automatique silencieuse), vérification des mises à jour, Aide / Contact / À propos / Mentions légales |
+| **⚙️ Réglages** | Activer/désactiver le calcul de dose (mode "glucides seuls"), ratios insuline/glucides (un ou plusieurs, ex. un par repas), glycémie cible et facteur de sensibilité pour la dose de correction, unité (mmol/L ou g/L), apparence (clair/sombre/système), sauvegarde chiffrée de toute la base (automatique sur Google Drive après chaque modification, ou fichier exporté/importé, avec annulation de la dernière restauration), vérification des mises à jour, Aide / Contact / À propos / Mentions légales |
 | **🕘 Historique** | Journal des pesées enregistrées avec le détail dose repas / dose de correction, filtrable par nom d'aliment et par période, exportable en **PDF** (pour être partagé, ex. avec ton équipe soignante) ou **CSV** (pour analyser dans un tableur). Sous-écran **Statistiques** : moyenne de glucides/jour, pesées/semaine, aliments les plus utilisés |
 
 Depuis l'écran Peser, les sheets de sélection récipient/aliment permettent aussi d'**ajouter directement** un nouveau récipient, un nouvel aliment/recette, ou un aliment trouvé dans **Ciqual** (créé et sélectionné en un tap, sans quitter l'écran). Tous les champs de recherche (récipient, aliment, ratio, Ciqual) supportent aussi la **recherche vocale**.
@@ -235,6 +235,16 @@ L'APK de release est signé avec une clé propre à GlucoDose, jamais avec le `d
 3. Vérifier avec `cd android && ./gradlew :app:signingReport` (section `Variant: release`).
 
 L'APK n'embarque que le code natif des téléphones ARM (plugin [`plugins/withAndroidAbis.js`](./plugins/withAndroidAbis.js)) ; `npx expo run:android` cible de toute façon l'architecture de l'appareil branché, émulateur compris.
+
+### Sauvegarde Google Drive et chiffrement
+
+La sauvegarde (Réglages → Sauvegarde) vient des paquets partagés [`@forthtilliath/expo-backup`](https://github.com/Forthtilliath/forthtilliath-packages/tree/main/packages/expo-backup#readme) et `expo-backup-ui`, configurés dans [`src/lib/backupManager.ts`](./src/lib/backupManager.ts) :
+
+- **Chiffrement obligatoire** (données de santé) : fichiers exportés et copie Drive sont chiffrés (XChaCha20-Poly1305) avec une clé générée par l'app, gardée dans le Keystore Android et déposée dans le dossier privé Drive de l'app. Rien à retenir ; une clé de secours est consultable dans l'écran pour qui n'utilise pas Drive. Les anciens exports en clair restent importables.
+- **Drive** : uniquement le dossier caché de l'app (scope `drive.appdata`), envoi automatique quelques secondes après chaque modification.
+- **`android.allowBackup: false`** (`app.json`) : la sauvegarde automatique d'Android copierait sinon la base en clair hors du téléphone.
+
+Configuration Google Cloud (une fois) : activer l'API Google Drive, déclarer le scope `drive.appdata` dans l'écran de consentement OAuth, puis créer un client OAuth **Android** avec le nom de paquet `com.forth.glucodose` et l'empreinte **SHA-1 de la clé de release** (`keytool -list -v -keystore glucodose-upload.keystore`). Détails et messages d'erreur : README d'`expo-backup`.
 
 ## Versioning & contribution
 
