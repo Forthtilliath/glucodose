@@ -17,7 +17,8 @@ export default function AboutScreen() {
         version={version}
         description={[
           "GlucoDose est un outil personnel d’aide au calcul de dose d’insuline au repas : pesée, aliments, recettes et correction, sans calculette.",
-          "Toutes les données (récipients, aliments, recettes, ratios, réglages, historique) restent uniquement sur cet appareil, dans une base locale. Rien n’est envoyé sur un serveur.",
+          "Toutes les données (récipients, aliments, recettes, ratios, réglages, historique) sont stockées sur cet appareil, dans une base locale. Aucun compte n’est nécessaire.",
+          "Si tu le choisis, l’app peut aussi les sauvegarder sur ton Google Drive (Réglages → Sauvegarde et restauration) : c’est facultatif, rien n’est envoyé tant que tu n’as pas relié ton compte. Les sauvegardes sont alors chiffrées sur ton téléphone avant l’envoi, pour protéger tes données de santé.",
         ]}
         sections={[
           {
