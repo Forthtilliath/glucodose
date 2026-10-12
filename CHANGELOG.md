@@ -21,6 +21,7 @@ Le format suit [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/), et le p
 ### Modifié
 - APK plus léger : il n'embarque plus le code natif des émulateurs (x86), seulement celui des téléphones (ARM).
 - L'ancienne sauvegarde automatique locale (fichier en clair dans l'app) est remplacée par la sauvegarde Drive chiffrée, et supprimée.
+- « À propos » et « Mentions légales » précisent que la sauvegarde Google Drive est facultative (rien n'est envoyé sans relier son compte) et chiffrée.
 
 ## [1.14.0] - 2026-10-09
 
