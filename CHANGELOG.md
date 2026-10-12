@@ -6,6 +6,12 @@ Le format suit [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/), et le p
 
 ## [Unreleased]
 
+### Sécurité
+- L'APK est désormais signé avec une clé propre à GlucoDose, et non plus avec la clé de debug publique commune à toutes les apps React Native (avec laquelle n'importe qui pouvait signer une fausse mise à jour). **Mise à jour impossible par-dessus l'ancienne version** : exporter une sauvegarde (Réglages → Sauvegarde), désinstaller l'app, installer la nouvelle version puis importer la sauvegarde.
+
+### Modifié
+- APK plus léger : il n'embarque plus le code natif des émulateurs (x86), seulement celui des téléphones (ARM).
+
 ## [1.14.0] - 2026-10-09
 
 ### Modifié
