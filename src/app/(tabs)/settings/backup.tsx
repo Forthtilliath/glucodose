@@ -1,88 +1,43 @@
-import { useEffect, useMemo, useState } from "react";
-import { Alert, ScrollView, StyleSheet } from "react-native";
-import * as DocumentPicker from "expo-document-picker";
-import * as Sharing from "expo-sharing";
-import { BackupSettingsScreen } from "@forthtilliath/react-native-kit/components/settings/BackupSettingsScreen";
+import { useMemo } from "react";
+import { ScrollView, StyleSheet } from "react-native";
+import { BackupScreen as SharedBackupScreen } from "@forthtilliath/expo-backup-ui";
 
-import { exportAllData, getAutoBackupSavedAt, importAllData, InvalidBackupFileError } from "@/lib/backup";
+import { describeBackup } from "@/lib/backup";
+import { backup } from "@/lib/backupManager";
 import { type ThemeColors, useColors } from "@/theme/colors";
 
 export default function BackupScreen() {
   const colors = useColors();
   const styles = useMemo(() => createStyles(colors), [colors]);
-  const [autoBackupSavedAt, setAutoBackupSavedAt] = useState<string | null | undefined>(undefined);
-
-  useEffect(() => {
-    getAutoBackupSavedAt().then(setAutoBackupSavedAt);
-  }, []);
-
-  async function handleExport() {
-    const uri = await exportAllData();
-    const canShare = await Sharing.isAvailableAsync();
-    if (canShare) {
-      await Sharing.shareAsync(uri, {
-        mimeType: "application/json",
-        dialogTitle: "Sauvegarder mes données",
-      });
-    } else {
-      Alert.alert("Export prêt", `Fichier créé : ${uri}`);
-    }
-  }
-
-  async function handleImport() {
-    const result = await DocumentPicker.getDocumentAsync({ type: "application/json" });
-    if (result.canceled || !result.assets[0]) return;
-    const uri = result.assets[0].uri;
-
-    try {
-      await importAllData(uri);
-      Alert.alert("Restauration terminée", "Les données ont été remplacées avec succès.");
-    } catch (error) {
-      if (error instanceof InvalidBackupFileError) {
-        // Titre distinct de l'erreur générique du composant — remonter
-        // l'erreur telle quelle afficherait "Échec de l'import" à la place.
-        Alert.alert("Fichier invalide", error.message);
-        return;
-      }
-      throw error;
-    }
-  }
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-      <BackupSettingsScreen
-        onExport={handleExport}
-        onImport={handleImport}
-        layout="sections"
-        info={{
-          label: "Sauvegarde automatique",
-          value:
-            autoBackupSavedAt == null
-              ? "Aucune sauvegarde automatique pour l'instant."
-              : new Date(autoBackupSavedAt).toLocaleString("fr-FR"),
-        }}
-        icons={{ export: "download-outline", import: "cloud-upload-outline" }}
+      <SharedBackupScreen
+        manager={backup}
+        describeBackup={describeBackup}
         labels={{
-          exportButton: "Exporter mes données",
-          importButton: "Importer une sauvegarde",
-          exportHelpText:
-            "Crée un fichier JSON contenant tout : récipients, aliments, recettes, ratios, réglages et historique. À garder précieusement ou à transférer vers un autre téléphone.",
-          importHelpText:
-            "Restaure une sauvegarde exportée précédemment. Remplace entièrement les données actuelles — il n’y a pas de fusion.",
-          importConfirmMessage:
-            "Toutes les données actuelles (récipients, aliments, recettes, ratios, réglages, historique) seront définitivement remplacées par celles du fichier. Cette action est irréversible.",
+          fileHintEncrypted:
+            "Un fichier chiffré contenant tout : récipients, aliments, recettes, ratios, réglages et historique. Illisible sans la clé de ce téléphone (ou sa clé de secours).",
+          restoreConfirmMessage: (description) =>
+            `Sauvegarde : ${description}. Toutes les données actuelles (récipients, aliments, recettes, ratios, réglages, historique) seront remplacées — tu pourras annuler la restauration ensuite.`,
         }}
         styles={{
-          infoBox: { backgroundColor: colors.surface, borderColor: colors.border },
-          infoLabel: { color: colors.textMuted },
-          infoValue: { color: colors.textMuted },
+          section: { backgroundColor: colors.surface, borderColor: colors.border },
           sectionTitle: { color: colors.text },
           hint: { color: colors.textMuted },
-          button: { backgroundColor: colors.primary, borderColor: colors.primary },
-          buttonDisabled: { opacity: 0.6 },
+          status: { color: colors.text },
+          errorText: { color: colors.danger },
+          button: { backgroundColor: colors.primary },
           buttonText: { color: colors.primaryText },
-          iconColor: colors.primaryText,
-          importButton: { backgroundColor: colors.danger, borderColor: colors.danger },
+          secondaryButton: { borderColor: colors.primary },
+          secondaryButtonText: { color: colors.primary },
+          ghostButtonText: { color: colors.textMuted },
+          switchLabel: { color: colors.text },
+          modalCard: { backgroundColor: colors.surface },
+          recoveryCode: { color: colors.text },
+          input: { color: colors.text, borderColor: colors.border },
+          placeholderTextColor: colors.textMuted,
+          activityIndicatorColor: colors.primary,
         }}
       />
     </ScrollView>

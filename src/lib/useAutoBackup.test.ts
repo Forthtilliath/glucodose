@@ -7,25 +7,38 @@ jest.mock("drizzle-orm/expo-sqlite", () => ({
   useLiveQuery: (...args: unknown[]) => mockUseLiveQuery(...args),
 }));
 
-const mockRunAutoBackup = jest.fn().mockResolvedValue(undefined);
-jest.mock("@/lib/backup", () => ({ runAutoBackup: () => mockRunAutoBackup() }));
+const mockNotifyDataChanged = jest.fn();
+const mockRemoveLegacyAutoBackup = jest.fn();
+jest.mock("@/lib/backupManager", () => ({
+  backup: { notifyDataChanged: () => mockNotifyDataChanged() },
+  removeLegacyAutoBackup: () => mockRemoveLegacyAutoBackup(),
+}));
 
-jest.mock("@/db/client", () => ({ db: { select: () => ({ from: () => "query" }) } }));
-jest.mock("@/db/schema", () => ({ containers: {}, foods: {}, settings: {} }));
+const mockStartManager = jest.fn();
+jest.mock("@forthtilliath/expo-backup-ui", () => ({
+  useAutoBackup: (manager: unknown) => mockStartManager(manager),
+}));
 
-const FIVE_MINUTES_MS = 5 * 60 * 1000;
+jest.mock("@/db/client", () => {
+  const query = { from: () => query };
+  return { db: { select: () => query } };
+});
 
-function setData(containersData: unknown, foodsData: unknown, settingsData: unknown) {
-  mockUseLiveQuery
-    .mockReturnValueOnce({ data: containersData })
-    .mockReturnValueOnce({ data: foodsData })
-    .mockReturnValueOnce({ data: settingsData });
+const LIVE_QUERIES = 6;
+const NO_WEIGHING = [{ total: 0, lastId: null }];
+
+// useLiveQuery est appelé 6 fois par rendu, dans l'ordre : récipients,
+// aliments, composants, ratios, réglages, agrégat des pesées.
+function setData(...values: unknown[]) {
+  for (let i = 0; i < LIVE_QUERIES; i++) {
+    mockUseLiveQuery.mockReturnValueOnce({ data: values[i] });
+  }
 }
 
 describe("useAutoBackup", () => {
   beforeEach(() => {
     jest.useFakeTimers();
-    mockRunAutoBackup.mockClear();
+    mockNotifyDataChanged.mockClear();
     mockUseLiveQuery.mockReset();
   });
 
@@ -33,50 +46,35 @@ describe("useAutoBackup", () => {
     jest.useRealTimers();
   });
 
-  it("ne déclenche rien tant que les 3 requêtes n'ont pas toutes livré leur premier résultat", async () => {
-    setData(undefined, undefined, undefined);
+  it("démarre le gestionnaire et supprime l'ancienne sauvegarde locale en clair", async () => {
+    setData([], [], [], [], [], NO_WEIGHING);
     await renderHook(() => useAutoBackup());
-
-    jest.advanceTimersByTime(FIVE_MINUTES_MS);
-    expect(mockRunAutoBackup).not.toHaveBeenCalled();
+    expect(mockStartManager).toHaveBeenCalled();
+    expect(mockRemoveLegacyAutoBackup).toHaveBeenCalled();
   });
 
-  it("ne déclenche pas de sauvegarde au premier rendu une fois les données chargées", async () => {
-    setData([], [], []);
-    await renderHook(() => useAutoBackup());
+  it("ne signale rien tant que les données ne sont pas chargées, ni au premier chargement", async () => {
+    setData(undefined, undefined, undefined, undefined, undefined, undefined);
+    const { rerender } = await renderHook(() => useAutoBackup());
+    setData([], [], [], [], [], NO_WEIGHING);
+    await rerender({});
 
-    jest.advanceTimersByTime(FIVE_MINUTES_MS);
-    expect(mockRunAutoBackup).not.toHaveBeenCalled();
+    jest.runAllTimers();
+    expect(mockNotifyDataChanged).not.toHaveBeenCalled();
   });
 
-  it("déclenche une sauvegarde 5 minutes après un changement de données", async () => {
-    setData([], [], []);
+  it("signale chaque modification, pesées comprises", async () => {
+    setData([], [], [], [], [], NO_WEIGHING);
     const { rerender } = await renderHook(() => useAutoBackup());
 
-    setData([{ id: 1 }], [], []);
+    setData([], [], [], [], [], [{ total: 1, lastId: 1 }]);
     await rerender({});
+    jest.runAllTimers();
+    expect(mockNotifyDataChanged).toHaveBeenCalledTimes(1);
 
-    jest.advanceTimersByTime(FIVE_MINUTES_MS - 1);
-    expect(mockRunAutoBackup).not.toHaveBeenCalled();
-
-    jest.advanceTimersByTime(1);
-    expect(mockRunAutoBackup).toHaveBeenCalledTimes(1);
-  });
-
-  it("repousse la sauvegarde si un nouveau changement survient avant les 5 minutes", async () => {
-    setData([], [], []);
-    const { rerender } = await renderHook(() => useAutoBackup());
-
-    setData([{ id: 1 }], [], []);
+    setData([{ id: 1 }], [], [], [], [], [{ total: 1, lastId: 1 }]);
     await rerender({});
-    jest.advanceTimersByTime(4 * 60 * 1000);
-
-    setData([{ id: 1 }, { id: 2 }], [], []);
-    await rerender({});
-    jest.advanceTimersByTime(4 * 60 * 1000);
-    expect(mockRunAutoBackup).not.toHaveBeenCalled();
-
-    jest.advanceTimersByTime(1 * 60 * 1000);
-    expect(mockRunAutoBackup).toHaveBeenCalledTimes(1);
+    jest.runAllTimers();
+    expect(mockNotifyDataChanged).toHaveBeenCalledTimes(2);
   });
 });
