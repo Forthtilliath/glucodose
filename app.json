@@ -20,6 +20,7 @@
       "predictiveBackGestureEnabled": false,
       "package": "com.forth.glucodose",
       "versionCode": 11400,
+      "allowBackup": false,
       "permissions": [
         "android.permission.REQUEST_INSTALL_PACKAGES"
       ]
