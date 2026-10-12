@@ -114,6 +114,49 @@ describe("importAllData", () => {
     expect(containers).toHaveLength(1);
     expect(containers[0].name).toBe("Bol importé");
   });
+
+  it("rejette un ratio d'insuline invalide sans toucher aux données existantes", async () => {
+    await testDb.insert(schema.insulinRatios).values({ label: "Midi", carbsGramsPerUnit: 10 });
+    fakeFs.store.set(
+      "tampered.json",
+      JSON.stringify({
+        schemaVersion: 1,
+        containers: [],
+        foods: [],
+        recipeComponents: [],
+        insulinRatios: [{ id: 1, label: "Midi", carbsGramsPerUnit: -1 }],
+        settings: [],
+        weighings: [],
+      })
+    );
+
+    await expect(backup.importAllData("tampered.json")).rejects.toThrow(/données invalides/);
+    const ratios = await testDb.select().from(schema.insulinRatios);
+    expect(ratios[0].carbsGramsPerUnit).toBe(10);
+  });
+
+  it("réimporte sans erreur une sauvegarde exportée par l'app", async () => {
+    await testDb.insert(schema.containers).values({ name: "Bol", tareWeightG: 100 });
+    const [food] = await testDb
+      .insert(schema.foods)
+      .values({ name: "Riz", type: "ingredient", carbsPer100g: 28 })
+      .returning();
+    const [ratio] = await testDb
+      .insert(schema.insulinRatios)
+      .values({ label: "Midi", carbsGramsPerUnit: 10 })
+      .returning();
+    await testDb.insert(schema.settings).values({ id: 1, targetGlycemia: 1.2, sensitivityFactor: 0.4 });
+    await testDb.insert(schema.weighings).values({
+      foodId: food.id, foodNameSnapshot: "Riz", grossWeightG: 300, netWeightG: 200,
+      carbsPer100gSnapshot: 28, carbsG: 56, ratioId: ratio.id, mealInsulinUnits: 5.6, totalInsulinUnits: 5.6,
+    });
+
+    const uri = await backup.exportAllData();
+    await backup.importAllData(uri);
+
+    expect(await testDb.select().from(schema.weighings)).toHaveLength(1);
+    expect((await testDb.select().from(schema.settings))[0].sensitivityFactor).toBe(0.4);
+  });
 });
 
 describe("runAutoBackup / getAutoBackupSavedAt", () => {
