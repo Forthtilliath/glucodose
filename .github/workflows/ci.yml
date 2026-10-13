@@ -26,7 +26,9 @@ jobs:
           node-version: 20
           cache: npm
 
-      - run: npm ci
+      # --legacy-peer-deps : @expo/require-utils (via expo-quick-actions) exige
+      # typescript ^5 alors que le projet est en 6 ; sans impact au runtime.
+      - run: npm ci --legacy-peer-deps
 
       - name: Vérification des types
         run: npx tsc --noEmit
