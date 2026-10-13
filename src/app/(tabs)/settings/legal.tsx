@@ -22,10 +22,10 @@ export default function LegalPage() {
           {
             title: "Confidentialité",
             paragraphs: [
-              "L’app ne collecte aucune donnée personnelle pour son propre compte : pas de compte utilisateur, pas de serveur. Tout ce que tu saisis (récipients, aliments, recettes, ratios, réglages, historique, photos de récipients) est stocké dans une base de données locale sur cet appareil.",
-              "Sauvegarde sur Google Drive, au choix : uniquement si tu relies toi-même ton compte Google dans Réglages → Sauvegarde et restauration. Sans cette démarche, rien ne quitte ton téléphone. Une fois le compte relié, tes données (hors photos) sont chiffrées sur le téléphone avant d’être envoyées, pour leur sécurité, dans un dossier privé réservé à l’app sur ton Drive. L’app n’a accès à aucun autre fichier de ton Drive et n’envoie ces sauvegardes à personne d’autre. Tu peux arrêter la sauvegarde à tout moment avec le bouton « Déconnecter ».",
+              "L’app ne collecte aucune donnée personnelle pour son propre compte : pas de compte utilisateur, pas de serveur. Tout ce que tu saisis (récipients, aliments, recettes, ratios, réglages, historique, photos de récipients et d’aliments) est stocké dans une base de données locale sur cet appareil.",
+              "Sauvegarde sur Google Drive, au choix : uniquement si tu relies toi-même ton compte Google dans Réglages → Sauvegarde et restauration. Sans cette démarche, rien ne quitte ton téléphone. Une fois le compte relié, tes données (photos comprises) sont chiffrées sur le téléphone avant d’être envoyées, pour leur sécurité, dans un dossier privé réservé à l’app sur ton Drive. L’app n’a accès à aucun autre fichier de ton Drive et n’envoie ces sauvegardes à personne d’autre. Tu peux arrêter la sauvegarde à tout moment avec le bouton « Déconnecter ».",
               "La recherche de mises à jour interroge GitHub, où l’app est publiée, sans transmettre aucune de tes données.",
-              "L’accès à l’appareil photo et à la pellicule n’est utilisé que pour illustrer tes récipients, à ta demande. Aucun outil d’analyse d’usage ni de publicité n’est intégré à l’app.",
+              "L’accès à l’appareil photo et à la pellicule n’est utilisé que pour illustrer tes récipients et aliments, à ta demande. Aucun outil d’analyse d’usage ni de publicité n’est intégré à l’app.",
               "Tes données restent sous ton contrôle : tu peux les exporter (dans un fichier chiffré) ou les supprimer à tout moment depuis Réglages → Sauvegarde et restauration, ou en désinstallant l’app.",
             ],
           },

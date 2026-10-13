@@ -6,6 +6,15 @@ Le format suit [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/), et le p
 
 ## [Unreleased]
 
+### Ajouté
+- Les photos des récipients et des aliments sont incluses dans la sauvegarde (fichier exporté et Google Drive, chiffrées comme le reste) : elles reviennent avec une restauration, après une réinstallation ou sur un nouveau téléphone.
+
+### Modifié
+- Les photos sont réduites (800 px) à l'enregistrement, pour garder une sauvegarde légère. Les photos déjà enregistrées sont réduites à la prochaine sauvegarde.
+
+### Sécurité
+- Une sauvegarde importée ne peut plus faire lire ni supprimer un fichier de l'app autre qu'une photo, et chaque photo importée est vérifiée (type d'image, taille) avant d'être écrite.
+
 ## [1.15.1] - 2026-10-13
 
 ### Corrigé
