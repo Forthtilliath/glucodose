@@ -3,9 +3,9 @@ import { Pressable, StyleSheet, Text, View } from "react-native";
 import Constants from "expo-constants";
 import { eq } from "drizzle-orm";
 import { useLiveQuery } from "drizzle-orm/expo-sqlite";
-import { UpdateAvailableBanner } from "@forthtilliath/expo-release-updates-ui/UpdateAvailableBanner";
 import { useUpdateCheck } from "@forthtilliath/expo-release-updates-ui/useUpdateCheck";
 
+import { UpdateBanner } from "@/components/UpdateBanner";
 import { db } from "@/db/client";
 import { dismissUpdateVersion, recordUpdateCheck } from "@/db/repository";
 import { settings } from "@/db/schema";
@@ -16,28 +16,44 @@ type InstallState =
   | { status: "downloading"; version: string; progress: number }
   | { status: "error"; version: string; apkUrl: string };
 
+type LastCheck = { lastCheckedAt: number | null; dismissedVersion: string | null };
+
 // Vérifie une fois par lancement si une nouvelle version est disponible sur
-// GitHub (voir useUpdateCheck de @forthtilliath/react-native-kit), et
+// GitHub (voir useUpdateCheck de @forthtilliath/expo-release-updates-ui), et
 // affiche une bannière si oui. "Installer" ferme la bannière et lance
 // directement le téléchargement de l'APK (une petite carte de progression
 // prend sa place, puis Android demande confirmation d'installation) — pas
 // de détour par l'écran Mises à jour. "Ignorer" ne renotifie plus pour cette
 // version précise, mais renotifiera si une version encore plus récente sort.
+//
+// useUpdateCheck ne lit getLastCheck() qu'une fois, au montage : il ne doit
+// donc être monté qu'APRÈS la lecture des réglages en base (updatedAt défini).
+// Sinon il voyait toujours "aucune version ignorée, jamais vérifié", et la
+// bannière réapparaissait à chaque lancement malgré "Ignorer".
 export function UpdateNotifier() {
+  const { data: settingsRows, updatedAt } = useLiveQuery(db.select().from(settings).where(eq(settings.id, 1)));
+  if (!updatedAt) return null;
+  const currentSettings = settingsRows[0];
+  return (
+    <UpdateCheck
+      lastCheck={{
+        lastCheckedAt: currentSettings?.lastUpdateCheckAt ?? null,
+        dismissedVersion: currentSettings?.dismissedUpdateVersion ?? null,
+      }}
+    />
+  );
+}
+
+function UpdateCheck({ lastCheck }: { lastCheck: LastCheck }) {
   const colors = useColors();
   const styles = useMemo(() => createStyles(colors), [colors]);
-  const { data: settingsRows } = useLiveQuery(db.select().from(settings).where(eq(settings.id, 1)));
-  const currentSettings = settingsRows?.[0];
   const [install, setInstall] = useState<InstallState | null>(null);
 
   const update = useUpdateCheck({
     currentVersion: Constants.expoConfig?.version ?? "0.0.0",
     checkForUpdate: fetchLatestRelease,
     compareVersions,
-    getLastCheck: () => ({
-      lastCheckedAt: currentSettings?.lastUpdateCheckAt ?? null,
-      dismissedVersion: currentSettings?.dismissedUpdateVersion ?? null,
-    }),
+    getLastCheck: () => lastCheck,
     onChecked: (lastCheckedAt) => {
       recordUpdateCheck(lastCheckedAt).catch(() => {});
     },
@@ -91,23 +107,10 @@ export function UpdateNotifier() {
 
   return (
     <View style={styles.container}>
-      <UpdateAvailableBanner
+      <UpdateBanner
         version={release.version}
         notes={release.notes}
-        labels={{
-          action: "Installer",
-          dismiss: "Ignorer",
-          dismissAccessibilityLabel: `Ignorer la version ${release.version}`,
-        }}
-        styles={{
-          container: { backgroundColor: colors.surface, borderColor: colors.border },
-          title: { color: colors.text },
-          notes: { heading: { color: colors.text }, text: { color: colors.textMuted } },
-          actionButton: { backgroundColor: colors.primary },
-          actionButtonText: { color: colors.primaryText },
-          dismissButtonText: { color: colors.textMuted },
-        }}
-        onPress={() => {
+        onInstall={() => {
           // Pas de version "ignorée" mémorisée en base : si l'installation
           // n'aboutit pas, la bannière pourra réapparaître au prochain
           // lancement (comportement voulu, distinct d'un vrai "Ignorer").
