@@ -69,7 +69,7 @@ export default function WeighScreen() {
   const targetGlycemia = appSettings?.targetGlycemia ?? null;
   const sensitivityFactor = appSettings?.sensitivityFactor ?? null;
   const glycemiaUnit = appSettings?.glycemiaUnit ?? null;
-  const showInsulinDose = appSettings?.showInsulinDose ?? true;
+  const showInsulinDose = appSettings?.showInsulinDose ?? false;
   const correctionAvailable = showInsulinDose && targetGlycemia != null && sensitivityFactor != null;
 
   const [selectedContainerId, setSelectedContainerId] = useState<number | null>(null);

@@ -86,9 +86,10 @@ export const settings = sqliteTable("settings", {
   sensitivityFactor: real("sensitivity_factor"), // baisse de glycémie pour 1 unité, dans glycemiaUnit
   // Désactivable pour les utilisateurs qui veulent juste connaître les
   // glucides d'un repas, sans calcul de dose (pas de ratio ni de correction).
+  // Désactivé par défaut : l'app est d'abord un calculateur de glucides.
   showInsulinDose: integer("show_insulin_dose", { mode: "boolean" })
     .notNull()
-    .default(true),
+    .default(false),
   // Sélection courante du widget d'accueil (cycle "Récents" sur tap) :
   // permet de reprendre le récipient/aliment choisi entre deux ouvertures du
   // widget, sans jamais ouvrir l'app. Pas de vraie contrainte de clé

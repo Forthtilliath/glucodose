@@ -137,6 +137,12 @@ describe("replaceAllData", () => {
     expect(await testDb.select().from(schema.weighings)).toHaveLength(1);
     expect((await testDb.select().from(schema.settings))[0].sensitivityFactor).toBe(0.4);
   });
+
+  it("garde la dose affichée pour une sauvegarde antérieure à ce réglage", async () => {
+    await backup.replaceAllData(backup.parseBackup(backupText({ settings: [{ id: 1, glycemiaUnit: "g/L" }] })));
+
+    expect((await testDb.select().from(schema.settings))[0].showInsulinDose).toBe(true);
+  });
 });
 
 describe("isBackupEmpty / describeBackup", () => {

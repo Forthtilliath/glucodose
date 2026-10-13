@@ -233,6 +233,14 @@ describe("ratios insuline/glucides", () => {
 });
 
 describe("réglages", () => {
+  it("n'active pas le calcul de dose sur une nouvelle installation", async () => {
+    // Première écriture de l'app : la vérification de mise à jour au lancement.
+    await repo.recordUpdateCheck(1_700_000_000_000);
+
+    const rows = await testDb.select().from(schema.settings);
+    expect(rows[0].showInsulinDose).toBe(false);
+  });
+
   it("crée la ligne de réglages si elle n'existe pas encore", async () => {
     await repo.updateSettings({
       glycemiaUnit: "mmol/L",
