@@ -98,7 +98,13 @@ export async function replaceAllData(data: BackupData): Promise<void> {
     // les relations (composants de recette, historique) restent cohérentes.
     if (data.containers.length) await tx.insert(containers).values(data.containers);
     if (data.insulinRatios.length) await tx.insert(insulinRatios).values(data.insulinRatios);
-    if (data.settings.length) await tx.insert(settings).values(data.settings);
+    // Les sauvegardes antérieures au réglage showInsulinDose affichaient
+    // toujours la dose : on la garde plutôt que de prendre le défaut (false).
+    if (data.settings.length) {
+      await tx
+        .insert(settings)
+        .values(data.settings.map((row) => ({ ...row, showInsulinDose: row.showInsulinDose ?? true })));
+    }
     if (data.foods.length) await tx.insert(foods).values(data.foods);
     if (data.recipeComponents.length) await tx.insert(recipeComponents).values(data.recipeComponents);
     if (data.weighings.length) await tx.insert(weighings).values(data.weighings);

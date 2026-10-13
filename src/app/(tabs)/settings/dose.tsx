@@ -17,7 +17,7 @@ export default function DoseSettingsScreen() {
   const [glycemiaUnit, setGlycemiaUnit] = useState<"mmol/L" | "g/L">("mmol/L");
   const [targetGlycemia, setTargetGlycemia] = useState("");
   const [sensitivityFactor, setSensitivityFactor] = useState("");
-  const [showInsulinDose, setShowInsulinDose] = useState(true);
+  const [showInsulinDose, setShowInsulinDose] = useState(false);
 
   // Hydrates the editable draft from the async-loaded settings, once they
   // arrive. Deliberately not derived directly from `currentSettings` — the

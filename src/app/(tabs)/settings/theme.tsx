@@ -36,7 +36,7 @@ export default function ThemeSettingsPage() {
       glycemiaUnit: currentSettings?.glycemiaUnit ?? "mmol/L",
       targetGlycemia: currentSettings?.targetGlycemia ?? null,
       sensitivityFactor: currentSettings?.sensitivityFactor ?? null,
-      showInsulinDose: currentSettings?.showInsulinDose ?? true,
+      showInsulinDose: currentSettings?.showInsulinDose ?? false,
       themePreference: preference,
     });
   }
