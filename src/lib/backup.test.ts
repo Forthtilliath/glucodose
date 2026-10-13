@@ -8,8 +8,15 @@ import {
 
 import { closeTestDb, createTestDb, mockDbClient, resetTestDb, type TestDb } from "@/db/testDb";
 import * as schema from "@/db/schema";
+import { Directory, File, Paths, resetFakeFileSystem } from "@/lib/testing/fakeFileSystem";
+
+jest.mock("expo-file-system", () => jest.requireActual("@/lib/testing/fakeFileSystem"));
+jest.mock("expo-image-manipulator", () => ({ ImageManipulator: {}, SaveFormat: { JPEG: "jpeg" } }));
 
 type Backup = typeof import("./backup");
+
+const DOC = "file:///data/app/files/";
+const JPEG = new Uint8Array([0xff, 0xd8, 0xff, 0xe0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]);
 
 let testDb: TestDb;
 let backup: Backup;
@@ -30,6 +37,7 @@ afterAll(() => {
 
 beforeEach(async () => {
   await resetTestDb(testDb);
+  resetFakeFileSystem();
 });
 
 function backupText(overrides: Record<string, unknown> = {}) {
@@ -136,6 +144,36 @@ describe("replaceAllData", () => {
 
     expect(await testDb.select().from(schema.weighings)).toHaveLength(1);
     expect((await testDb.select().from(schema.settings))[0].sensitivityFactor).toBe(0.4);
+  });
+
+  it("restaure les photos sur un téléphone qui ne les a plus (réinstallation)", async () => {
+    const photo = new File(`${DOC}containers/container-1.jpg`);
+    photo.write(JPEG);
+    await testDb.insert(schema.containers).values({ name: "Bol", tareWeightG: 100, photoUri: photo.uri });
+    const text = JSON.stringify(await backup.buildExportedData());
+
+    resetFakeFileSystem();
+    await resetTestDb(testDb);
+    await backup.replaceAllData(backup.parseBackup(text));
+
+    const [container] = await testDb.select().from(schema.containers);
+    expect(container.photoUri).not.toBe(photo.uri);
+    expect(await new File(container.photoUri!).bytes()).toEqual(JPEG);
+  });
+
+  it("n'écrit aucune photo si la base refuse les données", async () => {
+    const data = backup.parseBackup(
+      backupText({
+        containers: [{ id: 1, name: "Bol", tareWeightG: 100 }],
+        photos: [{ table: "containers", id: 1, mimeType: "image/jpeg", data: Buffer.from(JPEG).toString("base64") }],
+      })
+    );
+    // Pesée vers un aliment absent : la base refuse (clé étrangère).
+    data.weighings = [{ id: 1, foodId: 99, foodNameSnapshot: "?", grossWeightG: 1, netWeightG: 1,
+      carbsPer100gSnapshot: 1, carbsG: 1, mealInsulinUnits: 0, totalInsulinUnits: 0 }];
+
+    await expect(backup.replaceAllData(data)).rejects.toThrow();
+    expect(new Directory(Paths.document, "containers").list()).toEqual([]);
   });
 
   it("garde la dose affichée pour une sauvegarde antérieure à ce réglage", async () => {
