@@ -1,4 +1,4 @@
-import { normalizeForSearch } from "@forthtilliath/react-native-kit/utils/helpers/normalizeForSearch";
+import { normalizeForSearch } from "@forthtilliath/ts-kit/string/normalizeForSearch";
 
 import { searchCiqualFoods } from "./ciqual";
 

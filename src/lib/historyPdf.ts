@@ -1,6 +1,6 @@
 import { File, Paths } from "expo-file-system";
 import * as Print from "expo-print";
-import { escapeHtml } from "@forthtilliath/react-native-kit/utils/format/escapeHtml";
+import { escapeHtml } from "@forthtilliath/ts-kit/string/escapeHtml";
 
 import { parseDbDate } from "./dbDate";
 import { buildExportFileName } from "./exportFileName";
