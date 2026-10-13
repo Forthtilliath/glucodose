@@ -19,6 +19,7 @@ Le format suit [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/), et le p
 - Clé de secours, pour relire un fichier exporté sur un autre téléphone sans Google Drive.
 
 ### Modifié
+- Le calcul de dose d'insuline est désactivé par défaut sur une nouvelle installation : l'app affiche d'abord les glucides, et la dose s'active dans Réglages → Dose et correction. Une installation existante garde son réglage.
 - APK plus léger : il n'embarque plus le code natif des émulateurs (x86), seulement celui des téléphones (ARM).
 - L'ancienne sauvegarde automatique locale (fichier en clair dans l'app) est remplacée par la sauvegarde Drive chiffrée, et supprimée.
 - « À propos » et « Mentions légales » précisent que la sauvegarde Google Drive est facultative (rien n'est envoyé sans relier son compte) et chiffrée.
