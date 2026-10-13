@@ -1,32 +1,63 @@
 import { fireEvent, render, waitFor } from "@testing-library/react-native";
 
 import { dismissUpdateVersion } from "@/db/repository";
-import { downloadAndInstallApk } from "@/lib/appUpdate";
+import { downloadAndInstallApk, fetchLatestRelease } from "@/lib/appUpdate";
 
 import { UpdateNotifier } from "./UpdateNotifier";
 
 jest.mock("@/db/client", () => ({
   db: { select: () => ({ from: () => ({ where: () => ({}) }) }) },
 }));
+// Réglages lus en base, modifiables par test (updatedAt absent = pas encore lus).
+let mockLiveQuery: { data: Record<string, unknown>[]; updatedAt?: Date } = { data: [] };
 jest.mock("drizzle-orm/expo-sqlite", () => ({
-  useLiveQuery: () => ({ data: [] }),
+  useLiveQuery: () => mockLiveQuery,
 }));
 jest.mock("@/db/repository", () => ({
   recordUpdateCheck: jest.fn(() => Promise.resolve()),
   dismissUpdateVersion: jest.fn(() => Promise.resolve()),
 }));
 jest.mock("@/lib/appUpdate", () => ({
-  fetchLatestRelease: () =>
-    Promise.resolve({ version: "99.0.0", notes: "", apkUrl: "https://example.test/app.apk" }),
+  fetchLatestRelease: jest.fn(),
   compareVersions: () => 1,
   downloadAndInstallApk: jest.fn(),
 }));
 
 const mockDownload = downloadAndInstallApk as jest.Mock;
+const mockFetch = fetchLatestRelease as jest.Mock;
 
 describe("UpdateNotifier", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockLiveQuery = { data: [], updatedAt: new Date() };
+    mockFetch.mockResolvedValue({ version: "99.0.0", notes: "", apkUrl: "https://example.test/app.apk" });
+  });
+
+  it("attend la lecture des réglages avant de vérifier", async () => {
+    mockLiveQuery = { data: [] };
+    await render(<UpdateNotifier />);
+    expect(mockFetch).not.toHaveBeenCalled();
+  });
+
+  it("ne réaffiche pas une version déjà ignorée", async () => {
+    mockLiveQuery = {
+      data: [{ id: 1, lastUpdateCheckAt: null, dismissedUpdateVersion: "99.0.0" }],
+      updatedAt: new Date(),
+    };
+    const screen = await render(<UpdateNotifier />);
+    await waitFor(() => expect(mockFetch).toHaveBeenCalled());
+    expect(screen.queryByText("Installer")).toBeNull();
+  });
+
+  it("affiche les notes de version dans une zone défilante", async () => {
+    mockFetch.mockResolvedValue({
+      version: "99.0.0",
+      notes: "### Corrigé\n- Un **bug**",
+      apkUrl: "https://example.test/app.apk",
+    });
+    const screen = await render(<UpdateNotifier />);
+    expect(await screen.findByTestId("update-notes")).toBeTruthy();
+    expect(screen.getByText("Corrigé")).toBeTruthy();
   });
 
   it("propose « Installer » et « Ignorer »", async () => {
