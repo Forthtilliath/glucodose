@@ -62,9 +62,9 @@ Le repas est ensuite enregistré dans ton historique. Une erreur ? Un tap sur «
 
 ### Un exemple concret
 
-> Tu manges des pâtes. L'assiette pleine pèse **430 g** ; vide, elle pèse **250 g**.
+> Tu manges des pâtes. L'assiette pleine pèse **440 g** ; vide, elle pèse **260 g**.
 >
-> - Poids des pâtes : 430 − 250 = **180 g**
+> - Poids des pâtes : 440 − 260 = **180 g**
 > - Les pâtes cuites contiennent environ **30 g de glucides pour 100 g**
 > - Glucides du repas : 180 × 30 ÷ 100 = **54 g**
 >
