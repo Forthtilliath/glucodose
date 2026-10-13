@@ -6,6 +6,11 @@ Le format suit [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/), et le p
 
 ## [Unreleased]
 
+## [1.16.0] - 2026-10-13
+
+### Important
+- **Venant de la 1.14.0 ou avant, les photos sont perdues à la mise à jour** : la désinstallation obligatoire (nouvelle clé de signature) les efface, et les sauvegardes de ces versions ne contenaient pas les images. Il faut les rajouter à la main. Désormais, elles sont dans la sauvegarde.
+
 ### Ajouté
 - Les photos des récipients et des aliments sont incluses dans la sauvegarde (fichier exporté et Google Drive, chiffrées comme le reste) : elles reviennent avec une restauration, après une réinstallation ou sur un nouveau téléphone.
 
@@ -14,7 +19,8 @@ Le format suit [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/), et le p
 
 ### Corrigé
 - Réglages → Mises à jour : notes de version lisibles en mode sombre (titres et passages en gras).
-- Notes de version : les citations, l'italique et le code ne s'affichent plus avec leurs symboles bruts (`>`, `*`, `` ` ``).
+- Notes de version : les citations, l'italique et le code ne s'affichent plus avec leurs symboles bruts.
+- Le lien vers une photo disparue est effacé au démarrage : le récipient ou l'aliment propose à nouveau d'ajouter une photo.
 
 ### Sécurité
 - Une sauvegarde importée ne peut plus faire lire ni supprimer un fichier de l'app autre qu'une photo, et chaque photo importée est vérifiée (type d'image, taille) avant d'être écrite.
@@ -223,7 +229,8 @@ Première version suivie. L'app était déjà fonctionnelle avant cette date (hi
 ### Corrigé
 - Validation des valeurs négatives (poids, glucides, glycémie), contraintes de clé étrangère SQLite activées, permission microphone superflue retirée.
 
-[Unreleased]: https://github.com/Forthtilliath/glucodose/compare/v1.15.1...HEAD
+[Unreleased]: https://github.com/Forthtilliath/glucodose/compare/v1.16.0...HEAD
+[1.16.0]: https://github.com/Forthtilliath/glucodose/releases/tag/v1.16.0
 [1.15.1]: https://github.com/Forthtilliath/glucodose/releases/tag/v1.15.1
 [1.15.0]: https://github.com/Forthtilliath/glucodose/releases/tag/v1.15.0
 [1.14.0]: https://github.com/Forthtilliath/glucodose/releases/tag/v1.14.0
