@@ -12,6 +12,10 @@ Le format suit [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/), et le p
 ### Modifié
 - Les photos sont réduites (800 px) à l'enregistrement, pour garder une sauvegarde légère. Les photos déjà enregistrées sont réduites à la prochaine sauvegarde.
 
+### Corrigé
+- Réglages → Mises à jour : notes de version lisibles en mode sombre (titres et passages en gras).
+- Notes de version : les citations, l'italique et le code ne s'affichent plus avec leurs symboles bruts (`>`, `*`, `` ` ``).
+
 ### Sécurité
 - Une sauvegarde importée ne peut plus faire lire ni supprimer un fichier de l'app autre qu'une photo, et chaque photo importée est vérifiée (type d'image, taille) avant d'être écrite.
 
