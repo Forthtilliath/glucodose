@@ -56,7 +56,7 @@ C'est long, répétitif, et une erreur de calcul est vite arrivée, surtout quan
 1. **Pose ton assiette sur la balance** et choisis le récipient utilisé : son poids à vide est déduit automatiquement.
 2. **Choisis l'aliment** : un aliment de ta liste, une de tes recettes, ou un aliment de la table officielle Ciqual. Tu peux aussi le dicter à voix haute.
 3. **Lis le résultat** : les glucides du repas s'affichent instantanément.
-4. **Sous insuline ?** Choisis ton ratio et, si besoin, indique ta glycémie : la dose du repas et la correction s'ajoutent au résultat.
+4. **Sous insuline ?** Active le calcul de dose dans les réglages, puis choisis ton ratio et, si besoin, indique ta glycémie : la dose du repas et la correction s'ajoutent au résultat.
 
 Le repas est ensuite enregistré dans ton historique. Une erreur ? Un tap sur « Annuler » suffit.
 
@@ -94,7 +94,7 @@ Le repas est ensuite enregistré dans ton historique. Une erreur ? Un tap sur «
 ### 💉 Une dose d'insuline en option
 - **Plusieurs ratios** possibles, par exemple un pour le matin et un pour le soir, puisque les besoins varient souvent au fil de la journée.
 - **Correction** selon ta glycémie, en g/L ou en mmol/L.
-- **Pas sous insuline ?** Le calcul de dose se désactive dans les réglages : l'application affiche alors seulement les glucides.
+- **Désactivée par défaut** : l'application n'affiche que les glucides tant que tu n'actives pas le calcul de dose dans *Réglages → Dose et correction*.
 
 ### 🩺 Un suivi à partager avec tes soignants
 - **Historique** de tous tes repas pesés, filtrable par aliment et par période.
@@ -133,7 +133,7 @@ GlucoDose est disponible **pour Android**. Il n'est pas (encore) sur le Play Sto
 <details>
 <summary><b>Je ne suis pas sous insuline, l'application m'est-elle utile ?</b></summary>
 
-Oui. Compter les glucides est son rôle premier. Désactive le calcul de dose dans *Réglages → Dose et correction* : l'application n'affiche plus que les glucides.
+Oui. Compter les glucides est son rôle premier, et le calcul de dose est désactivé par défaut : tu ne vois que les glucides, sans rien à configurer.
 </details>
 
 <details>
@@ -368,3 +368,7 @@ Configuration Google Cloud (une fois) : activer l'API Google Drive, déclarer le
 - La branche `main` est protégée : tout changement passe par une branche dédiée et une Pull Request.
 
 </details>
+
+## Licence
+
+GlucoDose est distribué sous [licence MIT](./LICENSE) : tu peux librement l'utiliser, le modifier et le partager.
