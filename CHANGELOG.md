@@ -6,9 +6,11 @@ Le format suit [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/), et le p
 
 ## [Unreleased]
 
-### Sécurité
-- L'APK est désormais signé avec une clé propre à GlucoDose, et non plus avec la clé de debug publique commune à toutes les apps React Native (avec laquelle n'importe qui pouvait signer une fausse mise à jour). **Mise à jour impossible par-dessus l'ancienne version** : exporter une sauvegarde (Réglages → Sauvegarde), désinstaller l'app, installer la nouvelle version puis importer la sauvegarde.
+## [1.15.0] - 2026-10-13
 
+### Sécurité
+- L'APK est désormais signé avec une clé propre à GlucoDose, et non plus avec la clé de debug publique commune à toutes les apps React Native (avec laquelle n'importe qui pouvait signer une fausse mise à jour). **Mise à jour impossible par-dessus l'ancienne version** : exporter une sauvegarde (Réglages → Sauvegarde et restauration), désinstaller l'app, installer la nouvelle version puis importer la sauvegarde.
+- Dépendances mises à jour pour corriger des failles connues (Expo 57.0.28, React Native 0.86.3).
 - Les sauvegardes sont chiffrées (fichiers exportés et copie Google Drive) avec une clé générée par l'app : rien à retenir. Les anciens exports en clair restent importables.
 - La sauvegarde automatique d'Android est désactivée : elle copiait la base en clair hors du téléphone.
 - Un fichier de sauvegarde modifié ou corrompu est rejeté en entier (chaque ligne est validée), sans rien importer.
@@ -201,7 +203,8 @@ Première version suivie. L'app était déjà fonctionnelle avant cette date (hi
 ### Corrigé
 - Validation des valeurs négatives (poids, glucides, glycémie), contraintes de clé étrangère SQLite activées, permission microphone superflue retirée.
 
-[Unreleased]: https://github.com/Forthtilliath/glucodose/compare/v1.14.0...HEAD
+[Unreleased]: https://github.com/Forthtilliath/glucodose/compare/v1.15.0...HEAD
+[1.15.0]: https://github.com/Forthtilliath/glucodose/releases/tag/v1.15.0
 [1.14.0]: https://github.com/Forthtilliath/glucodose/releases/tag/v1.14.0
 [1.13.1]: https://github.com/Forthtilliath/glucodose/releases/tag/v1.13.1
 [1.13.0]: https://github.com/Forthtilliath/glucodose/releases/tag/v1.13.0
