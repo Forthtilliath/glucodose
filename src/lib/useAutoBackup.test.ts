@@ -14,6 +14,11 @@ jest.mock("@/lib/backupManager", () => ({
   removeLegacyAutoBackup: () => mockRemoveLegacyAutoBackup(),
 }));
 
+const mockClearMissingPhotoLinks = jest.fn(() => Promise.resolve(0));
+jest.mock("@/lib/missingPhotos", () => ({
+  clearMissingPhotoLinks: () => mockClearMissingPhotoLinks(),
+}));
+
 const mockStartManager = jest.fn();
 jest.mock("@forthtilliath/expo-backup-ui", () => ({
   useAutoBackup: (manager: unknown) => mockStartManager(manager),
@@ -46,11 +51,12 @@ describe("useAutoBackup", () => {
     jest.useRealTimers();
   });
 
-  it("démarre le gestionnaire et supprime l'ancienne sauvegarde locale en clair", async () => {
+  it("démarre le gestionnaire, supprime l'ancienne sauvegarde en clair et les liens de photos perdues", async () => {
     setData([], [], [], [], [], NO_WEIGHING);
     await renderHook(() => useAutoBackup());
     expect(mockStartManager).toHaveBeenCalled();
     expect(mockRemoveLegacyAutoBackup).toHaveBeenCalled();
+    expect(mockClearMissingPhotoLinks).toHaveBeenCalled();
   });
 
   it("ne signale rien tant que les données ne sont pas chargées, ni au premier chargement", async () => {

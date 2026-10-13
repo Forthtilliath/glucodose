@@ -7,6 +7,7 @@ import { useDebouncedChange } from "@forthtilliath/react-native-kit/hooks/useDeb
 import { db } from "@/db/client";
 import { containers, foods, insulinRatios, recipeComponents, settings, weighings } from "@/db/schema";
 import { backup, removeLegacyAutoBackup } from "@/lib/backupManager";
+import { clearMissingPhotoLinks } from "@/lib/missingPhotos";
 
 // Sauvegarde automatique sur Google Drive (si un compte est relié) : chaque
 // modification des données planifie un envoi chiffré, regroupé par le
@@ -20,6 +21,7 @@ export function useAutoBackup() {
 
   useEffect(() => {
     removeLegacyAutoBackup();
+    clearMissingPhotoLinks().catch(() => {});
   }, []);
 
   const { data: containersData } = useLiveQuery(db.select().from(containers));
