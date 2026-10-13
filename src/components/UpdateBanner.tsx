@@ -2,6 +2,7 @@ import { useMemo } from "react";
 import { Pressable, ScrollView, StyleSheet, Text, useWindowDimensions, View } from "react-native";
 import { ChangelogNotes } from "@forthtilliath/expo-release-updates-ui/ChangelogNotes";
 
+import { changelogNotesStyles } from "@/components/changelogNotesStyles";
 import { type ThemeColors, useColors } from "@/theme/colors";
 
 type Props = {
@@ -21,16 +22,7 @@ export function UpdateBanner({ version, notes, onInstall, onDismiss }: Props) {
   const colors = useColors();
   const styles = useMemo(() => createStyles(colors), [colors]);
   const { height } = useWindowDimensions();
-  const notesStyles = useMemo(
-    () => ({
-      heading: { color: colors.text },
-      bullet: { color: colors.textMuted },
-      itemText: { color: colors.textMuted },
-      text: { color: colors.textMuted },
-      bold: { color: colors.text },
-    }),
-    [colors]
-  );
+  const notesStyles = useMemo(() => changelogNotesStyles(colors), [colors]);
 
   return (
     <View style={styles.card}>
