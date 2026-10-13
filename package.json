@@ -2,6 +2,7 @@
   "name": "glucodose",
   "main": "./index.js",
   "version": "1.14.0",
+  "license": "MIT",
   "dependencies": {
     "@expo/ui": "~57.0.23",
     "@expo/vector-icons": "^15.0.2",
