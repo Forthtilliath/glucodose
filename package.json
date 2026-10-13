@@ -90,7 +90,8 @@
       "<rootDir>/jest.setup.js"
     ],
     "moduleNameMapper": {
-      "^@/assets/(.*)$": "<rootDir>/assets/$1"
+      "^@/assets/(.*)$": "<rootDir>/assets/$1",
+      "^uuid$": "<rootDir>/node_modules/uuid/dist/cjs/index.js"
     },
     "transformIgnorePatterns": [
       "/node_modules/(?!(.pnpm|react-native|@react-native|@react-native-community|@forthtilliath|@noble|@scure|expo|@expo|@expo-google-fonts|react-navigation|@react-navigation|@sentry/react-native|native-base|standard-navigation))",
