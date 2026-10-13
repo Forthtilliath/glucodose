@@ -1,9 +1,13 @@
 import { db } from "@/db/client";
 import { containers, foods, insulinRatios, recipeComponents, settings, weighings } from "@/db/schema";
 
+import { type BackupPhoto, validateBackupPhotos } from "./backupPhotoValidation";
+import { collectBackupPhotos, deletePhotoFiles, pruneUnusedPhotos, writeBackupPhotos } from "./backupPhotos";
 import { BackupValidationError, validateBackupRows, type ValidatedBackup } from "./backupValidation";
 import { getAppVersion } from "./exportFileName";
 
+// Les photos s'ajoutent sans changer de version : une ancienne version de
+// l'app ignore simplement la liste `photos` qu'elle ne connaît pas.
 const SCHEMA_VERSION = 1;
 
 // Contenu d'une sauvegarde (fichier exporté ou copie Google Drive), une fois
@@ -14,19 +18,24 @@ export type BackupData = ValidatedBackup & {
   // Version de l'app ayant produit le fichier (absente des anciennes
   // sauvegardes) : informative, non utilisée à l'import.
   appVersion?: string;
+  // Photos des récipients et aliments (absentes avant la 1.16).
+  photos: BackupPhoto[];
 };
 
 export async function buildExportedData(): Promise<BackupData> {
+  const containerRows = await db.select().from(containers);
+  const foodRows = await db.select().from(foods);
   return {
     schemaVersion: SCHEMA_VERSION,
     exportedAt: new Date().toISOString(),
     appVersion: getAppVersion(),
-    containers: await db.select().from(containers),
-    foods: await db.select().from(foods),
+    containers: containerRows,
+    foods: foodRows,
     recipeComponents: await db.select().from(recipeComponents),
     insulinRatios: await db.select().from(insulinRatios),
     settings: await db.select().from(settings),
     weighings: await db.select().from(weighings),
+    photos: await collectBackupPhotos({ containers: containerRows, foods: foodRows }),
   };
 }
 
@@ -66,11 +75,13 @@ export function parseBackup(text: string): BackupData {
   }
 
   try {
+    const rows = validateBackupRows(parsed);
     return {
       schemaVersion: parsed.schemaVersion,
       exportedAt: typeof parsed.exportedAt === "string" ? parsed.exportedAt : undefined,
       appVersion: typeof parsed.appVersion === "string" ? parsed.appVersion : undefined,
-      ...validateBackupRows(parsed),
+      ...rows,
+      photos: validateBackupPhotos(parsed.photos, rows),
     };
   } catch (error) {
     if (!(error instanceof BackupValidationError)) throw error;
@@ -82,8 +93,24 @@ export function parseBackup(text: string): BackupData {
 
 // Remplace entièrement les données actuelles (pas de fusion). La confirmation
 // et la sauvegarde de secours de l'état actuel sont faites en amont par le
-// gestionnaire de sauvegarde (voir backupManager.ts).
-export async function replaceAllData(data: BackupData): Promise<void> {
+// gestionnaire de sauvegarde (voir backupManager.ts). Les photos sont écrites
+// d'abord, puis supprimées si la base refuse les données.
+export async function replaceAllData(backupData: BackupData): Promise<void> {
+  const restored = writeBackupPhotos(
+    { containers: backupData.containers, foods: backupData.foods },
+    backupData.photos
+  );
+  const data = { ...backupData, ...restored.rows };
+  try {
+    await replaceAllRows(data);
+  } catch (error) {
+    deletePhotoFiles(restored.writtenUris);
+    throw error;
+  }
+  pruneUnusedPhotos(restored.rows);
+}
+
+async function replaceAllRows(data: ValidatedBackup): Promise<void> {
   await db.transaction(async (tx) => {
     // Ordre de suppression sûr vis-à-vis des clés étrangères : les tables
     // qui référencent les autres d'abord.
@@ -127,6 +154,7 @@ export function describeBackup(data: BackupData): string {
     `${data.insulinRatios.length} ratio(s)`,
     `${data.weighings.length} pesée(s)`,
   ];
+  if (data.photos.length) parts.push(`${data.photos.length} photo(s)`);
   const date = data.exportedAt ? ` du ${new Date(data.exportedAt).toLocaleString("fr-FR")}` : "";
   return `${parts.join(", ")}${date}`;
 }
