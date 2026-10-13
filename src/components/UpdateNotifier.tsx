@@ -3,8 +3,8 @@ import { Pressable, StyleSheet, Text, View } from "react-native";
 import Constants from "expo-constants";
 import { eq } from "drizzle-orm";
 import { useLiveQuery } from "drizzle-orm/expo-sqlite";
-import { UpdateAvailableBanner } from "@forthtilliath/react-native-kit/components/update/UpdateAvailableBanner";
-import { useUpdateCheck } from "@forthtilliath/react-native-kit/hooks/useUpdateCheck";
+import { UpdateAvailableBanner } from "@forthtilliath/expo-release-updates-ui/UpdateAvailableBanner";
+import { useUpdateCheck } from "@forthtilliath/expo-release-updates-ui/useUpdateCheck";
 
 import { db } from "@/db/client";
 import { dismissUpdateVersion, recordUpdateCheck } from "@/db/repository";

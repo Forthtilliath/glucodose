@@ -6,7 +6,7 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { PhotoPicker } from "@forthtilliath/react-native-kit/components/picker/PhotoPicker";
 import { PickerModal, type PickerItem } from "@forthtilliath/react-native-kit/components/picker/PickerModal";
-import { rankByNameMatch } from "@forthtilliath/react-native-kit/utils/helpers/rankByNameMatch";
+import { rankByNameMatch } from "@forthtilliath/ts-kit/array/rankByNameMatch";
 import { useSubmitGuard } from "@forthtilliath/react-native-kit/hooks/useSubmitGuard";
 import { VoiceSearchButton } from "@forthtilliath/react-native-kit/components/picker/VoiceSearchButton";
 

@@ -5,8 +5,8 @@ import { useLiveQuery } from "drizzle-orm/expo-sqlite";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { PickerModal, type PickerItem } from "@forthtilliath/react-native-kit/components/picker/PickerModal";
-import { getMostRecentIds } from "@forthtilliath/react-native-kit/utils/helpers/getMostRecentIds";
-import { rankByNameMatch } from "@forthtilliath/react-native-kit/utils/helpers/rankByNameMatch";
+import { getMostRecentIds } from "@forthtilliath/ts-kit/array/getMostRecentIds";
+import { rankByNameMatch } from "@forthtilliath/ts-kit/array/rankByNameMatch";
 
 import { db } from "@/db/client";
 import { createIngredient, recordWeighing } from "@/db/repository";

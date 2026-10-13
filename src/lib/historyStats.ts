@@ -1,4 +1,4 @@
-import { getPeriodStartMs, type PeriodFilter } from "@forthtilliath/react-native-kit/utils/helpers/getPeriodStartMs";
+import { getPeriodStartMs, type PeriodFilter } from "@forthtilliath/ts-kit/date/getPeriodStartMs";
 
 import { parseDbDate } from "./dbDate";
 

@@ -1,8 +1,8 @@
 import path from "node:path";
-import { closeTestDb } from "@forthtilliath/expo-test-kit/closeTestDb";
-import { createTestDb as createTestDbBase, type TestDb as TestDbBase } from "@forthtilliath/expo-test-kit/createTestDb";
-import { mockDbClient as mockDbClientBase } from "@forthtilliath/expo-test-kit/mockDbClient";
-import { resetTestDb as resetTestDbBase } from "@forthtilliath/expo-test-kit/resetTestDb";
+import { closeTestDb } from "@forthtilliath/expo-test-kit/sqlite/closeTestDb";
+import { createTestDb as createTestDbBase, type TestDb as TestDbBase } from "@forthtilliath/expo-test-kit/sqlite/createTestDb";
+import { mockDbClient as mockDbClientBase } from "@forthtilliath/expo-test-kit/sqlite/mockDbClient";
+import { resetTestDb as resetTestDbBase } from "@forthtilliath/expo-test-kit/sqlite/resetTestDb";
 
 import * as schema from "./schema";
 
