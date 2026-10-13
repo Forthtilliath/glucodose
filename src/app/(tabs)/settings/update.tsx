@@ -2,6 +2,7 @@ import { UpdateSettingsScreen } from "@forthtilliath/react-native-kit/components
 import Constants from "expo-constants";
 import { ScrollView } from "react-native";
 
+import { changelogNotesStyles } from "@/components/changelogNotesStyles";
 import { compareVersions, downloadAndInstallApk, fetchLatestRelease, fetchReleaseHistory } from "@/lib/appUpdate";
 import { useColors } from "@/theme/colors";
 
@@ -34,6 +35,7 @@ export default function UpdateSettingsPage() {
           changelogEntry: { backgroundColor: colors.surface, borderColor: colors.border },
           changelogVersion: { color: colors.text },
           changelogDate: { color: colors.textMuted },
+          notes: changelogNotesStyles(colors),
         }}
       />
     </ScrollView>
