@@ -17,6 +17,11 @@ export const backup = createBackupManager<BackupData>({
   isEmpty: isBackupEmpty,
   exportFileName: (date) => buildExportFileName("sauvegarde", "json", date),
   exportDialogTitle: "Sauvegarder mes données",
+  // Les photos sont dans la sauvegarde, sans nombre maximal : ~200 à 270 Ko
+  // chacune une fois chiffrée. Les 10 Mo par défaut refuseraient l'import
+  // d'une sauvegarde exportée normalement dès une quarantaine de photos ;
+  // 50 Mo en laissent ~180, et bornent toujours la lecture d'un fichier choisi.
+  maxFileBytes: 50 * 1024 * 1024,
 });
 
 // Ancienne sauvegarde automatique locale (avant 1.15), en clair dans les
