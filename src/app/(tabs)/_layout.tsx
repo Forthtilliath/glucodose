@@ -1,12 +1,17 @@
 import { Ionicons } from "@expo/vector-icons";
 import { Tabs, useRouter } from "expo-router";
 import { Pressable } from "react-native";
+import { useCloudBackupProblem } from "@forthtilliath/expo-backup-ui";
 
+import { backup } from "@/lib/backupManager";
 import { useColors } from "@/theme/colors";
 
 export default function TabsLayout() {
   const colors = useColors();
   const router = useRouter();
+  // Pastille sur Réglages tant que la sauvegarde Google Drive échoue (voir
+  // BackupProblemNotifier) : l'alerte ne s'affiche qu'une fois par lancement.
+  const backupProblem = useCloudBackupProblem(backup);
 
   // Onglets à sous-navigation (Stack imbriqué) : sans ça, revenir sur l'onglet
   // après en avoir quitté un autre restaure la dernière sous-page visitée
@@ -80,6 +85,8 @@ export default function TabsLayout() {
         options={{
           title: "Réglages",
           headerShown: false,
+          tabBarBadge: backupProblem ? "!" : undefined,
+          tabBarBadgeStyle: { backgroundColor: colors.danger },
           tabBarIcon: ({ color, size }) => <Ionicons name="settings-outline" size={size} color={color} />,
         }}
       />
