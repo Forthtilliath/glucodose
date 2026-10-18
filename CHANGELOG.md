@@ -6,6 +6,9 @@ Le format suit [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/), et le p
 
 ## [Unreleased]
 
+### Sécurité
+- L'app ne demande plus de permissions inutiles : stockage externe, superposition à d'autres apps, empreinte digitale et biométrie. L'appareil photo, le micro (recherche vocale) et l'installation des mises à jour restent autorisés.
+
 ## [1.16.0] - 2026-10-13
 
 ### Important
