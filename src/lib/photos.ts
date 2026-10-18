@@ -10,12 +10,15 @@ type PhotoSubdir = PhotoTable;
 
 // Les photos sont incluses dans les sauvegardes (fichier et Google Drive,
 // renvoyée à chaque modification) : on les réduit pour garder une sauvegarde
-// légère. 800 px suffisent largement pour reconnaître un bol ou un plat.
-const MAX_PHOTO_SIDE = 800;
-const PHOTO_QUALITY = 0.7;
-// Au-delà, une photo date d'avant la réduction automatique : elle est réduite
-// à la prochaine sauvegarde (voir compactExistingPhoto).
-const COMPACT_PHOTO_MAX_BYTES = 400 * 1024;
+// légère. Elles ne s'affichent qu'en petit (140 dp au plus, l'aperçu de
+// l'écran d'édition, soit ~420 px sur un écran 3x ; 48 dp dans les listes) :
+// 320 px restent nets et pèsent ~12 à 20 Ko.
+const MAX_PHOTO_SIDE = 320;
+const PHOTO_QUALITY = 0.6;
+// Au-delà, une photo date d'un réglage plus lourd (avant 1.17.0 : 800 px,
+// 100 à 200 Ko) : elle est réduite à la prochaine sauvegarde (voir
+// compactExistingPhoto).
+const COMPACT_PHOTO_MAX_BYTES = 50 * 1024;
 const PHOTO_FILE_NAME = /^[\w-]+\.(jpe?g|png|webp)$/i;
 
 // expo-image-picker renvoie souvent un fichier dans un dossier de cache

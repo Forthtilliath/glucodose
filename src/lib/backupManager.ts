@@ -17,10 +17,12 @@ export const backup = createBackupManager<BackupData>({
   isEmpty: isBackupEmpty,
   exportFileName: (date) => buildExportFileName("sauvegarde", "json", date),
   exportDialogTitle: "Sauvegarder mes données",
-  // Les photos sont dans la sauvegarde, sans nombre maximal : ~200 à 270 Ko
-  // chacune une fois chiffrée. Les 10 Mo par défaut refuseraient l'import
-  // d'une sauvegarde exportée normalement dès une quarantaine de photos ;
-  // 50 Mo en laissent ~180, et bornent toujours la lecture d'un fichier choisi.
+  // Les photos sont dans la sauvegarde, sans nombre maximal. Celles d'avant
+  // 1.17.0 (800 px) pèsent ~200 à 270 Ko chacune une fois chiffrées : les
+  // 10 Mo par défaut refuseraient l'import d'une sauvegarde de la 1.16 dès
+  // une quarantaine de photos. 50 Mo en laissent ~180 (bien plus avec les
+  // photos réduites d'aujourd'hui, ~30 Ko), et bornent toujours la lecture
+  // d'un fichier choisi.
   maxFileBytes: 50 * 1024 * 1024,
 });
 
