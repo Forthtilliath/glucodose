@@ -6,8 +6,8 @@
   "dependencies": {
     "@expo/ui": "~57.0.23",
     "@expo/vector-icons": "^15.0.2",
-    "@forthtilliath/expo-backup": "^0.1.0",
-    "@forthtilliath/expo-backup-ui": "^0.1.0",
+    "@forthtilliath/expo-backup": "^0.3.0",
+    "@forthtilliath/expo-backup-ui": "^0.3.0",
     "@forthtilliath/expo-release-updates": "^0.6.1",
     "@forthtilliath/expo-release-updates-ui": "^0.4.0",
     "@forthtilliath/react-native-kit": "^0.16.0",
