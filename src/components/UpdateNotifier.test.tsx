@@ -58,7 +58,9 @@ describe("UpdateNotifier", () => {
     const screen = await render(<UpdateNotifier />);
     expect(await screen.findByTestId("update-notes")).toBeTruthy();
     expect(screen.getByText("Corrigé")).toBeTruthy();
-  });
+    // Premier rendu des notes : le rendu Markdown est chargé et compilé ici,
+    // ce qui dépasse les 5 s par défaut sur la CI (sans cache Jest).
+  }, 20000);
 
   it("propose « Installer » et « Ignorer »", async () => {
     const screen = await render(<UpdateNotifier />);
