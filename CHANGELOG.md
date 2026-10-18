@@ -14,13 +14,14 @@ Le format suit [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/), et le p
 ### Modifié
 - Messages d'erreur de la sauvegarde plus clairs : ils disent ce qui bloque et quoi faire, depuis quand les envois échouent, avec le détail technique à transmettre en cas de besoin.
 - « Sauvegarder maintenant » confirme l'envoi, ou explique pourquoi il a échoué.
+- Photos réduites à 320 px (environ 15 Ko au lieu de 100 à 200 Ko), largement assez pour leur affichage en vignette : sauvegardes bien plus légères. Les photos déjà enregistrées sont réduites à la prochaine sauvegarde.
 
 ### Corrigé
 - Relier un compte Google n'affiche plus « Sauvegarde automatique activée » quand le premier envoi échoue.
 - Une sauvegarde de plus de 5 Mo (avec beaucoup de photos) n'est plus refusée par Google Drive.
 
 ### Sécurité
-- Un fichier de plus de 50 Mo est refusé à l'import avant d'être lu (de quoi garder environ 180 photos dans une sauvegarde).
+- Un fichier de plus de 50 Mo est refusé à l'import avant d'être lu (assez pour une sauvegarde de la 1.16 avec environ 180 photos).
 
 ## [1.16.1] - 2026-10-18
 
