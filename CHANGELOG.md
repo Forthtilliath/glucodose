@@ -6,6 +6,8 @@ Le format suit [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/), et le p
 
 ## [Unreleased]
 
+## [1.17.0] - 2026-10-18
+
 ### Ajouté
 - Une alerte prévient dès que la sauvegarde Google Drive échoue (espace Google plein, accès retiré…), et une pastille reste sur l'onglet Réglages tant que le problème dure : plus besoin d'ouvrir l'écran Sauvegarde pour s'en rendre compte. Une simple coupure de connexion n'alerte qu'au bout d'un jour.
 
@@ -248,7 +250,8 @@ Première version suivie. L'app était déjà fonctionnelle avant cette date (hi
 ### Corrigé
 - Validation des valeurs négatives (poids, glucides, glycémie), contraintes de clé étrangère SQLite activées, permission microphone superflue retirée.
 
-[Unreleased]: https://github.com/Forthtilliath/glucodose/compare/v1.16.1...HEAD
+[Unreleased]: https://github.com/Forthtilliath/glucodose/compare/v1.17.0...HEAD
+[1.17.0]: https://github.com/Forthtilliath/glucodose/releases/tag/v1.17.0
 [1.16.1]: https://github.com/Forthtilliath/glucodose/releases/tag/v1.16.1
 [1.16.0]: https://github.com/Forthtilliath/glucodose/releases/tag/v1.16.0
 [1.15.1]: https://github.com/Forthtilliath/glucodose/releases/tag/v1.15.1
