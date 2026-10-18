@@ -6,6 +6,8 @@ Le format suit [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/), et le p
 
 ## [Unreleased]
 
+## [1.16.1] - 2026-10-18
+
 ### Sécurité
 - L'app ne demande plus de permissions inutiles : stockage externe, superposition à d'autres apps, empreinte digitale et biométrie. L'appareil photo, le micro (recherche vocale) et l'installation des mises à jour restent autorisés.
 
@@ -232,7 +234,8 @@ Première version suivie. L'app était déjà fonctionnelle avant cette date (hi
 ### Corrigé
 - Validation des valeurs négatives (poids, glucides, glycémie), contraintes de clé étrangère SQLite activées, permission microphone superflue retirée.
 
-[Unreleased]: https://github.com/Forthtilliath/glucodose/compare/v1.16.0...HEAD
+[Unreleased]: https://github.com/Forthtilliath/glucodose/compare/v1.16.1...HEAD
+[1.16.1]: https://github.com/Forthtilliath/glucodose/releases/tag/v1.16.1
 [1.16.0]: https://github.com/Forthtilliath/glucodose/releases/tag/v1.16.0
 [1.15.1]: https://github.com/Forthtilliath/glucodose/releases/tag/v1.15.1
 [1.15.0]: https://github.com/Forthtilliath/glucodose/releases/tag/v1.15.0
