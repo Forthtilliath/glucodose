@@ -46,6 +46,7 @@ jest.mock("expo-quick-actions", () => ({
   initial: null,
 }));
 jest.mock("@/lib/useAutoBackup", () => ({ useAutoBackup: () => {} }));
+jest.mock("@/components/BackupProblemNotifier", () => ({ BackupProblemNotifier: () => null }));
 jest.mock("expo-router", () => ({
   useRouter: () => ({ push: jest.fn() }),
   ThemeProvider: ({ children }: { children: React.ReactNode }) => children,

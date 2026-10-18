@@ -9,6 +9,7 @@ import { eq } from "drizzle-orm";
 import { useLiveQuery } from "drizzle-orm/expo-sqlite";
 import { useMigrations } from "drizzle-orm/expo-sqlite/migrator";
 
+import { BackupProblemNotifier } from "@/components/BackupProblemNotifier";
 import { UpdateNotifier } from "@/components/UpdateNotifier";
 import { db } from "@/db/client";
 import { settings } from "@/db/schema";
@@ -46,6 +47,7 @@ function AppShell() {
   return (
     <RouterThemeProvider value={scheme === "dark" ? DarkTheme : DefaultTheme}>
       <AutoBackupRunner />
+      <BackupProblemNotifier />
       <UpdateNotifier />
       <Stack screenOptions={{ headerTitleAlign: "center" }}>
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
