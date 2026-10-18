@@ -2,13 +2,16 @@ import { useMemo } from "react";
 import { ScrollView, StyleSheet } from "react-native";
 import { useRouter } from "expo-router";
 import { SettingsMenu } from "@forthtilliath/react-native-kit/components/settings/SettingsMenu";
+import { useCloudBackupProblem } from "@forthtilliath/expo-backup-ui";
 
+import { backup } from "@/lib/backupManager";
 import { type ThemeColors, useColors } from "@/theme/colors";
 
 export default function SettingsScreen() {
   const colors = useColors();
   const styles = useMemo(() => createStyles(colors), [colors]);
   const router = useRouter();
+  const backupProblem = useCloudBackupProblem(backup);
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
@@ -38,8 +41,8 @@ export default function SettingsScreen() {
             items: [
               {
                 key: "backup",
-                icon: "cloud-upload-outline",
-                title: "Sauvegarde et restauration",
+                icon: backupProblem ? "warning-outline" : "cloud-upload-outline",
+                title: backupProblem ? "Sauvegarde et restauration (en échec)" : "Sauvegarde et restauration",
                 onPress: () => router.push("/settings/backup"),
               },
             ],
