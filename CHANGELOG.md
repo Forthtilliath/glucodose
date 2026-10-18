@@ -17,6 +17,9 @@ Le format suit [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/), et le p
 - Relier un compte Google n'affiche plus « Sauvegarde automatique activée » quand le premier envoi échoue.
 - Une sauvegarde de plus de 5 Mo (avec beaucoup de photos) n'est plus refusée par Google Drive.
 
+### Sécurité
+- Un fichier de plus de 50 Mo est refusé à l'import avant d'être lu (de quoi garder environ 180 photos dans une sauvegarde).
+
 ## [1.16.1] - 2026-10-18
 
 ### Sécurité
