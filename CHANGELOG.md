@@ -6,6 +6,17 @@ Le format suit [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/), et le p
 
 ## [Unreleased]
 
+### Ajouté
+- Une alerte prévient dès que la sauvegarde Google Drive échoue (espace Google plein, accès retiré…), et une pastille reste sur l'onglet Réglages tant que le problème dure : plus besoin d'ouvrir l'écran Sauvegarde pour s'en rendre compte. Une simple coupure de connexion n'alerte qu'au bout d'un jour.
+
+### Modifié
+- Messages d'erreur de la sauvegarde plus clairs : ils disent ce qui bloque et quoi faire, depuis quand les envois échouent, avec le détail technique à transmettre en cas de besoin.
+- « Sauvegarder maintenant » confirme l'envoi, ou explique pourquoi il a échoué.
+
+### Corrigé
+- Relier un compte Google n'affiche plus « Sauvegarde automatique activée » quand le premier envoi échoue.
+- Une sauvegarde de plus de 5 Mo (avec beaucoup de photos) n'est plus refusée par Google Drive.
+
 ## [1.16.1] - 2026-10-18
 
 ### Sécurité
