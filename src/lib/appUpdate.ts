@@ -2,6 +2,7 @@ import { downloadAndInstallApk as downloadAndInstallApkBase } from "@forthtillia
 import {
   fetchLatestRelease as fetchLatestReleaseBase,
   fetchReleaseHistory as fetchReleaseHistoryBase,
+  releaseDownloadUrlPrefix,
 } from "@forthtilliath/expo-release-updates/githubReleases";
 
 export { compareVersions } from "@forthtilliath/expo-release-updates/compareVersions";
@@ -29,8 +30,10 @@ export function simplifyReleaseNotes(notes: string): string {
     .join("\n");
 }
 
+// Seules les versions dont GitHub donne l'empreinte SHA-256 de l'APK sont proposées : une release
+// sans empreinte, ou dont l'APK est hors des releases du dépôt, est sautée au profit de la suivante.
 export async function fetchLatestRelease() {
-  const release = await fetchLatestReleaseBase(REPO);
+  const release = await fetchLatestReleaseBase({ ...REPO, requireVerifiedApk: true });
   return release && { ...release, notes: simplifyReleaseNotes(release.notes) };
 }
 
@@ -42,6 +45,17 @@ export async function fetchReleaseHistory(limit = 10) {
   return history.map((entry) => ({ ...entry, notes: simplifyReleaseNotes(entry.notes) }));
 }
 
-export function downloadAndInstallApk(apkUrl: string, onProgress?: (fraction: number) => void) {
-  return downloadAndInstallApkBase({ apkUrl, fileName: APK_FILE_NAME, onProgress });
+// Téléchargement limité aux releases du dépôt, et refusé si l'APK n'a pas l'empreinte annoncée par
+// GitHub (l'installeur d'Android refuse en plus un APK signé avec une autre clé).
+export function downloadAndInstallApk(apkUrl: string, onProgress?: (fraction: number) => void, apkSha256?: string) {
+  if (!apkSha256) {
+    return Promise.reject(new Error("Empreinte de la mise à jour absente : installation refusée."));
+  }
+  return downloadAndInstallApkBase({
+    apkUrl,
+    fileName: APK_FILE_NAME,
+    onProgress,
+    expectedSha256: apkSha256,
+    allowedUrlPrefix: releaseDownloadUrlPrefix(REPO),
+  });
 }
