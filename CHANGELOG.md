@@ -9,6 +9,7 @@ Le format suit [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/), et le p
 ### Modifié
 - Les mises à jour intégrées vérifient l'empreinte du fichier téléchargé et son origine (les releases GitHub de GlucoDose) avant de l'installer.
 - L'écran Aide décrit les vraies étapes d'une pesée (un aliment par pesée, recettes pour les plats composés).
+- L'import d'une sauvegarde est vérifié plus strictement : longueur des textes, format des dates et nombre de lignes sont bornés. Un fichier modifié ou démesuré est refusé en entier, avec un message qui dit ce qui ne va pas.
 
 ### Corrigé
 - Un nombre tapé avec une virgule (« 1,8 ») était lu sans sa partie décimale (1) : glycémie, ratio, cible, facteur de sensibilité et poids sont maintenant lus correctement, avec une virgule comme avec un point.
