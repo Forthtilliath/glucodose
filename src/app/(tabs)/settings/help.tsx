@@ -22,15 +22,21 @@ export default function HelpScreen() {
       </Text>
 
       <Text style={styles.sectionTitle}>Les étapes d’une pesée</Text>
-      <Text style={styles.step}>1. Choisis un récipient (son poids à vide est déjà connu).</Text>
-      <Text style={styles.step}>2. Pose-le sur la balance et ajoute tes aliments un par un.</Text>
       <Text style={styles.step}>
-        3. Sélectionne chaque aliment ou recette dans la liste pour que l’app calcule ses glucides à partir
-        du poids pesé.
+        1. Choisis le récipient utilisé (son poids à vide est déjà connu), ou saisis une tare à la main.
+      </Text>
+      <Text style={styles.step}>2. Pèse le récipient rempli et tape le poids affiché par la balance.</Text>
+      <Text style={styles.step}>
+        3. Choisis l’aliment : un de tes aliments, une de tes recettes, ou un aliment de la table Ciqual.
+        Les glucides du repas s’affichent aussitôt.
       </Text>
       <Text style={styles.step}>
-        4. L’app additionne les glucides, applique ton ratio insuline/glucides et affiche la dose
-        conseillée, avec une correction en plus si tu as renseigné une glycémie actuelle.
+        4. Si le calcul de dose est activé (Réglages → Dose et correction), choisis ton ratio
+        insuline/glucides, et indique ta glycémie actuelle pour ajouter une correction.
+      </Text>
+      <Text style={styles.step}>
+        Une pesée porte sur un seul aliment : pour un plat composé, crée une recette dans l’onglet
+        Aliments.
       </Text>
 
       <Text style={styles.sectionTitle}>Aliments, récipients et recettes</Text>
@@ -50,9 +56,10 @@ export default function HelpScreen() {
 
       <Text style={styles.sectionTitle}>Historique et sauvegarde</Text>
       <Text style={styles.paragraph}>
-        L’onglet Historique garde une trace de tes pesées passées. Dans Réglages → Sauvegarde et
-        restauration, tu peux exporter toutes tes données dans un fichier, à garder précieusement ou à
-        transférer vers un autre téléphone.
+        L’onglet Historique garde une trace de tes pesées passées, exportable en PDF ou en tableur. Dans
+        Réglages → Sauvegarde et restauration, tu peux relier ton Google Drive pour une sauvegarde
+        automatique, ou exporter toutes tes données dans un fichier chiffré, à transférer vers un autre
+        téléphone.
       </Text>
     </ScrollView>
   );
