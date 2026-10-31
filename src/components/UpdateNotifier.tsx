@@ -14,7 +14,7 @@ import { type ThemeColors, useColors } from "@/theme/colors";
 
 type InstallState =
   | { status: "downloading"; version: string; progress: number }
-  | { status: "error"; version: string; apkUrl: string };
+  | { status: "error"; version: string; apkUrl: string; apkSha256?: string };
 
 type LastCheck = { lastCheckedAt: number | null; dismissedVersion: string | null };
 
@@ -59,11 +59,11 @@ function UpdateCheck({ lastCheck }: { lastCheck: LastCheck }) {
     },
   });
 
-  function startInstall(version: string, apkUrl: string) {
+  function startInstall(version: string, apkUrl: string, apkSha256?: string) {
     setInstall({ status: "downloading", version, progress: 0 });
-    downloadAndInstallApk(apkUrl, (progress) => setInstall({ status: "downloading", version, progress }))
+    downloadAndInstallApk(apkUrl, (progress) => setInstall({ status: "downloading", version, progress }), apkSha256)
       .then(() => setInstall(null))
-      .catch(() => setInstall({ status: "error", version, apkUrl }));
+      .catch(() => setInstall({ status: "error", version, apkUrl, apkSha256 }));
   }
 
   if (install?.status === "downloading") {
@@ -89,7 +89,7 @@ function UpdateCheck({ lastCheck }: { lastCheck: LastCheck }) {
               <Text style={styles.secondaryButtonText}>Fermer</Text>
             </Pressable>
             <Pressable
-              onPress={() => startInstall(install.version, install.apkUrl)}
+              onPress={() => startInstall(install.version, install.apkUrl, install.apkSha256)}
               accessibilityRole="button"
               style={styles.primaryButton}
             >
@@ -115,7 +115,7 @@ function UpdateCheck({ lastCheck }: { lastCheck: LastCheck }) {
           // n'aboutit pas, la bannière pourra réapparaître au prochain
           // lancement (comportement voulu, distinct d'un vrai "Ignorer").
           update.dismiss();
-          startInstall(release.version, release.apkUrl);
+          startInstall(release.version, release.apkUrl, release.apkSha256);
         }}
         onDismiss={() => {
           dismissUpdateVersion(release.version).catch(() => {});

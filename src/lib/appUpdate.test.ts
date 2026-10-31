@@ -7,6 +7,7 @@ import {
 import { downloadAndInstallApk, fetchLatestRelease, fetchReleaseHistory, simplifyReleaseNotes } from "./appUpdate";
 
 jest.mock("@forthtilliath/expo-release-updates/githubReleases", () => ({
+  ...jest.requireActual("@forthtilliath/expo-release-updates/githubReleases"),
   fetchLatestRelease: jest.fn(),
   fetchReleaseHistory: jest.fn(),
 }));
@@ -49,7 +50,7 @@ describe("appUpdate", () => {
 
   it("fetchLatestRelease interroge le dépôt glucodose", async () => {
     await fetchLatestRelease();
-    expect(fetchLatestReleaseBase).toHaveBeenCalledWith(REPO);
+    expect(fetchLatestReleaseBase).toHaveBeenCalledWith({ ...REPO, requireVerifiedApk: true });
   });
 
   it("fetchLatestRelease et fetchReleaseHistory simplifient les notes", async () => {
@@ -70,13 +71,21 @@ describe("appUpdate", () => {
     expect(fetchReleaseHistoryBase).toHaveBeenCalledWith({ ...REPO, limit: 3 });
   });
 
-  it("downloadAndInstallApk utilise un nom de fichier fixe", async () => {
+  it("downloadAndInstallApk vérifie l'empreinte et limite le téléchargement aux releases du dépôt", async () => {
     const onProgress = jest.fn();
-    await downloadAndInstallApk("https://example.com/app.apk", onProgress);
+    const apkUrl = "https://github.com/Forthtilliath/glucodose/releases/download/v2.0.0/GlucoDose-2.0.0.apk";
+    await downloadAndInstallApk(apkUrl, onProgress, "e".repeat(64));
     expect(downloadAndInstallApkBase).toHaveBeenCalledWith({
-      apkUrl: "https://example.com/app.apk",
+      apkUrl,
       fileName: "glucodose-update.apk",
       onProgress,
+      expectedSha256: "e".repeat(64),
+      allowedUrlPrefix: "https://github.com/Forthtilliath/glucodose/releases/download/",
     });
+  });
+
+  it("downloadAndInstallApk refuse une release sans empreinte, sans rien télécharger", async () => {
+    await expect(downloadAndInstallApk("https://github.com/x.apk")).rejects.toThrow("Empreinte");
+    expect(downloadAndInstallApkBase).not.toHaveBeenCalled();
   });
 });

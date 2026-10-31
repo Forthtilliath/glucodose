@@ -30,7 +30,12 @@ describe("UpdateNotifier", () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockLiveQuery = { data: [], updatedAt: new Date() };
-    mockFetch.mockResolvedValue({ version: "99.0.0", notes: "", apkUrl: "https://example.test/app.apk" });
+    mockFetch.mockResolvedValue({
+      version: "99.0.0",
+      notes: "",
+      apkUrl: "https://example.test/app.apk",
+      apkSha256: "f".repeat(64),
+    });
   });
 
   it("attend la lecture des réglages avant de vérifier", async () => {
@@ -73,7 +78,11 @@ describe("UpdateNotifier", () => {
     const screen = await render(<UpdateNotifier />);
     await fireEvent.press(await screen.findByText("Installer"));
 
-    expect(mockDownload).toHaveBeenCalledWith("https://example.test/app.apk", expect.any(Function));
+    expect(mockDownload).toHaveBeenCalledWith(
+      "https://example.test/app.apk",
+      expect.any(Function),
+      "f".repeat(64),
+    );
     expect(screen.queryByText("Installer")).toBeNull();
     expect(screen.getByText(/Téléchargement de la version 99\.0\.0/)).toBeTruthy();
     expect(dismissUpdateVersion).not.toHaveBeenCalled();
