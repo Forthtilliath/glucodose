@@ -24,6 +24,31 @@ Si tu es sous insuline, il peut aussi en déduire ta dose.
 > [!CAUTION]
 > **GlucoDose n'est pas un dispositif médical.** C'est un outil d'aide au calcul. Les valeurs que tu y entres (ratios, glycémie cible, facteur de sensibilité) doivent venir de ton équipe soignante. Vérifie toujours un résultat avant de t'en servir pour une injection. En cas de doute, fie-toi à ton jugement et à tes soignants, jamais uniquement à l'application.
 
+## Sommaire
+
+- [Compter les glucides, sans la calculette](#compter-les-glucides-sans-la-calculette)
+- [Aperçu](#aperçu)
+- [Comment ça marche](#comment-ça-marche)
+- [Guide d'utilisation](#guide-dutilisation)
+  - [Premiers pas](#premiers-pas)
+  - [Peser un repas](#peser-un-repas)
+  - [Tes récipients](#tes-récipients)
+  - [Tes aliments](#tes-aliments)
+  - [La table Ciqual](#la-table-ciqual)
+  - [Tes recettes](#tes-recettes)
+  - [Historique et statistiques](#historique-et-statistiques)
+  - [Dose d'insuline et correction](#dose-dinsuline-et-correction)
+  - [Ratios insuline/glucides](#ratios-insulineglucides)
+  - [Sauvegarde et changement de téléphone](#sauvegarde-et-changement-de-téléphone)
+  - [Mises à jour](#mises-à-jour)
+  - [Apparence](#apparence)
+  - [Raccourcis et recherche vocale](#raccourcis-et-recherche-vocale)
+- [Ce que GlucoDose t'apporte](#ce-que-glucodose-tapporte)
+- [Petit lexique](#petit-lexique)
+- [Installer GlucoDose](#installer-glucodose)
+- [Questions fréquentes](#questions-fréquentes)
+- [Soutenir le projet](#soutenir-le-projet)
+
 ## Compter les glucides, sans la calculette
 
 Avec un diabète, chaque repas commence par la même question : *combien de glucides dans mon assiette ?* Pour y répondre, il faut d'habitude :
@@ -58,23 +83,252 @@ C'est long, répétitif, et une erreur de calcul est vite arrivée, surtout quan
 3. **Lis le résultat** : les glucides du repas s'affichent instantanément.
 4. **Sous insuline ?** Active le calcul de dose dans les réglages, puis choisis ton ratio et, si besoin, indique ta glycémie : la dose du repas et la correction s'ajoutent au résultat.
 
-Le repas est ensuite enregistré dans ton historique. Une erreur ? Un tap sur « Annuler » suffit.
+Le repas est ensuite enregistré dans ton historique. Une erreur ? « Annuler cette pesée » suffit.
 
 ### Un exemple concret
 
 > Tu manges des pâtes. L'assiette pleine pèse **440 g** ; vide, elle pèse **260 g**.
 >
 > - Poids des pâtes : 440 − 260 = **180 g**
-> - Les pâtes cuites contiennent environ **30 g de glucides pour 100 g**
-> - Glucides du repas : 180 × 30 ÷ 100 = **54 g**
+> - Tes pâtes cuites contiennent **30,6 g de glucides pour 100 g**
+> - Glucides du repas : 180 × 30,6 ÷ 100 = **55,1 g**
 >
-> **Avec le calcul de dose activé**, et par exemple un ratio d'1 unité pour 10 g de glucides :
+> **Avec le calcul de dose activé**, et par exemple un ratio d'1 unité pour 10 g de glucides le midi :
 >
-> - Dose repas : 54 ÷ 10 = **5,4 unités**
+> - Dose repas : 55,1 ÷ 10 = **5,5 unités**
 > - Glycémie à 1,80 g/L pour une cible à 1,20 g/L, avec 1 unité qui fait baisser de 0,40 g/L : correction de (1,80 − 1,20) ÷ 0,40 = **1,5 unité**
-> - Total : **6,9 unités**
+> - Total : **7,0 unités**
 >
-> Toi, tu n'as fait que peser et choisir « pâtes ». *Ces chiffres sont des exemples : tes propres valeurs viennent de ton équipe soignante.*
+> Toi, tu n'as fait que peser et choisir « Pâtes cuites ». C'est exactement l'écran ci-dessous. *Ces chiffres sont des exemples : tes propres valeurs viennent de ton équipe soignante.*
+
+<div align="center">
+<img src="./docs/screenshots/peser-resultat.png" width="260" alt="Écran Peser rempli : 440 g dans l'assiette plate, pâtes cuites, 55,1 g de glucides, ratio Midi, glycémie 1,8, dose totale 7,0 U" />
+</div>
+
+## Guide d'utilisation
+
+L'application a cinq onglets, en bas de l'écran : **Peser**, **Aliments**, **Récipients**, **Historique** et **Réglages**.
+
+### Premiers pas
+
+1. **Enregistre tes récipients** habituels (onglet *Récipients*) : bols, assiettes, boîtes. C'est ce qui fait gagner le plus de temps ensuite.
+2. **Ajoute les aliments** que tu manges souvent (onglet *Aliments*), ou pioche-les dans la table Ciqual au moment de peser.
+3. **Sous insuline ?** Va dans *Réglages → Dose et correction* pour activer le calcul de dose, puis dans *Réglages → Ratios insuline/glucides* pour saisir tes ratios.
+
+Sans insuline, l'étape 3 ne sert à rien : l'application s'arrête aux glucides, sans rien à configurer.
+
+> [!TIP]
+> Les nombres à virgule se tapent avec une virgule ou un point, comme ton clavier le propose : « 1,8 » et « 1.8 » donnent le même résultat.
+
+### Peser un repas
+
+<table>
+<tr>
+<td width="33%"><img src="./docs/screenshots/peser.png" alt="Écran Peser : tare, poids brut, aliment, ratio et correction" /></td>
+<td width="33%"><img src="./docs/screenshots/choix-recipient.png" alt="Choix du récipient : liste des récipients avec leur poids à vide" /></td>
+<td width="33%"><img src="./docs/screenshots/choix-aliment.png" alt="Choix de l'aliment : recherche, aliments récents, ingrédients et recettes" /></td>
+</tr>
+</table>
+
+L'onglet **Peser** se remplit de haut en bas :
+
+1. **Tare** : touche la case pour choisir le récipient. Son poids à vide est retiré automatiquement. Tu manges dans un récipient que tu n'as pas enregistré ? Choisis *Aucun récipient* et tape son poids dans *Tare manuelle*.
+2. **Poids brut** : tape le poids affiché par la balance, récipient compris. Le **poids net** (l'aliment seul) s'affiche dessous. Si le poids tapé est plus petit que celui du récipient, une alerte te le signale.
+3. **Aliment** : choisis-le dans la liste. Les **plus récents** sont en haut ; tape quelques lettres pour chercher, ou touche le micro pour le dicter. Un aliment absent ? *Ajouter un aliment ou une recette*, ou *Chercher dans Ciqual*. Les **glucides du repas** s'affichent aussitôt sous l'aliment.
+4. **Ratio insuline/glucides** *(si le calcul de dose est activé)* : choisis le ratio du moment, par exemple « Midi ».
+5. **Correction** *(facultatif, si tu as réglé une glycémie cible)* : tape ta glycémie actuelle. La correction s'ajoute à la dose repas ; une glycémie sous la cible n'enlève rien.
+
+La carte **Dose d'insuline totale** récapitule : dose repas + correction. Touche **Enregistrer la pesée** pour la garder dans ton historique. L'écran suivant reprend le résultat et propose **Annuler cette pesée** en cas d'erreur.
+
+> [!NOTE]
+> Une pesée porte sur **un seul aliment**. Pour un plat composé (gratin, salade, gâteau…), crée une [recette](#tes-recettes) : tu la pèses ensuite comme un aliment.
+
+### Tes récipients
+
+<table>
+<tr>
+<td width="33%"><img src="./docs/screenshots/recipients.png" alt="Liste des récipients : bol blanc, assiette plate, assiette creuse, boîte en verre" /></td>
+<td>
+
+L'onglet **Récipients** garde le **poids à vide** (la tare) de tes bols, assiettes et boîtes.
+
+- **Ajouter** : bouton **+** en bas à droite. Donne un nom (« Bol bleu »), pèse le récipient vide et tape son poids. Une **photo** est facultative mais aide à reconnaître les récipients qui se ressemblent.
+- **Modifier** : touche le récipient.
+- **Supprimer** : fais glisser la ligne vers la gauche, ou ouvre la fiche. Les pesées déjà faites avec ce récipient restent intactes dans l'historique.
+
+</td>
+</tr>
+</table>
+
+### Tes aliments
+
+<table>
+<tr>
+<td width="33%"><img src="./docs/screenshots/aliments.png" alt="Liste des aliments : ingrédients avec leurs glucides pour 100 g" /></td>
+<td width="33%"><img src="./docs/screenshots/aliments-recettes.png" alt="Fin de la liste : la recette Gratin dauphinois avec son étiquette Recette" /></td>
+<td>
+
+L'onglet **Aliments** rassemble tes **ingrédients** et tes **recettes**, chacun avec ses **glucides pour 100 g**.
+
+- **Ajouter** : bouton **+**, puis *Ingrédient* ou *Recette*. Pour un ingrédient, tape sa teneur en glucides (sur l'emballage, ligne « dont glucides » ou « glucides » pour 100 g), ou reprends-la de Ciqual.
+- **Pèse les aliments dans l'état où tu les manges** : des pâtes cuites n'ont pas la même teneur que des pâtes sèches.
+- **Modifier, supprimer** : comme pour les récipients. Un ingrédient utilisé dans une recette ne peut pas être supprimé tant que la recette l'utilise.
+
+Modifier un aliment ne change pas les repas déjà enregistrés : l'historique garde les valeurs du jour de la pesée.
+
+</td>
+</tr>
+</table>
+
+### La table Ciqual
+
+<table>
+<tr>
+<td width="33%"><img src="./docs/screenshots/ciqual.png" alt="Recherche « lentille » dans Ciqual : lentilles sèches et cuites avec leurs glucides" /></td>
+<td>
+
+**Ciqual** est la table officielle de composition des aliments publiée par l'Anses. GlucoDose en embarque plus de **3 000 aliments**, consultables **sans connexion internet**.
+
+- Depuis l'écran Peser (*Chercher dans Ciqual*) ou en créant un ingrédient.
+- Tape au moins deux lettres ; les accents ne comptent pas (« creme » trouve « crème »).
+- Choisir un aliment Ciqual l'ajoute à ta liste : tu le retrouves ensuite dans tes récents.
+
+Regarde bien l'état de l'aliment : « Lentille verte, sèche » (44,5 g) et « Lentille verte, bouillie/cuite à l'eau » (16,2 g) n'ont rien à voir.
+
+</td>
+</tr>
+</table>
+
+### Tes recettes
+
+<table>
+<tr>
+<td width="33%"><img src="./docs/screenshots/recette.png" alt="Recette Gratin dauphinois : nom et liste des ingrédients pesés" /></td>
+<td width="33%"><img src="./docs/screenshots/recette-bas.png" alt="Bas de la recette : poids total 1,6 kg, glucides totaux 196,4 g, 12,3 g pour 100 g" /></td>
+<td>
+
+Une **recette** calcule les glucides d'un plat fait maison, une fois pour toutes.
+
+1. *Aliments* → **+** → *Recette*, puis donne-lui un nom.
+2. **Ajouter un aliment pesé** pour chaque ingrédient, avec son poids.
+3. GlucoDose additionne : **poids total**, **glucides totaux**, et surtout **glucides pour 100 g** du plat.
+
+Ensuite, la recette se pèse comme n'importe quel aliment. Exemple : pommes de terre 1 000 g + lait 400 g + crème 200 g = 1,6 kg et 196,4 g de glucides, soit **12,3 g pour 100 g**.
+
+Le poids total est la somme des ingrédients. Si la cuisson fait perdre beaucoup d'eau au plat, il est plus léger une fois cuit et sa teneur réelle pour 100 g est plus élevée : parles-en avec ton équipe soignante pour savoir comment en tenir compte.
+
+</td>
+</tr>
+</table>
+
+### Historique et statistiques
+
+<table>
+<tr>
+<td width="33%"><img src="./docs/screenshots/historique.png" alt="Historique : recherche, filtres de période, statistiques, exports PDF et CSV, liste des pesées" /></td>
+<td width="33%"><img src="./docs/screenshots/statistiques.png" alt="Statistiques : 124,4 g de glucides par jour, 14,5 pesées par semaine, aliments les plus utilisés" /></td>
+<td>
+
+L'onglet **Historique** liste tous tes repas pesés, du plus récent au plus ancien : date et heure, poids net, glucides, ratio, dose, et la part de correction avec ta glycémie.
+
+- **Filtrer** : par aliment (champ de recherche) et par période (*Tout*, *Aujourd'hui*, *7 jours*, *30 jours*).
+- **Exporter** la liste affichée : **PDF** à envoyer ou imprimer pour un rendez-vous, ou **CSV** à ouvrir dans un tableur.
+- **Supprimer** une pesée : fais glisser la ligne vers la gauche.
+- **Statistiques** : glucides moyens par jour, nombre moyen de pesées par semaine, nombre de pesées et aliments les plus fréquents, sur 7 jours, 30 jours ou tout l'historique.
+
+</td>
+</tr>
+</table>
+
+### Dose d'insuline et correction
+
+<table>
+<tr>
+<td width="33%"><img src="./docs/screenshots/dose.png" alt="Réglages Dose et correction : interrupteur du calcul de dose, unité g/L, cible 1,2, facteur 0,4" /></td>
+<td>
+
+*Réglages → Dose et correction* :
+
+- **Afficher le calcul de dose d'insuline** : **désactivé par défaut**. Tant qu'il est éteint, l'écran Peser s'arrête aux glucides, sans ratio ni dose.
+- **Unité de glycémie** : **mmol/L** ou **g/L**, celle de ton lecteur. Elle s'applique à la cible, au facteur et à la glycémie tapée en pesant.
+- **Glycémie cible** et **facteur de sensibilité** (de combien 1 unité fait baisser ta glycémie) : facultatifs. Renseignés tous les deux, ils ajoutent l'étape *Correction* à l'écran Peser.
+
+Ces valeurs sont personnelles : elles viennent de ton équipe soignante.
+
+</td>
+</tr>
+</table>
+
+### Ratios insuline/glucides
+
+<table>
+<tr>
+<td width="33%"><img src="./docs/screenshots/ratios.png" alt="Liste des ratios : Matin 8 g, Midi 10 g, Soir 12 g par unité" /></td>
+<td>
+
+*Réglages → Ratios insuline/glucides* : le nombre de **grammes de glucides couverts par 1 unité**.
+
+- Crée-en **autant que nécessaire** (« Matin », « Midi », « Soir », « Sport »…) : les besoins varient souvent au fil de la journée.
+- Touche un ratio pour le modifier ou le supprimer.
+- À la pesée, tu choisis le ratio du moment. Changer un ratio plus tard ne modifie pas les doses déjà enregistrées.
+
+</td>
+</tr>
+</table>
+
+### Sauvegarde et changement de téléphone
+
+<table>
+<tr>
+<td width="33%"><img src="./docs/screenshots/sauvegarde.png" alt="Écran Sauvegarde : Google Drive, export et import manuels, clé de secours" /></td>
+<td>
+
+*Réglages → Sauvegarde et restauration* :
+
+- **Sauvegarde automatique** : *Connecter Google Drive*. Tes données sont envoyées après chaque modification, dans un **dossier privé** de ton Drive que seule GlucoDose peut ouvrir (il n'apparaît pas dans tes fichiers). Si l'envoi échoue durablement (espace plein, accès retiré…), une alerte te prévient et une pastille reste sur l'onglet Réglages.
+- **Sauvegarde manuelle** : *Exporter mes données* crée un fichier avec tout (récipients, aliments, recettes, ratios, réglages, historique, photos). *Importer une sauvegarde* le restaure : **toutes les données actuelles sont remplacées**, après confirmation, et tu peux annuler la restauration juste après.
+- **Chiffrement** : les sauvegardes sont **toujours chiffrées**, sans mot de passe à retenir. La clé est gardée sur ton téléphone et dans ton Drive. Tu n'utilises pas Drive ? Note ta **clé de secours** (*Afficher la clé de secours*) : sans elle, un fichier exporté est illisible sur un autre téléphone. Sur le nouveau téléphone, *Saisir une clé de secours* avant d'importer.
+
+Un fichier abîmé ou modifié est refusé en entier, avec un message qui dit ce qui ne va pas : rien n'est importé à moitié.
+
+</td>
+</tr>
+</table>
+
+### Mises à jour
+
+<table>
+<tr>
+<td width="33%"><img src="./docs/screenshots/mises-a-jour.png" alt="Écran Mises à jour : version installée 1.17.0, bouton de recherche, historique des versions" /></td>
+<td>
+
+Au lancement, un bandeau te prévient quand une nouvelle version est disponible. *Réglages → Mises à jour* affiche la version installée, permet de **chercher une mise à jour** et liste les **nouveautés** de chaque version.
+
+L'installation se fait en un tap : l'application télécharge le fichier, **vérifie son empreinte** (il doit être identique à celui publié sur GitHub), puis Android te demande de confirmer. Android refuse d'ailleurs toute mise à jour qui ne viendrait pas de GlucoDose.
+
+</td>
+</tr>
+</table>
+
+### Apparence
+
+<table>
+<tr>
+<td width="33%"><img src="./docs/screenshots/apparence.png" alt="Écran Apparence : thème clair, sombre ou comme le système" /></td>
+<td width="33%"><img src="./docs/screenshots/historique-sombre.png" alt="Historique en thème sombre" /></td>
+<td>
+
+*Réglages → Apparence* : thème **Clair**, **Sombre**, ou **Système** (il suit alors le réglage clair/sombre de ton téléphone).
+
+</td>
+</tr>
+</table>
+
+### Raccourcis et recherche vocale
+
+- **Appui long sur l'icône** de GlucoDose : *Peser*, *Nouveau récipient* ou *Nouvel aliment*, directement. Tu peux aussi glisser un raccourci sur ton écran d'accueil.
+- **Micro** à droite de chaque champ de recherche : dicte le nom de l'aliment, pratique quand on a les mains prises. Android demande l'autorisation du micro la première fois.
+- **Réglages → Aide** résume le fonctionnement dans l'application, et **Contact** permet d'écrire par e-mail (question, bug, idée) ou de partager l'application.
 
 ## Ce que GlucoDose t'apporte
 
@@ -82,9 +336,8 @@ Le repas est ensuite enregistré dans ton historique. Une erreur ? Un tap sur «
 - **Tes récipients mémorisés**, avec une photo pour les reconnaître d'un coup d'œil : plus besoin de retenir le poids de chaque bol.
 - **Tes aliments mémorisés**, et les plus récents proposés en premier.
 - **Plus de 3 000 aliments de la table Ciqual** (base officielle de l'Anses), consultables sans connexion internet.
-- **Tes recettes maison** : pèse les ingrédients une seule fois, GlucoDose calcule les glucides du plat. Tu le réutilises ensuite comme n'importe quel aliment.
-- **Recherche vocale** dans toutes les listes, pratique quand on a les mains prises.
-- **Raccourcis** : un appui long sur l'icône de l'app ouvre directement la pesée.
+- **Tes recettes maison** : pèse les ingrédients une seule fois, GlucoDose calcule les glucides du plat.
+- **Recherche vocale** et **raccourcis** sur l'icône de l'app.
 
 ### ✅ Moins d'erreurs de calcul
 - Aucun calcul à faire de tête : la soustraction du récipient, la règle de trois et la conversion en unités sont faites pour toi.
@@ -92,19 +345,19 @@ Le repas est ensuite enregistré dans ton historique. Une erreur ? Un tap sur «
 - Chaque repas enregistré garde les valeurs utilisées ce jour-là : si tu modifies un aliment ou un ratio plus tard, ton historique reste exact.
 
 ### 💉 Une dose d'insuline en option
-- **Plusieurs ratios** possibles, par exemple un pour le matin et un pour le soir, puisque les besoins varient souvent au fil de la journée.
+- **Plusieurs ratios** possibles, par exemple un pour le matin et un pour le soir.
 - **Correction** selon ta glycémie, en g/L ou en mmol/L.
-- **Désactivée par défaut** : l'application n'affiche que les glucides tant que tu n'actives pas le calcul de dose dans *Réglages → Dose et correction*.
+- **Désactivée par défaut** : l'application n'affiche que les glucides tant que tu n'actives pas le calcul de dose.
 
 ### 🩺 Un suivi à partager avec tes soignants
 - **Historique** de tous tes repas pesés, filtrable par aliment et par période.
-- **Export PDF** à envoyer ou à imprimer pour ton rendez-vous, ou **export tableur** (CSV) pour l'analyser toi-même.
-- **Statistiques** : glucides moyens par jour, nombre de pesées par semaine, aliments les plus fréquents.
+- **Export PDF** pour ton rendez-vous, ou **CSV** pour l'analyser toi-même.
+- **Statistiques** : glucides moyens par jour, pesées par semaine, aliments les plus fréquents.
 
 ### 🔒 Tes données restent les tiennes
 - **Aucun compte à créer**, aucune publicité, aucun suivi.
 - **Tout est stocké sur ton téléphone** et fonctionne sans internet.
-- **Sauvegarde facultative sur ton Google Drive**, chiffrée et rangée dans un dossier privé que seule l'application peut ouvrir. Pratique pour changer de téléphone.
+- **Sauvegarde facultative sur ton Google Drive**, chiffrée et rangée dans un dossier privé que seule l'application peut ouvrir.
 
 ## Petit lexique
 
@@ -112,6 +365,7 @@ Le repas est ensuite enregistré dans ton historique. Une erreur ? Un tap sur «
 |---|---|
 | **Glucides** | Les sucres et féculents d'un aliment, ceux qui font monter la glycémie. On les compte en grammes. |
 | **Tare** | Le poids du récipient vide, à retirer de la pesée pour n'avoir que l'aliment. |
+| **Poids brut / net** | Brut : récipient compris, ce qu'affiche la balance. Net : l'aliment seul. |
 | **Ratio insuline/glucides** | Le nombre de grammes de glucides « couverts » par 1 unité d'insuline. Fixé avec ton équipe soignante. |
 | **Facteur de sensibilité** | De combien 1 unité d'insuline fait baisser ta glycémie. Sert à calculer la correction. |
 | **Correction** | La petite dose ajoutée quand la glycémie avant le repas est au-dessus de ta cible. |
@@ -121,7 +375,7 @@ Le repas est ensuite enregistré dans ton historique. Une erreur ? Un tap sur «
 
 GlucoDose est disponible **pour Android**. Il n'est pas (encore) sur le Play Store : il s'installe depuis cette page.
 
-1. Sur ton téléphone, ouvre la [**dernière version**](https://github.com/Forthtilliath/glucodose/releases/latest) et télécharge le fichier `.apk`.
+1. Sur ton téléphone, ouvre la [**dernière version**](https://github.com/Forthtilliath/glucodose/releases/latest) et télécharge le fichier `GlucoDose-<version>.apk`.
 2. Ouvre le fichier téléchargé. Android te demande d'autoriser l'installation depuis ton navigateur : accepte.
 3. C'est installé ! Les mises à jour suivantes te sont proposées directement dans l'application.
 
@@ -143,6 +397,12 @@ Non. Il fait les calculs à partir des valeurs que ton équipe soignante t'a don
 </details>
 
 <details>
+<summary><b>Mon assiette contient plusieurs aliments, comment faire ?</b></summary>
+
+Une pesée porte sur un seul aliment. Deux solutions : peser chaque aliment séparément (une pesée chacun, en remettant la balance à zéro entre deux), ou, pour un plat que tu refais souvent, créer une [recette](#tes-recettes).
+</details>
+
+<details>
 <summary><b>Faut-il une connexion internet ?</b></summary>
 
 Non. Tout fonctionne hors ligne, y compris la recherche dans la table Ciqual. Internet n'est utile que pour la sauvegarde Google Drive (facultative) et la vérification des mises à jour.
@@ -157,7 +417,13 @@ Personne d'autre que toi : elles restent sur ton téléphone, et l'application n
 <details>
 <summary><b>Et si je change de téléphone ?</b></summary>
 
-Avec la sauvegarde Google Drive, il suffit de te reconnecter sur le nouveau téléphone pour tout retrouver. Sans Drive, exporte un fichier de sauvegarde depuis *Réglages → Sauvegarde et restauration* et importe-le sur le nouvel appareil (pense à noter ta clé de secours, affichée sur le même écran).
+Avec la sauvegarde Google Drive, il suffit de te reconnecter sur le nouveau téléphone pour tout retrouver. Sans Drive, exporte un fichier de sauvegarde depuis *Réglages → Sauvegarde et restauration* et importe-le sur le nouvel appareil, après y avoir saisi ta clé de secours (affichée sur le même écran).
+</details>
+
+<details>
+<summary><b>J'ai enregistré une pesée par erreur.</b></summary>
+
+Juste après l'enregistrement, touche *Annuler cette pesée*. Plus tard, dans l'*Historique*, fais glisser la ligne vers la gauche pour la supprimer.
 </details>
 
 <details>
@@ -180,194 +446,9 @@ GlucoDose est développé sur mon temps libre. Tu peux aider :
 - en parlant de l'application autour de toi ;
 - en [m'offrant un café](https://buymeacoffee.com/forthtilliath) ☕.
 
----
-
 ## Pour les développeurs
 
-Cette partie s'adresse à celles et ceux qui veulent compiler l'application ou contribuer.
-
-<details>
-<summary><b>Stack technique</b></summary>
-
-| Domaine | Choix |
-|---|---|
-| Framework | [Expo](https://expo.dev) (SDK 57) + [Expo Router](https://docs.expo.dev/router/introduction/) |
-| Langage | TypeScript strict |
-| Base de données | SQLite embarqué (`expo-sqlite`) via [Drizzle ORM](https://orm.drizzle.team/docs/get-started/expo-new) : schéma typé, migrations versionnées, requêtes réactives (`useLiveQuery`) |
-| Photos | `expo-image-picker` + `expo-file-system` |
-| État | Hooks React + requêtes SQL réactives, sans state manager global |
-| Données | 100 % locales, aucun backend, aucun compte |
-
-</details>
-
-<details>
-<summary><b>Méthode de calcul</b></summary>
-
-```
-glucides pesés   = poids net (poids brut − tare) × (glucides pour 100 g) / 100
-dose repas       = glucides pesés ÷ ratio insuline/glucides
-dose correction  = max(0, (glycémie actuelle − glycémie cible) ÷ facteur de sensibilité)
-dose totale      = dose repas + dose correction
-```
-
-Les glucides pour 100 g sont une propriété stable de l'aliment, alors que le ratio est un paramètre personnel qui varie selon le repas et dans le temps : les deux sont stockés séparément. Chaque pesée fige les valeurs utilisées (snapshot), pour qu'aucune modification ultérieure ne change une dose déjà calculée. Toutes les formules sont dans [`src/lib/insulin.ts`](./src/lib/insulin.ts).
-
-</details>
-
-<details>
-<summary><b>Modèle de données</b></summary>
-
-```mermaid
-erDiagram
-    CONTAINERS {
-        int id PK
-        text name
-        real tareWeightG
-        text photoUri
-    }
-    FOODS {
-        int id PK
-        text name
-        text type "ingredient | recipe"
-        real carbsPer100g
-        real totalWeightG "recette uniquement"
-        real totalCarbsG "recette uniquement"
-    }
-    RECIPE_COMPONENTS {
-        int id PK
-        int recipeFoodId FK
-        int componentFoodId FK
-        real weightG
-        real carbsG
-    }
-    INSULIN_RATIOS {
-        int id PK
-        text label
-        real carbsGramsPerUnit
-    }
-    SETTINGS {
-        int id PK "singleton"
-        text glycemiaUnit
-        real targetGlycemia
-        real sensitivityFactor
-        bool showInsulinDose
-    }
-    WEIGHINGS {
-        int id PK
-        int foodId FK
-        int containerId FK
-        int ratioId FK
-        real netWeightG
-        real carbsG
-        real mealInsulinUnits
-        real correctionInsulinUnits
-        real totalInsulinUnits
-        text weighedAt
-    }
-
-    FOODS ||--o{ RECIPE_COMPONENTS : "composée de"
-    FOODS ||--o{ RECIPE_COMPONENTS : "utilisé comme composant"
-    FOODS ||--o{ WEIGHINGS : "pesé lors de"
-    CONTAINERS ||--o{ WEIGHINGS : "tare utilisée"
-    INSULIN_RATIOS ||--o{ WEIGHINGS : "ratio appliqué"
-```
-
-</details>
-
-<details>
-<summary><b>Structure du projet</b></summary>
-
-```
-src/
-├── app/                  # Écrans (Expo Router)
-│   ├── _layout.tsx       # Layout racine : migrations DB + splash screen
-│   └── (tabs)/           # Peser, aliments, récipients, historique, réglages
-├── db/                   # Schéma Drizzle, connexion SQLite, écritures
-├── lib/                  # Calculs, Ciqual, sauvegarde, exports PDF/CSV
-├── components/           # Composants propres à l'app
-└── theme/                # Couleurs
-assets/data/ciqual.json   # Table Ciqual pré-traitée
-drizzle/                  # Migrations SQL générées (versionnées)
-plugins/                  # Config plugins Expo (signature release, ABI)
-scripts/                  # Import Ciqual, génération des icônes
-```
-
-</details>
-
-<details>
-<summary><b>Démarrer le projet</b></summary>
-
-Prérequis : Node.js ≥ 20 et un téléphone ou émulateur Android.
-
-```bash
-npm install
-npx expo run:android
-```
-
-> [!IMPORTANT]
-> **Expo Go ne suffit pas** : l'app utilise des modules natifs (photos, recherche vocale, raccourcis d'icône). Sans eux, l'écran Peser plante dès l'ouverture. Il faut un build de développement (`npx expo run:android`).
-
-| Commande | Effet |
-|---|---|
-| `npm run start` | Serveur de développement Expo |
-| `npm run android` | Build et lancement sur Android |
-| `npm run lint` | Lint du projet |
-| `npm test` | Tests (Jest) |
-| `npx tsc --noEmit` | Vérification TypeScript |
-| `npx drizzle-kit generate` | Génère une migration après modification de `src/db/schema.ts` |
-| `npm run import-ciqual` | Reconvertit le fichier Ciqual (Anses) en `assets/data/ciqual.json` |
-| `npm run generate-icons` | Régénère les icônes de l'app |
-
-**Migrations** : le schéma (`src/db/schema.ts`) est la source de vérité. `npx drizzle-kit generate` produit un fichier SQL dans `drizzle/`, appliqué automatiquement au démarrage. Ne jamais modifier une migration publiée : en générer une nouvelle.
-
-</details>
-
-<details>
-<summary><b>Signer l'APK de release</b></summary>
-
-L'APK de release est signé avec une clé propre à GlucoDose, jamais avec le `debug.keystore` public de React Native (plugin [`plugins/withReleaseSigning.js`](./plugins/withReleaseSigning.js)). Sans cette clé, `gradlew assembleRelease` échoue (« Keystore file not set »).
-
-1. Générer la clé une seule fois, **hors du dépôt**, et la sauvegarder (gestionnaire de mots de passe) : la perdre empêche toute mise à jour de l'app installée.
-
-   ```powershell
-   keytool -genkeypair -v -storetype PKCS12 -keyalg RSA -keysize 2048 -validity 10000 -alias glucodose-upload -keystore "$env:USERPROFILE\keys\glucodose-upload.keystore"
-   ```
-
-2. Déclarer son emplacement et son mot de passe dans `~/.gradle/gradle.properties` (jamais dans `android/`, régénéré par `expo prebuild`) :
-
-   ```properties
-   GLUCODOSE_UPLOAD_STORE_FILE=C:/Users/<toi>/keys/glucodose-upload.keystore
-   GLUCODOSE_UPLOAD_STORE_PASSWORD=...
-   GLUCODOSE_UPLOAD_KEY_ALIAS=glucodose-upload
-   GLUCODOSE_UPLOAD_KEY_PASSWORD=...
-   ```
-
-3. Vérifier avec `cd android && ./gradlew :app:signingReport` (section `Variant: release`).
-
-L'APK n'embarque que le code natif des téléphones ARM (plugin [`plugins/withAndroidAbis.js`](./plugins/withAndroidAbis.js)).
-
-</details>
-
-<details>
-<summary><b>Sauvegarde Google Drive et chiffrement</b></summary>
-
-La sauvegarde vient des paquets partagés [`@forthtilliath/expo-backup`](https://github.com/Forthtilliath/forthtilliath-packages/tree/main/packages/expo-backup#readme) et `expo-backup-ui`, configurés dans [`src/lib/backupManager.ts`](./src/lib/backupManager.ts) :
-
-- **Chiffrement obligatoire** (données de santé) : fichiers exportés et copie Drive sont chiffrés (XChaCha20-Poly1305) avec une clé générée par l'app, gardée dans le Keystore Android et déposée dans le dossier privé Drive de l'app. Une clé de secours est consultable dans l'écran pour qui n'utilise pas Drive. Les anciens exports en clair restent importables.
-- **Drive** : uniquement le dossier caché de l'app (scope `drive.appdata`), envoi automatique quelques secondes après chaque modification.
-- **`android.allowBackup: false`** (`app.json`) : la sauvegarde automatique d'Android copierait sinon la base en clair hors du téléphone.
-
-Configuration Google Cloud (une fois) : activer l'API Google Drive, déclarer le scope `drive.appdata` dans l'écran de consentement OAuth, puis créer un client OAuth **Android** avec le nom de paquet `com.forth.glucodose` et l'empreinte **SHA-1 de la clé de release** (`keytool -list -v -keystore glucodose-upload.keystore`). Détails : README d'`expo-backup`.
-
-</details>
-
-<details>
-<summary><b>Versions et contributions</b></summary>
-
-- Les changements sont suivis dans [`CHANGELOG.md`](./CHANGELOG.md) (format [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/), versions [semver](https://semver.org/lang/fr/)).
-- La branche `main` est protégée : tout changement passe par une branche dédiée et une Pull Request.
-
-</details>
+Compilation, architecture, méthode de calcul, base de données, sauvegarde chiffrée, signature et publication : tout est dans le **[README développeurs](./docs/README.md)**.
 
 ## Licence
 
