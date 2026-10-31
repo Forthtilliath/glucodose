@@ -18,6 +18,7 @@ import { confirmDeleteOrArchiveFood } from "@/lib/confirmDelete";
 import { formatCarbs, MAX_CARBS_PER_100G } from "@/lib/insulin";
 import { deletePhoto, saveFoodPhoto } from "@/lib/photos";
 import { pickerModalStyles } from "@/lib/pickerModalStyles";
+import { parseDecimal } from "@/lib/parseDecimal";
 import { type ThemeColors, useColors } from "@/theme/colors";
 
 function filterCiqualItems(items: PickerItem[], query: string): PickerItem[] {
@@ -92,7 +93,7 @@ export default function IngredientFormScreen() {
     }
   }, [existing]);
 
-  const parsedCarbsPer100g = parseFloat(carbsPer100g);
+  const parsedCarbsPer100g = parseDecimal(carbsPer100g);
   const canSave =
     name.trim().length > 0 &&
     !Number.isNaN(parsedCarbsPer100g) &&

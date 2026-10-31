@@ -9,6 +9,7 @@ import { createRatio, deleteRatio, updateRatio } from "@/db/repository";
 import { insulinRatios } from "@/db/schema";
 import { confirmDestructive } from "@forthtilliath/react-native-kit/utils/helpers/confirmDestructive";
 import { useSubmitGuard } from "@forthtilliath/react-native-kit/hooks/useSubmitGuard";
+import { parseDecimal } from "@/lib/parseDecimal";
 import { type ThemeColors, useColors } from "@/theme/colors";
 
 export default function RatioFormScreen() {
@@ -38,7 +39,7 @@ export default function RatioFormScreen() {
     }
   }, [existing]);
 
-  const parsedValue = parseFloat(carbsGramsPerUnit);
+  const parsedValue = parseDecimal(carbsGramsPerUnit);
   const canSave = label.trim().length > 0 && !Number.isNaN(parsedValue) && parsedValue > 0;
 
   async function handleSave() {

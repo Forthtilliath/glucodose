@@ -23,6 +23,7 @@ import {
   MAX_WEIGHT_G,
 } from "@/lib/insulin";
 import { pickerModalStyles } from "@/lib/pickerModalStyles";
+import { parseDecimal } from "@/lib/parseDecimal";
 import { type ThemeColors, useColors } from "@/theme/colors";
 
 function filterCiqualPickerItems(items: PickerItem[], query: string): PickerItem[] {
@@ -106,7 +107,7 @@ export default function WeighScreen() {
   const selectedFood = (foodList ?? []).find((f) => f.id === selectedFoodId) ?? null;
   const selectedRatio = (ratioList ?? []).find((r) => r.id === selectedRatioId) ?? null;
 
-  const manualTareNumber = parseFloat(manualTare);
+  const manualTareNumber = parseDecimal(manualTare);
   const manualTareValid =
     !Number.isNaN(manualTareNumber) && manualTareNumber >= 0 && manualTareNumber <= MAX_WEIGHT_G;
   // NaN > ou < un nombre vaut toujours false, donc ces conditions ignorent
@@ -116,7 +117,7 @@ export default function WeighScreen() {
   const tareWeightG = selectedContainer
     ? selectedContainer.tareWeightG
     : Math.max(0, manualTareValid ? manualTareNumber : 0);
-  const grossWeightNumber = parseFloat(grossWeight);
+  const grossWeightNumber = parseDecimal(grossWeight);
   const grossWeightValid = !Number.isNaN(grossWeightNumber) && grossWeightNumber <= MAX_WEIGHT_G;
   const grossWeightOutOfRange = grossWeightNumber > MAX_WEIGHT_G;
   const grossWeightBelowTare =
@@ -125,7 +126,7 @@ export default function WeighScreen() {
   const carbsG = selectedFood ? computeCarbsGrams(netWeightG, selectedFood.carbsPer100g) : 0;
   const mealInsulinUnits = selectedRatio ? computeMealInsulinUnits(carbsG, selectedRatio.carbsGramsPerUnit) : 0;
 
-  const currentGlycemiaNumber = parseFloat(currentGlycemia);
+  const currentGlycemiaNumber = parseDecimal(currentGlycemia);
   const correctionInsulinUnits =
     targetGlycemia != null && sensitivityFactor != null && !Number.isNaN(currentGlycemiaNumber)
       ? computeCorrectionInsulinUnits(currentGlycemiaNumber, targetGlycemia, sensitivityFactor)
@@ -344,7 +345,7 @@ export default function WeighScreen() {
           </Text>
           <TextInput
             style={styles.input}
-            placeholder="ex: 12"
+            placeholder={glycemiaUnit === "mmol/L" ? "ex: 8" : "ex: 1.40"}
             placeholderTextColor={colors.textMuted}
             keyboardType="decimal-pad"
             value={currentGlycemia}
