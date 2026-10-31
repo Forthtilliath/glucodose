@@ -6,6 +6,14 @@ Le format suit [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/), et le p
 
 ## [Unreleased]
 
+### Modifié
+- Les mises à jour intégrées vérifient l'empreinte du fichier téléchargé et son origine (les releases GitHub de GlucoDose) avant de l'installer.
+- L'écran Aide décrit les vraies étapes d'une pesée (un aliment par pesée, recettes pour les plats composés).
+
+### Corrigé
+- Un nombre tapé avec une virgule (« 1,8 ») était lu sans sa partie décimale (1) : glycémie, ratio, cible, facteur de sensibilité et poids sont maintenant lus correctement, avec une virgule comme avec un point.
+- L'exemple du champ « Glycémie actuelle » correspond à l'unité choisie (il affichait « 12 » même en g/L).
+
 ## [1.17.0] - 2026-10-18
 
 ### Ajouté
