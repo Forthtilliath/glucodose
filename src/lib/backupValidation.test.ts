@@ -76,6 +76,41 @@ describe("validateBackupRows", () => {
     expect(() => validateBackupRows(data)).toThrow("aliment introuvable");
   });
 
+  it("rejette un texte démesuré", () => {
+    const data = backupWith({ foods: [{ id: 1, name: "R".repeat(201), type: "ingredient", carbsPer100g: 28 }] });
+
+    expect(() => validateBackupRows(data)).toThrow("foods[0] : « name » invalide.");
+  });
+
+  it("rejette une date qui n'en est pas une", () => {
+    const data = backupWith({
+      containers: [{ id: 1, name: "Bol", tareWeightG: 120, createdAt: "<script>" }],
+    });
+
+    expect(() => validateBackupRows(data)).toThrow("« createdAt » invalide");
+  });
+
+  it("accepte les dates de SQLite comme les dates ISO", () => {
+    const data = backupWith({
+      containers: [
+        { id: 1, name: "Bol", tareWeightG: 120, createdAt: "2026-10-09 19:46:00", updatedAt: "2026-10-09T19:46:00.000Z" },
+      ],
+    });
+
+    expect(validateBackupRows(data).containers[0].createdAt).toBe("2026-10-09 19:46:00");
+  });
+
+  it("rejette une table trop longue (une seule ligne de réglages)", () => {
+    const data = backupWith({ settings: [{ id: 1 }, { id: 2 }] });
+
+    expect(() => validateBackupRows(data)).toThrow("settings : 1 lignes au maximum.");
+  });
+
+  it("rejette une table qui n'est pas une liste, ou une ligne qui n'est pas un objet", () => {
+    expect(() => validateBackupRows(backupWith({ foods: "x" as unknown as unknown[] }))).toThrow("liste attendue");
+    expect(() => validateBackupRows(backupWith({ containers: [42] }))).toThrow("containers[0] : ligne invalide.");
+  });
+
   it("détache les références orphelines de l'historique sans rejeter le fichier", () => {
     const result = validateBackupRows(backupWith({ insulinRatios: [] }));
 
