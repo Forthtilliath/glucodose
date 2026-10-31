@@ -168,4 +168,32 @@ describe("WeighScreen (Peser)", () => {
     );
     expect(mockPush).toHaveBeenCalledWith("/weighing-result/42");
   });
+
+  // Certains claviers Android en français tapent une virgule décimale :
+  // parseFloat("9,5") donnait 9 sans erreur, et faussait poids et correction.
+  it("lit les décimales tapées avec une virgule (poids et glycémie)", async () => {
+    mockSettingsRow.targetGlycemia = 6;
+    mockSettingsRow.sensitivityFactor = 2;
+    try {
+      const screen = await render(<WeighScreen />);
+      await selectContainer(screen, "Bol bleu");
+      await fireEvent.changeText(screen.getByLabelText("Poids brut en grammes"), "350,5");
+      await selectFood(screen, "Riz cuit");
+      await fireEvent.changeText(screen.getByLabelText("Glycémie actuelle en mmol/L"), "9,5");
+
+      await fireEvent.press(screen.getByLabelText("Enregistrer la pesée"));
+
+      expect(mockRecordWeighing).toHaveBeenCalledWith(
+        expect.objectContaining({
+          grossWeightG: 350.5,
+          netWeightG: 200.5,
+          currentGlycemia: 9.5,
+          correctionInsulinUnits: 1.75, // (9,5 − 6) ÷ 2
+        })
+      );
+    } finally {
+      mockSettingsRow.targetGlycemia = null;
+      mockSettingsRow.sensitivityFactor = null;
+    }
+  });
 });

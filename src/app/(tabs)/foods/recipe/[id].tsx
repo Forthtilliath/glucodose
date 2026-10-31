@@ -15,6 +15,7 @@ import { confirmDeleteOrArchiveFood } from "@/lib/confirmDelete";
 import { computeCarbsGrams, computeRecipeCarbsPer100g, formatCarbs, formatWeight, MAX_WEIGHT_G } from "@/lib/insulin";
 import { deletePhoto, saveFoodPhoto } from "@/lib/photos";
 import { pickerModalStyles } from "@/lib/pickerModalStyles";
+import { parseDecimal } from "@/lib/parseDecimal";
 import { type ThemeColors, useColors } from "@/theme/colors";
 
 type Row = { key: string; foodId: number; weightG: string };
@@ -120,7 +121,7 @@ export default function RecipeFormScreen() {
     let totalWeightG = 0;
     let totalCarbsG = 0;
     for (const row of rows) {
-      const weight = parseFloat(row.weightG);
+      const weight = parseDecimal(row.weightG);
       if (Number.isNaN(weight)) continue;
       const food = foodMap.get(row.foodId);
       totalWeightG += weight;
@@ -137,7 +138,7 @@ export default function RecipeFormScreen() {
     name.trim().length > 0 &&
     rows.length > 0 &&
     rows.every((r) => {
-      const w = parseFloat(r.weightG);
+      const w = parseDecimal(r.weightG);
       return !Number.isNaN(w) && w > 0 && w <= MAX_WEIGHT_G;
     });
 
@@ -154,7 +155,7 @@ export default function RecipeFormScreen() {
         photoUri,
         components: rows.map((r) => ({
           componentFoodId: r.foodId,
-          weightG: parseFloat(r.weightG),
+          weightG: parseDecimal(r.weightG),
           carbsPer100gAtEntry: foodMap.get(r.foodId)?.carbsPer100g ?? 0,
         })),
       });
@@ -197,7 +198,7 @@ export default function RecipeFormScreen() {
       <Text style={styles.label}>Composants</Text>
       {rows.map((row) => {
         const food = foodMap.get(row.foodId);
-        const weight = parseFloat(row.weightG);
+        const weight = parseDecimal(row.weightG);
         const carbs = !Number.isNaN(weight) ? computeCarbsGrams(weight, food?.carbsPer100g ?? 0) : 0;
         return (
           <View key={row.key} style={styles.componentRow}>

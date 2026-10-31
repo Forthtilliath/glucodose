@@ -12,6 +12,7 @@ import { deleteContainer, createContainer, updateContainer } from "@/db/reposito
 import { containers } from "@/db/schema";
 import { formatWeight, MAX_WEIGHT_G } from "@/lib/insulin";
 import { deletePhoto, saveContainerPhoto } from "@/lib/photos";
+import { parseDecimal } from "@/lib/parseDecimal";
 import { type ThemeColors, useColors } from "@/theme/colors";
 
 export default function ContainerFormScreen() {
@@ -47,7 +48,7 @@ export default function ContainerFormScreen() {
     }
   }, [existing]);
 
-  const parsedTareWeight = parseFloat(tareWeight);
+  const parsedTareWeight = parseDecimal(tareWeight);
   const canSave =
     name.trim().length > 0 &&
     !Number.isNaN(parsedTareWeight) &&

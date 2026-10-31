@@ -6,6 +6,7 @@ import { useLiveQuery } from "drizzle-orm/expo-sqlite";
 import { db } from "@/db/client";
 import { updateSettings } from "@/db/repository";
 import { settings } from "@/db/schema";
+import { parseDecimal } from "@/lib/parseDecimal";
 import { type ThemeColors, useColors } from "@/theme/colors";
 
 export default function DoseSettingsScreen() {
@@ -40,17 +41,17 @@ export default function DoseSettingsScreen() {
   // peut pas être négative, et un facteur de sensibilité nul ou négatif
   // rendrait la formule de correction incohérente (division par zéro/signe).
   const targetGlycemiaValid =
-    targetGlycemia.trim() === "" || (!Number.isNaN(parseFloat(targetGlycemia)) && parseFloat(targetGlycemia) >= 0);
+    targetGlycemia.trim() === "" || (!Number.isNaN(parseDecimal(targetGlycemia)) && parseDecimal(targetGlycemia) >= 0);
   const sensitivityFactorValid =
     sensitivityFactor.trim() === "" ||
-    (!Number.isNaN(parseFloat(sensitivityFactor)) && parseFloat(sensitivityFactor) > 0);
+    (!Number.isNaN(parseDecimal(sensitivityFactor)) && parseDecimal(sensitivityFactor) > 0);
   const canSaveSettings = targetGlycemiaValid && sensitivityFactorValid;
 
   function saveCurrentSettings(showInsulinDoseOverride: boolean) {
     return updateSettings({
       glycemiaUnit,
-      targetGlycemia: targetGlycemia.trim() ? parseFloat(targetGlycemia) : null,
-      sensitivityFactor: sensitivityFactor.trim() ? parseFloat(sensitivityFactor) : null,
+      targetGlycemia: targetGlycemia.trim() ? parseDecimal(targetGlycemia) : null,
+      sensitivityFactor: sensitivityFactor.trim() ? parseDecimal(sensitivityFactor) : null,
       showInsulinDose: showInsulinDoseOverride,
       themePreference: currentSettings?.themePreference ?? "system",
     });
