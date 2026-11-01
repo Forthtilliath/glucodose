@@ -1,29 +1,29 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
-import { and, eq, ne } from "drizzle-orm";
+import { Pressable, ScrollView, StyleSheet, Text, TextInput } from "react-native";
+import { eq, ne } from "drizzle-orm";
 import { useLiveQuery } from "drizzle-orm/expo-sqlite";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { PhotoPicker } from "@forthtilliath/react-native-kit/components/picker/PhotoPicker";
-import { PickerModal, type PickerItem } from "@forthtilliath/react-native-kit/components/picker/PickerModal";
 import { useSubmitGuard } from "@forthtilliath/react-native-kit/hooks/useSubmitGuard";
 
+import { RecipeComponentRow } from "@/components/recipe/RecipeComponentRow";
+import { type PickedIngredient, RecipeIngredientPickers } from "@/components/recipe/RecipeIngredientPickers";
+import { RecipeTotalsBox } from "@/components/recipe/RecipeTotalsBox";
+import { describeRow, type DraftRow, toComponentInput } from "@/components/recipe/recipeDraft";
 import { db } from "@/db/client";
 import { saveRecipe } from "@/db/repository";
 import { foods, recipeComponents } from "@/db/schema";
 import { confirmDeleteOrArchiveFood } from "@/lib/confirmDelete";
-import { computeCarbsGrams, computeRecipeCarbsPer100g, formatCarbs, formatWeight, MAX_WEIGHT_G } from "@/lib/insulin";
+import { MAX_WEIGHT_G } from "@/lib/insulin";
 import { deletePhoto, saveFoodPhoto } from "@/lib/photos";
-import { pickerModalStyles } from "@/lib/pickerModalStyles";
 import { parseDecimal } from "@/lib/parseDecimal";
+import { computeRecipeTotals, isCookedWeightPlausible, storedCookedWeight } from "@/lib/recipeTotals";
 import { type ThemeColors, useColors } from "@/theme/colors";
-
-type Row = { key: string; foodId: number; weightG: string };
 
 export default function RecipeFormScreen() {
   const colors = useColors();
   const styles = useMemo(() => createStyles(colors), [colors]);
-  const pickerStyles = useMemo(() => pickerModalStyles(colors), [colors]);
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const isNew = id === "new";
@@ -47,22 +47,19 @@ export default function RecipeFormScreen() {
       .orderBy(recipeComponents.position)
   );
 
-  // Aliments sélectionnables comme composant : tous sauf la recette en cours
-  // d'édition elle-même (évite une auto-référence directe).
-  const { data: availableFoods } = useLiveQuery(
-    db
-      .select()
-      .from(foods)
-      .where(
-        and(eq(foods.isArchived, false), ne(foods.id, recipeFoodId ?? -1))
-      )
+  // Tous les aliments sauf la recette elle-même (évite une auto-référence
+  // directe), archivés compris : un composant archivé doit garder son nom et
+  // son taux, sinon il compterait pour 0 g de glucides au réenregistrement.
+  const { data: allFoods } = useLiveQuery(
+    db.select().from(foods).where(ne(foods.id, recipeFoodId ?? -1))
   );
-  const foodMap = useMemo(() => new Map((availableFoods ?? []).map((f) => [f.id, f])), [availableFoods]);
+  const foodMap = useMemo(() => new Map((allFoods ?? []).map((f) => [f.id, f])), [allFoods]);
 
   const [name, setName] = useState("");
   const [notes, setNotes] = useState("");
   const [photoUri, setPhotoUri] = useState<string | null>(null);
-  const [rows, setRows] = useState<Row[]>([]);
+  const [rows, setRows] = useState<DraftRow[]>([]);
+  const [cookedWeightG, setCookedWeightG] = useState("");
   const [pickerVisible, setPickerVisible] = useState(false);
   const { isSaving, guard } = useSubmitGuard();
 
@@ -80,7 +77,7 @@ export default function RecipeFormScreen() {
   }, [existing]);
 
   useEffect(() => {
-    if (!initialized.current && existingComponents && existingComponents.length > 0) {
+    if (!initialized.current && existing && existingComponents && existingComponents.length > 0) {
       setRows(
         existingComponents.map((c) => ({
           key: String(nextKey.current++),
@@ -88,25 +85,14 @@ export default function RecipeFormScreen() {
           weightG: String(c.weightG),
         }))
       );
+      const cooked = storedCookedWeight(existing.totalWeightG, existingComponents.map((c) => c.weightG));
+      setCookedWeightG(cooked == null ? "" : String(cooked));
       initialized.current = true;
     }
-  }, [existingComponents]);
+  }, [existing, existingComponents]);
 
-  const pickerItems: PickerItem[] = useMemo(
-    () =>
-      (availableFoods ?? []).map((f) => ({
-        id: f.id,
-        label: f.name,
-        subtitle: `${formatCarbs(f.carbsPer100g)} glucides/100g${f.type === "recipe" ? " · recette" : ""}`,
-        imageUri: f.photoUri,
-        group: f.type === "recipe" ? "Recettes" : "Ingrédients",
-      })),
-    [availableFoods]
-  );
-
-  function addRow(foodId: number) {
-    setRows((prev) => [...prev, { key: String(nextKey.current++), foodId, weightG: "" }]);
-    setPickerVisible(false);
+  function addRow(row: PickedIngredient) {
+    setRows((prev) => [...prev, { ...row, key: String(nextKey.current++), weightG: "" }]);
   }
 
   function updateRowWeight(key: string, weightG: string) {
@@ -117,26 +103,31 @@ export default function RecipeFormScreen() {
     setRows((prev) => prev.filter((r) => r.key !== key));
   }
 
+  const infos = useMemo(() => rows.map((row) => describeRow(row, foodMap)), [rows, foodMap]);
+
+  const cookedText = cookedWeightG.trim();
+  const parsedCooked = cookedText === "" ? null : parseDecimal(cookedText);
+
   const totals = useMemo(() => {
-    let totalWeightG = 0;
-    let totalCarbsG = 0;
-    for (const row of rows) {
-      const weight = parseDecimal(row.weightG);
-      if (Number.isNaN(weight)) continue;
-      const food = foodMap.get(row.foodId);
-      totalWeightG += weight;
-      totalCarbsG += computeCarbsGrams(weight, food?.carbsPer100g ?? 0);
-    }
-    return {
-      totalWeightG,
-      totalCarbsG,
-      carbsPer100g: computeRecipeCarbsPer100g(totalCarbsG, totalWeightG),
-    };
-  }, [rows, foodMap]);
+    const components = rows.flatMap((row, index) => {
+      const weightG = parseDecimal(row.weightG);
+      return Number.isNaN(weightG) ? [] : [{ weightG, carbsPer100g: infos[index].carbsPer100g }];
+    });
+    const raw = computeRecipeTotals(components, null);
+    const cooked =
+      parsedCooked != null && !Number.isNaN(parsedCooked) && isCookedWeightPlausible(parsedCooked, raw.rawWeightG)
+        ? parsedCooked
+        : null;
+    return { ...computeRecipeTotals(components, cooked), cooked };
+  }, [rows, infos, parsedCooked]);
+
+  const cookedWeightInvalid = parsedCooked != null && totals.cooked == null;
 
   const canSave =
     name.trim().length > 0 &&
     rows.length > 0 &&
+    !cookedWeightInvalid &&
+    infos.every((info) => !info.missing) &&
     rows.every((r) => {
       const w = parseDecimal(r.weightG);
       return !Number.isNaN(w) && w > 0 && w <= MAX_WEIGHT_G;
@@ -153,11 +144,8 @@ export default function RecipeFormScreen() {
         name: name.trim(),
         notes: notes.trim() || undefined,
         photoUri,
-        components: rows.map((r) => ({
-          componentFoodId: r.foodId,
-          weightG: parseDecimal(r.weightG),
-          carbsPer100gAtEntry: foodMap.get(r.foodId)?.carbsPer100g ?? 0,
-        })),
+        cookedWeightG: totals.cooked,
+        components: rows.map((row, index) => toComponentInput(row, infos[index])),
       });
       router.back();
     });
@@ -190,72 +178,45 @@ export default function RecipeFormScreen() {
       <TextInput
         style={styles.input}
         placeholder="ex: Salade composée"
+        placeholderTextColor={colors.textMuted}
         value={name}
         onChangeText={setName}
         accessibilityLabel="Nom de la recette"
       />
 
-      <Text style={styles.label}>Composants</Text>
-      {rows.map((row) => {
-        const food = foodMap.get(row.foodId);
-        const weight = parseDecimal(row.weightG);
-        const carbs = !Number.isNaN(weight) ? computeCarbsGrams(weight, food?.carbsPer100g ?? 0) : 0;
-        return (
-          <View key={row.key} style={styles.componentRow}>
-            <View style={styles.componentInfo}>
-              <Text style={styles.componentName}>{food?.name ?? "Aliment introuvable"}</Text>
-              <Text style={styles.componentSubtitle}>
-                {food ? `${formatCarbs(food.carbsPer100g)}/100g` : ""} · {formatCarbs(carbs)} glucides
-              </Text>
-            </View>
-            <TextInput
-              style={[styles.componentWeightInput, weight > MAX_WEIGHT_G && styles.componentWeightInputError]}
-              placeholder="g"
-              keyboardType="decimal-pad"
-              value={row.weightG}
-              onChangeText={(v) => updateRowWeight(row.key, v)}
-              accessibilityLabel={`Poids de ${food?.name ?? "cet aliment"} en grammes`}
-            />
-            <Pressable
-              onPress={() => removeRow(row.key)}
-              hitSlop={10}
-              accessibilityRole="button"
-              accessibilityLabel={`Retirer ${food?.name ?? "cet aliment"} de la recette`}
-            >
-              <Ionicons name="trash-outline" size={20} color={colors.danger} />
-            </Pressable>
-          </View>
-        );
-      })}
+      <Text style={styles.label}>Ingrédients</Text>
+      {rows.map((row, index) => (
+        <RecipeComponentRow
+          key={row.key}
+          info={infos[index]}
+          weightG={row.weightG}
+          onChangeWeight={(v) => updateRowWeight(row.key, v)}
+          onRemove={() => removeRow(row.key)}
+        />
+      ))}
 
       <Pressable
         style={styles.addRowButton}
         onPress={() => setPickerVisible(true)}
         accessibilityRole="button"
-        accessibilityLabel="Ajouter un aliment pesé"
+        accessibilityLabel="Ajouter un ingrédient"
       >
         <Ionicons name="add-circle-outline" size={20} color={colors.primary} />
-        <Text style={styles.addRowButtonText}>Ajouter un aliment pesé</Text>
+        <Text style={styles.addRowButtonText}>Ajouter un ingrédient</Text>
       </Pressable>
 
-      <View style={styles.totalsBox}>
-        <View style={styles.totalsRow}>
-          <Text style={styles.totalsLabel}>Poids total</Text>
-          <Text style={styles.totalsValue}>{formatWeight(totals.totalWeightG)}</Text>
-        </View>
-        <View style={styles.totalsRow}>
-          <Text style={styles.totalsLabel}>Glucides totaux</Text>
-          <Text style={styles.totalsValue}>{formatCarbs(totals.totalCarbsG)}</Text>
-        </View>
-        <View style={styles.totalsRow}>
-          <Text style={styles.totalsLabelStrong}>Glucides pour 100g</Text>
-          <Text style={styles.totalsValueStrong}>{formatCarbs(totals.carbsPer100g)}</Text>
-        </View>
-      </View>
+      <RecipeTotalsBox
+        totals={totals}
+        cookedWeightG={cookedWeightG}
+        onChangeCookedWeight={setCookedWeightG}
+        cookedWeightInvalid={cookedWeightInvalid}
+        hasCookedWeight={totals.cooked != null}
+      />
 
       <Text style={styles.label}>Notes (optionnel)</Text>
       <TextInput
         style={[styles.input, styles.notesInput]}
+        placeholderTextColor={colors.textMuted}
         value={notes}
         onChangeText={setNotes}
         multiline
@@ -284,14 +245,11 @@ export default function RecipeFormScreen() {
         </Pressable>
       )}
 
-      <PickerModal
+      <RecipeIngredientPickers
         visible={pickerVisible}
-        title="Choisir un aliment"
-        items={pickerItems}
-        onSelect={(item) => addRow(item.id)}
         onClose={() => setPickerVisible(false)}
-        emptyMessage="Aucun aliment disponible. Crée d'abord un ingrédient."
-        styles={pickerStyles}
+        foods={allFoods ?? []}
+        onPick={addRow}
       />
     </ScrollView>
   );
@@ -313,32 +271,6 @@ function createStyles(colors: ThemeColors) {
       color: colors.text,
     },
     notesInput: { minHeight: 80, textAlignVertical: "top" },
-    componentRow: {
-      flexDirection: "row",
-      alignItems: "center",
-      gap: 10,
-      backgroundColor: colors.surface,
-      borderWidth: 1,
-      borderColor: colors.border,
-      borderRadius: 10,
-      padding: 12,
-      marginTop: 8,
-    },
-    componentInfo: { flex: 1 },
-    componentName: { fontSize: 15, fontWeight: "600", color: colors.text },
-    componentSubtitle: { fontSize: 12, color: colors.textMuted, marginTop: 2 },
-    componentWeightInput: {
-      width: 70,
-      borderWidth: 1,
-      borderColor: colors.border,
-      borderRadius: 8,
-      paddingHorizontal: 8,
-      paddingVertical: 6,
-      fontSize: 15,
-      textAlign: "right",
-      color: colors.text,
-    },
-    componentWeightInputError: { borderColor: colors.danger },
     addRowButton: {
       flexDirection: "row",
       alignItems: "center",
@@ -347,20 +279,6 @@ function createStyles(colors: ThemeColors) {
       marginTop: 4,
     },
     addRowButtonText: { color: colors.primary, fontSize: 15, fontWeight: "600" },
-    totalsBox: {
-      backgroundColor: colors.surface,
-      borderWidth: 1,
-      borderColor: colors.border,
-      borderRadius: 10,
-      padding: 14,
-      marginTop: 16,
-      gap: 6,
-    },
-    totalsRow: { flexDirection: "row", justifyContent: "space-between" },
-    totalsLabel: { fontSize: 14, color: colors.textMuted },
-    totalsValue: { fontSize: 14, fontWeight: "600", color: colors.text },
-    totalsLabelStrong: { fontSize: 15, fontWeight: "700", color: colors.text },
-    totalsValueStrong: { fontSize: 15, fontWeight: "700", color: colors.primary },
     saveButton: {
       backgroundColor: colors.primary,
       borderRadius: 10,
