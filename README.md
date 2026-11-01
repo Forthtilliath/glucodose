@@ -210,12 +210,15 @@ Regarde bien l'état de l'aliment : « Lentille verte, sèche » (44,5 g) et « 
 Une **recette** calcule les glucides d'un plat fait maison, une fois pour toutes.
 
 1. *Aliments* → **+** → *Recette*, puis donne-lui un nom.
-2. **Ajouter un aliment pesé** pour chaque ingrédient, avec son poids.
-3. GlucoDose additionne : **poids total**, **glucides totaux**, et surtout **glucides pour 100 g** du plat.
+2. **Ajouter un ingrédient** pour chaque ingrédient, puis tape son poids. Trois choix :
+   - un aliment ou une recette **de ta liste** ;
+   - **Chercher dans Ciqual** : l'aliment est ajouté à ta liste quand tu enregistres la recette (s'il y est déjà, il est réutilisé) ;
+   - **Saisir un ingrédient pour cette recette** : un nom et ses glucides pour 100 g (ex. « Légumes », 6 g), sans l'ajouter à ta liste. Il reste dans la recette tant qu'elle l'utilise.
+3. GlucoDose additionne : **poids des ingrédients**, **glucides totaux**, et surtout **glucides pour 100 g** du plat.
 
 Ensuite, la recette se pèse comme n'importe quel aliment. Exemple : pommes de terre 1 000 g + lait 400 g + crème 200 g = 1,6 kg et 196,4 g de glucides, soit **12,3 g pour 100 g**.
 
-Le poids total est la somme des ingrédients. Si la cuisson fait perdre beaucoup d'eau au plat, il est plus léger une fois cuit et sa teneur réelle pour 100 g est plus élevée : parles-en avec ton équipe soignante pour savoir comment en tenir compte.
+**Poids du plat cuit** (facultatif) : un plat qui perd de l'eau à la cuisson (quiche, gratin) est plus léger une fois cuit, donc plus riche en glucides pour 100 g ; un plat qui en absorbe (riz, pâtes) l'est moins. Pèse le plat cuit (sans le récipient) et tape ce poids : les glucides pour 100 g sont alors calculés sur le plat cuit. Laissé vide, c'est la somme des ingrédients crus qui compte. Un poids cuit inférieur à 10 % ou supérieur à 4 fois le poids des ingrédients est refusé, pour attraper une faute de frappe.
 
 </td>
 </tr>
@@ -233,7 +236,8 @@ L'onglet **Historique** liste tous tes repas pesés, du plus récent au plus anc
 
 - **Filtrer** : par aliment (champ de recherche) et par période (*Tout*, *Aujourd'hui*, *7 jours*, *30 jours*).
 - **Exporter** la liste affichée : **PDF** à envoyer ou imprimer pour un rendez-vous, ou **CSV** à ouvrir dans un tableur.
-- **Supprimer** une pesée : fais glisser la ligne vers la gauche.
+- **Revoir** une pesée : touche la ligne pour rouvrir sa fiche (glucides, dose, correction).
+- **Supprimer** une pesée : fais glisser la ligne vers la gauche, ou ouvre sa fiche puis *Supprimer cette pesée*.
 - **Statistiques** : glucides moyens par jour, nombre moyen de pesées par semaine, nombre de pesées et aliments les plus fréquents, sur 7 jours, 30 jours ou tout l'historique.
 
 </td>

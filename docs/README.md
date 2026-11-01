@@ -175,14 +175,15 @@ erDiagram
 
 - **Source de vérité** : [`src/db/schema.ts`](../src/db/schema.ts). `npx drizzle-kit generate` produit un fichier SQL dans `drizzle/`, appliqué automatiquement au démarrage (`src/app/_layout.tsx`). Ne jamais modifier une migration publiée : en générer une nouvelle.
 - Les clés étrangères de l'historique sont en `ON DELETE SET NULL` : supprimer un aliment, un récipient ou un ratio garde les pesées, avec leurs valeurs figées. Côté recettes, supprimer une recette supprime ses composants (`cascade`), mais un ingrédient utilisé dans une recette ne peut pas être supprimé (`restrict`).
-- Écritures regroupées dans [`src/db/repository.ts`](../src/db/repository.ts) (testées sur une vraie base SQLite en mémoire, `testDb.ts`).
+- Écritures regroupées dans [`src/db/repository.ts`](../src/db/repository.ts), qui réexporte celles des aliments et recettes ([`foodRepository.ts`](../src/db/foodRepository.ts)) (testées sur une vraie base SQLite en mémoire, `testDb.ts`).
 - `settings` est une ligne unique (`id = 1`). Les colonnes `widgetSelected*` servent au widget désactivé.
 - Les dates `current_timestamp` de SQLite sont en UTC sans fuseau : toujours les lire avec `parseDbDate` (`src/lib/dbDate.ts`).
 
 ## Aliments, recettes et Ciqual
 
 - **Ingrédient** : glucides pour 100 g saisis à la main, ou repris de Ciqual (`source = "ciqual"`).
-- **Recette** : liste de composants pesés ; poids total et glucides totaux sont la somme des composants, les glucides pour 100 g en découlent. Une recette se pèse ensuite comme n'importe quel aliment.
+- **Recette** : liste de composants pesés ; glucides totaux = somme des composants. Poids total = **poids du plat cuit** s'il est saisi, sinon somme des composants crus ; les glucides pour 100 g en découlent ([`src/lib/recipeTotals.ts`](../src/lib/recipeTotals.ts), bornes 10 %–400 % du cru). Pas de colonne dédiée : un `foods.totalWeightG` différent de la somme des composants **est** le poids cuit (`storedCookedWeight`). Une recette se pèse ensuite comme n'importe quel aliment.
+- **Ingrédients ajoutés depuis une recette** ([`src/db/foodRepository.ts`](../src/db/foodRepository.ts)) : créés seulement à l'enregistrement de la recette. Depuis Ciqual → ingrédient normal ; saisie manuelle → ingrédient **archivé** (`isArchived`), absent des listes. Un aliment archivé n'existe que pour les recettes : quand plus aucune ne l'utilise (composant retiré, recette supprimée), il est supprimé avec sa photo. L'écran de recette charge les aliments archivés, sinon leurs glucides compteraient pour 0 au réenregistrement.
 - **Ciqual** : `assets/data/ciqual.json` (≈ 3 300 aliments, nom + glucides + groupe) est généré par `npm run import-ciqual` à partir de `scripts/ciqual-source/Table_Ciqual_2025_FR.xlsx`. Recherche locale dans [`src/lib/ciqual.ts`](../src/lib/ciqual.ts) (insensible aux accents, 2 caractères minimum), aucun appel réseau.
 - **Recherche vocale** : bouton micro du `PickerModal` du kit (`expo-speech-recognition`, permission demandée au premier usage).
 
