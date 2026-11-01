@@ -1,50 +1,34 @@
 import { useEffect, useMemo, useState } from "react";
-import { Pressable, StyleSheet, Text, TextInput, View } from "react-native";
+import { Pressable, StyleSheet, Text, TextInput } from "react-native";
 import { desc, eq } from "drizzle-orm";
 import { useLiveQuery } from "drizzle-orm/expo-sqlite";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { Ionicons } from "@expo/vector-icons";
-import { PickerModal, type PickerItem } from "@forthtilliath/react-native-kit/components/picker/PickerModal";
-import { getMostRecentIds } from "@forthtilliath/ts-kit/array/getMostRecentIds";
-import { rankByNameMatch } from "@forthtilliath/ts-kit/array/rankByNameMatch";
 
 import { FormScrollView } from "@/components/FormScrollView";
+import { CorrectionField } from "@/components/weigh/CorrectionField";
+import { SelectorButton } from "@/components/weigh/SelectorButton";
+import { TareField } from "@/components/weigh/TareField";
+import { type WeighPicker, WeighPickers } from "@/components/weigh/WeighPickers";
+import { WeighResultBox } from "@/components/weigh/WeighResultBox";
 import { db } from "@/db/client";
-import { createIngredient, recordWeighing } from "@/db/repository";
+import { recordWeighing } from "@/db/repository";
 import { containers, foods, insulinRatios, settings, weighings } from "@/db/schema";
-import { ALL_CIQUAL_FOODS, CIQUAL_PICKER_ITEMS } from "@/lib/ciqual";
 import {
   computeCarbsGrams,
   computeCorrectionInsulinUnits,
   computeMealInsulinUnits,
   computeNetWeight,
   formatCarbs,
-  formatInsulinUnits,
   formatWeight,
   MAX_WEIGHT_G,
 } from "@/lib/insulin";
-import { pickerModalStyles } from "@/lib/pickerModalStyles";
 import { parseDecimal } from "@/lib/parseDecimal";
+import { buildWeighingInsulinFields } from "@/lib/weighingInsulinFields";
 import { type ThemeColors, useColors } from "@/theme/colors";
-
-function filterCiqualPickerItems(items: PickerItem[], query: string): PickerItem[] {
-  return rankByNameMatch(items, query, (item) => item.label);
-}
-
-function toFoodItem(f: typeof foods.$inferSelect, group: string): PickerItem {
-  return {
-    id: f.id,
-    label: f.name,
-    subtitle: `${formatCarbs(f.carbsPer100g)} glucides/100g${f.type === "recipe" ? " · recette" : ""}`,
-    imageUri: f.photoUri,
-    group,
-  };
-}
 
 export default function WeighScreen() {
   const colors = useColors();
   const styles = useMemo(() => createStyles(colors), [colors]);
-  const pickerStyles = useMemo(() => pickerModalStyles(colors), [colors]);
   const {
     autoFocusWeight,
     containerId: containerIdParam,
@@ -80,11 +64,7 @@ export default function WeighScreen() {
   const [selectedFoodId, setSelectedFoodId] = useState<number | null>(null);
   const [selectedRatioId, setSelectedRatioId] = useState<number | null>(null);
   const [currentGlycemia, setCurrentGlycemia] = useState("");
-
-  const [containerPickerVisible, setContainerPickerVisible] = useState(false);
-  const [foodPickerVisible, setFoodPickerVisible] = useState(false);
-  const [ratioPickerVisible, setRatioPickerVisible] = useState(false);
-  const [ciqualQuickAddVisible, setCiqualQuickAddVisible] = useState(false);
+  const [openPicker, setOpenPicker] = useState<WeighPicker | null>(null);
 
   // Pré-remplit récipient/aliment quand on arrive depuis le widget d'accueil
   // (sélection faite là-bas, sans avoir à la refaire dans l'app).
@@ -134,53 +114,6 @@ export default function WeighScreen() {
       : 0;
   const totalInsulinUnits = mealInsulinUnits + correctionInsulinUnits;
 
-  const containerItems: PickerItem[] = useMemo(
-    () =>
-      (containerList ?? []).map((c) => ({
-        id: c.id,
-        label: c.name,
-        subtitle: formatWeight(c.tareWeightG),
-        imageUri: c.photoUri,
-      })),
-    [containerList]
-  );
-  const recentFoodIds = useMemo(() => getMostRecentIds(recentWeighings ?? []), [recentWeighings]);
-
-  // Les aliments récemment pesés sont sortis de leur groupe habituel
-  // (ingrédients/recettes) pour apparaître une seule fois, en tête de liste
-  // sous "Récents", plutôt que dupliqués à deux endroits du sélecteur.
-  const foodItems: PickerItem[] = useMemo(() => {
-    const all = foodList ?? [];
-    const byId = new Map(all.map((f) => [f.id, f]));
-    const recentFoods = recentFoodIds.map((id) => byId.get(id)).filter((f) => f != null);
-    const recentIds = new Set(recentFoods.map((f) => f.id));
-    const restFoods = all.filter((f) => !recentIds.has(f.id));
-    return [
-      ...recentFoods.map((f) => toFoodItem(f, "Récents")),
-      ...restFoods.map((f) => toFoodItem(f, f.type === "recipe" ? "Recettes" : "Ingrédients")),
-    ];
-  }, [foodList, recentFoodIds]);
-  const ratioItems: PickerItem[] = useMemo(
-    () =>
-      (ratioList ?? []).map((r) => ({
-        id: r.id,
-        label: r.label,
-        subtitle: `1 U / ${formatCarbs(r.carbsGramsPerUnit)}`,
-      })),
-    [ratioList]
-  );
-  async function handleSelectCiqualQuickAdd(item: PickerItem) {
-    const food = ALL_CIQUAL_FOODS[item.id];
-    if (!food) return;
-    const newFoodId = await createIngredient({
-      name: food.name,
-      carbsPer100g: food.carbsPer100g,
-      source: "Ciqual",
-    });
-    setSelectedFoodId(newFoodId);
-    setCiqualQuickAddVisible(false);
-  }
-
   const canSave =
     grossWeightValid &&
     grossWeightNumber > 0 &&
@@ -188,35 +121,17 @@ export default function WeighScreen() {
     selectedFood != null &&
     (!showInsulinDose || selectedRatio != null);
 
-  // Regroupe tous les champs liés au calcul de dose : quand ce calcul est
-  // désactivé (mode "glucides seuls"), la pesée est quand même enregistrée,
-  // juste sans aucune de ces valeurs.
-  const insulinFields =
-    showInsulinDose && selectedRatio
-      ? {
-          ratioId: selectedRatio.id,
-          ratioLabel: selectedRatio.label,
-          carbsGramsPerUnit: selectedRatio.carbsGramsPerUnit,
-          mealInsulinUnits,
-          glycemiaUnit,
-          currentGlycemia: !Number.isNaN(currentGlycemiaNumber) ? currentGlycemiaNumber : null,
-          targetGlycemia,
-          sensitivityFactor,
-          correctionInsulinUnits,
-          totalInsulinUnits,
-        }
-      : {
-          ratioId: null,
-          ratioLabel: null,
-          carbsGramsPerUnit: null,
-          mealInsulinUnits: 0,
-          glycemiaUnit: null,
-          currentGlycemia: null,
-          targetGlycemia: null,
-          sensitivityFactor: null,
-          correctionInsulinUnits: 0,
-          totalInsulinUnits: 0,
-        };
+  const insulinFields = buildWeighingInsulinFields({
+    showInsulinDose,
+    ratio: selectedRatio,
+    mealInsulinUnits,
+    glycemiaUnit,
+    currentGlycemia: currentGlycemiaNumber,
+    targetGlycemia,
+    sensitivityFactor,
+    correctionInsulinUnits,
+    totalInsulinUnits,
+  });
 
   async function handleSave() {
     if (!selectedFood || (showInsulinDose && !selectedRatio)) return;
@@ -240,44 +155,14 @@ export default function WeighScreen() {
   return (
     <FormScrollView style={styles.container} contentContainerStyle={styles.content}>
       <Text style={styles.sectionTitle}>1. Tare</Text>
-      <Pressable
-        style={styles.selector}
-        onPress={() => setContainerPickerVisible(true)}
-        accessibilityRole="button"
-        accessibilityLabel={
-          selectedContainer
-            ? `Récipient : ${selectedContainer.name}. Modifier.`
-            : "Choisir un récipient, ou saisir une tare manuelle"
-        }
-      >
-        <Text style={styles.selectorLabel}>
-          {selectedContainer ? selectedContainer.name : "Aucun récipient (tare manuelle)"}
-        </Text>
-        <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />
-      </Pressable>
-      {selectedContainer ? (
-        <Pressable
-          onPress={() => setSelectedContainerId(null)}
-          accessibilityRole="button"
-          accessibilityLabel="Retirer le récipient et saisir une tare manuelle"
-        >
-          <Text style={styles.clearLink}>Retirer le récipient / Saisir une tare manuelle</Text>
-        </Pressable>
-      ) : (
-        <View style={styles.inlineField}>
-          <Text style={styles.inlineFieldLabel}>Tare manuelle (g)</Text>
-          <TextInput
-            style={styles.inlineInput}
-            keyboardType="decimal-pad"
-            value={manualTare}
-            onChangeText={setManualTare}
-            accessibilityLabel="Tare manuelle en grammes"
-          />
-        </View>
-      )}
-      {!selectedContainer && manualTareOutOfRange && (
-        <Text style={styles.errorText}>La tare doit être comprise entre 0 et {formatWeight(MAX_WEIGHT_G)}.</Text>
-      )}
+      <TareField
+        containerName={selectedContainer?.name ?? null}
+        manualTare={manualTare}
+        onChangeManualTare={setManualTare}
+        manualTareOutOfRange={manualTareOutOfRange}
+        onPickContainer={() => setOpenPicker("container")}
+        onClearContainer={() => setSelectedContainerId(null)}
+      />
 
       <Text style={styles.sectionTitle}>2. Poids brut</Text>
       <TextInput
@@ -301,15 +186,11 @@ export default function WeighScreen() {
       <Text style={styles.netWeightHint}>Poids net : {formatWeight(netWeightG)}</Text>
 
       <Text style={styles.sectionTitle}>3. Aliment</Text>
-      <Pressable
-        style={styles.selector}
-        onPress={() => setFoodPickerVisible(true)}
-        accessibilityRole="button"
+      <SelectorButton
+        label={selectedFood ? selectedFood.name : "Choisir un aliment"}
+        onPress={() => setOpenPicker("food")}
         accessibilityLabel={selectedFood ? `Aliment : ${selectedFood.name}. Modifier.` : "Choisir un aliment"}
-      >
-        <Text style={styles.selectorLabel}>{selectedFood ? selectedFood.name : "Choisir un aliment"}</Text>
-        <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />
-      </Pressable>
+      />
       {selectedFood && showInsulinDose ? (
         <Text style={styles.netWeightHint}>{formatCarbs(carbsG)} de glucides</Text>
       ) : null}
@@ -317,77 +198,44 @@ export default function WeighScreen() {
       {showInsulinDose && (
         <>
           <Text style={styles.sectionTitle}>4. Ratio insuline/glucides</Text>
-          <Pressable
-            style={styles.selector}
-            onPress={() => setRatioPickerVisible(true)}
+          <SelectorButton
+            label={
+              selectedRatio
+                ? `${selectedRatio.label} (1 U / ${formatCarbs(selectedRatio.carbsGramsPerUnit)})`
+                : "Aucun ratio configuré — va dans Réglages"
+            }
+            onPress={() => setOpenPicker("ratio")}
             disabled={(ratioList ?? []).length === 0}
-            accessibilityRole="button"
             accessibilityLabel={
               selectedRatio
                 ? `Ratio : ${selectedRatio.label}, 1 unité pour ${formatCarbs(selectedRatio.carbsGramsPerUnit)}. Modifier.`
                 : "Aucun ratio configuré, va dans Réglages"
             }
-          >
-            <Text style={styles.selectorLabel}>
-              {selectedRatio
-                ? `${selectedRatio.label} (1 U / ${formatCarbs(selectedRatio.carbsGramsPerUnit)})`
-                : "Aucun ratio configuré — va dans Réglages"}
-            </Text>
-            <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />
-          </Pressable>
+          />
         </>
       )}
 
       {correctionAvailable && (
         <>
           <Text style={styles.sectionTitle}>5. Correction (optionnel)</Text>
-          <Text style={styles.inlineFieldLabel}>
-            Glycémie actuelle ({glycemiaUnit}), cible {targetGlycemia}
-          </Text>
-          <TextInput
-            style={styles.input}
-            placeholder={glycemiaUnit === "mmol/L" ? "ex: 8" : "ex: 1.40"}
-            placeholderTextColor={colors.textMuted}
-            keyboardType="decimal-pad"
-            value={currentGlycemia}
-            onChangeText={setCurrentGlycemia}
-            accessibilityLabel={`Glycémie actuelle en ${glycemiaUnit}`}
+          <CorrectionField
+            glycemiaUnit={glycemiaUnit}
+            targetGlycemia={targetGlycemia}
+            currentGlycemia={currentGlycemia}
+            onChangeCurrentGlycemia={setCurrentGlycemia}
+            correctionInsulinUnits={correctionInsulinUnits}
           />
-          {correctionInsulinUnits > 0 && (
-            <Text style={styles.netWeightHint}>
-              + {formatInsulinUnits(correctionInsulinUnits)} U de correction
-            </Text>
-          )}
         </>
       )}
 
-      {showInsulinDose ? (
-        <View
-          style={styles.resultBox}
-          accessible
-          accessibilityLabel={`Dose d'insuline totale : ${formatInsulinUnits(totalInsulinUnits)} unités`}
-        >
-          <Text style={styles.resultLabel}>Dose d’insuline totale</Text>
-          <Text style={styles.resultValue}>{formatInsulinUnits(totalInsulinUnits)} U</Text>
-          {correctionInsulinUnits > 0 && (
-            <Text style={styles.resultBreakdown}>
-              {formatInsulinUnits(mealInsulinUnits)} U repas + {formatInsulinUnits(correctionInsulinUnits)} U
-              correction
-            </Text>
-          )}
-        </View>
-      ) : (
-        selectedFood && (
-          <View
-            style={styles.resultBox}
-            accessible
-            accessibilityLabel={`Glucides : ${formatCarbs(carbsG)}`}
-          >
-            <Text style={styles.resultLabel}>Glucides</Text>
-            <Text style={styles.resultValue}>{formatCarbs(carbsG)}</Text>
-          </View>
-        )
-      )}
+      <WeighResultBox
+        showInsulinDose={showInsulinDose}
+        hasFood={selectedFood != null}
+        carbsG={carbsG}
+        mealInsulinUnits={mealInsulinUnits}
+        correctionInsulinUnits={correctionInsulinUnits}
+        totalInsulinUnits={totalInsulinUnits}
+      />
 
       <Pressable
         style={[styles.saveButton, !canSave && styles.saveButtonDisabled]}
@@ -400,77 +248,16 @@ export default function WeighScreen() {
         <Text style={styles.saveButtonText}>Enregistrer la pesée</Text>
       </Pressable>
 
-      <PickerModal
-        visible={containerPickerVisible}
-        title="Choisir un récipient"
-        items={containerItems}
-        onSelect={(item) => {
-          setSelectedContainerId(item.id);
-          setContainerPickerVisible(false);
-        }}
-        onClose={() => setContainerPickerVisible(false)}
-        emptyMessage="Aucun récipient enregistré."
-        extraActions={[
-          {
-            label: "Ajouter un récipient",
-            onPress: () => {
-              setContainerPickerVisible(false);
-              router.push("/containers/new");
-            },
-          },
-        ]}
-        styles={pickerStyles}
-      />
-      <PickerModal
-        visible={foodPickerVisible}
-        title="Choisir un aliment"
-        items={foodItems}
-        onSelect={(item) => {
-          setSelectedFoodId(item.id);
-          setFoodPickerVisible(false);
-        }}
-        onClose={() => setFoodPickerVisible(false)}
-        emptyMessage="Aucun aliment enregistré."
-        groupOrder={["Récents", "Ingrédients", "Recettes"]}
-        extraActions={[
-          {
-            label: "Ajouter un aliment ou une recette",
-            onPress: () => {
-              setFoodPickerVisible(false);
-              router.push("/foods/new");
-            },
-          },
-          {
-            label: "Chercher dans Ciqual",
-            onPress: () => {
-              setFoodPickerVisible(false);
-              setCiqualQuickAddVisible(true);
-            },
-          },
-        ]}
-        styles={pickerStyles}
-      />
-      <PickerModal
-        visible={ciqualQuickAddVisible}
-        title="Chercher dans Ciqual"
-        items={CIQUAL_PICKER_ITEMS}
-        filterItems={filterCiqualPickerItems}
-        onSelect={handleSelectCiqualQuickAdd}
-        onClose={() => setCiqualQuickAddVisible(false)}
-        emptyMessage="Aucun aliment trouvé dans Ciqual."
-        styles={pickerStyles}
-      />
-      <PickerModal
-        visible={ratioPickerVisible}
-        title="Choisir un ratio"
-        items={ratioItems}
-        onSelect={(item) => {
-          setSelectedRatioId(item.id);
-          setRatioPickerVisible(false);
-        }}
-        onClose={() => setRatioPickerVisible(false)}
-        emptyMessage="Aucun ratio enregistré."
-        styles={pickerStyles}
+      <WeighPickers
+        openPicker={openPicker}
+        onOpenPicker={setOpenPicker}
+        containers={containerList ?? []}
+        foods={foodList ?? []}
+        recentWeighings={recentWeighings ?? []}
+        ratios={ratioList ?? []}
+        onSelectContainer={setSelectedContainerId}
+        onSelectFood={setSelectedFoodId}
+        onSelectRatio={setSelectedRatioId}
       />
     </FormScrollView>
   );
@@ -481,46 +268,7 @@ function createStyles(colors: ThemeColors) {
     container: { flex: 1, backgroundColor: colors.background },
     content: { padding: 16, paddingBottom: 48 },
     sectionTitle: { fontSize: 13, fontWeight: "700", color: colors.textMuted, marginTop: 20, marginBottom: 8 },
-    selector: {
-      flexDirection: "row",
-      justifyContent: "space-between",
-      alignItems: "center",
-      gap: 12,
-      backgroundColor: colors.surface,
-      borderWidth: 1,
-      borderColor: colors.border,
-      borderRadius: 10,
-      paddingHorizontal: 14,
-      paddingVertical: 14,
-    },
-    selectorLabel: { flex: 1, fontSize: 16, color: colors.text, fontWeight: "600" },
-    clearLink: { color: colors.primary, fontSize: 13, marginTop: 6 },
     errorText: { fontSize: 12, color: colors.danger, marginTop: 4 },
-    inlineField: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginTop: 8 },
-    inlineFieldLabel: { fontSize: 14, color: colors.textMuted },
-    inlineInput: {
-      borderWidth: 1,
-      borderColor: colors.border,
-      borderRadius: 8,
-      paddingHorizontal: 10,
-      paddingVertical: 6,
-      fontSize: 15,
-      width: 90,
-      textAlign: "right",
-      backgroundColor: colors.surface,
-      color: colors.text,
-    },
-    input: {
-      backgroundColor: colors.surface,
-      borderWidth: 1,
-      borderColor: colors.border,
-      borderRadius: 10,
-      paddingHorizontal: 12,
-      paddingVertical: 10,
-      fontSize: 16,
-      color: colors.text,
-      marginTop: 6,
-    },
     grossInput: {
       backgroundColor: colors.surface,
       borderWidth: 1,
@@ -535,18 +283,6 @@ function createStyles(colors: ThemeColors) {
       textAlign: "center",
     },
     netWeightHint: { textAlign: "center", color: colors.textMuted, marginTop: 6, fontSize: 14 },
-    resultBox: {
-      marginTop: 24,
-      backgroundColor: colors.surface,
-      borderWidth: 2,
-      borderColor: colors.primary,
-      borderRadius: 14,
-      paddingVertical: 20,
-      alignItems: "center",
-    },
-    resultLabel: { fontSize: 14, color: colors.textMuted, fontWeight: "600" },
-    resultValue: { fontSize: 40, fontWeight: "800", color: colors.primary, marginTop: 4 },
-    resultBreakdown: { fontSize: 12, color: colors.textMuted, marginTop: 6 },
     saveButton: {
       backgroundColor: colors.primary,
       borderRadius: 10,
