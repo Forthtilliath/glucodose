@@ -6,6 +6,12 @@ Le format suit [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/), et le p
 
 ## [Unreleased]
 
+### Modifié
+- Passage à Expo SDK 58 (React Native 0.88) : application plus légère (~54 Mo au lieu de ~65 Mo).
+
+### Sécurité
+- Corrige une faille de la navigation (`decode-uri-component`, via expo-router) : un lien `glucodose://` mal formé pouvait figer l'application.
+
 ## [1.18.0] - 2026-11-01
 
 ### Ajouté

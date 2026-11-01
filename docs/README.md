@@ -38,7 +38,7 @@ Tout ce qu'il faut pour compiler GlucoDose et travailler sur son code. La prése
 
 ## Démarrer
 
-Prérequis : Node.js ≥ 20, le SDK Android, un téléphone ou un émulateur.
+Prérequis : Node.js 22.13+ ou 24.3+ (exigence d'Expo SDK 58), le SDK Android, un téléphone ou un émulateur. Sous Windows, installer aussi **CMake 4.1.2** depuis le SDK Manager (voir `plugins/withWindowsNativeBuild.js` : chemins de plus de 260 caractères).
 
 ```bash
 npm install --legacy-peer-deps   # voir la note dans .github/workflows/ci.yml
@@ -82,7 +82,7 @@ src/
 └── __tests__/                  tests des écrans (hors de src/app)
 assets/data/ciqual.json         table Ciqual pré-traitée (~3 300 aliments)
 drizzle/                        migrations SQL générées (versionnées)
-plugins/                        config plugins Expo : signature release, ABI ARM
+plugins/                        config plugins Expo : signature release, ABI ARM, chemins de build Windows
 scripts/                        import Ciqual (source .xlsx incluse), génération des icônes
 ```
 
