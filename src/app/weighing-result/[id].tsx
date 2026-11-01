@@ -2,8 +2,9 @@ import { useEffect, useMemo, useState } from "react";
 import { Animated, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { eq } from "drizzle-orm";
 import { useLiveQuery } from "drizzle-orm/expo-sqlite";
-import { useLocalSearchParams, useRouter } from "expo-router";
+import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
+import { confirmDestructive } from "@forthtilliath/react-native-kit/utils/helpers/confirmDestructive";
 
 import { db } from "@/db/client";
 import { deleteWeighing } from "@/db/repository";
@@ -20,17 +21,21 @@ const TOAST_FADE_MS = 300;
 export default function WeighingResultScreen() {
   const colors = useColors();
   const styles = useMemo(() => createStyles(colors), [colors]);
-  const { id } = useLocalSearchParams<{ id: string }>();
+  // Ouvert depuis l'historique : simple fiche de détail, sans notification
+  // « Pesée enregistrée » ni enchaînement sur une nouvelle pesée.
+  const { id, from } = useLocalSearchParams<{ id: string; from?: string }>();
+  const fromHistory = from === "history";
   const router = useRouter();
   const weighingId = Number(id);
 
   const { data } = useLiveQuery(db.select().from(weighings).where(eq(weighings.id, weighingId)));
   const weighing = data?.[0];
 
-  const [toastVisible, setToastVisible] = useState(true);
+  const [toastVisible, setToastVisible] = useState(!fromHistory);
   const [toastOpacity] = useState(() => new Animated.Value(1));
 
   useEffect(() => {
+    if (fromHistory) return;
     const timeout = setTimeout(() => {
       Animated.timing(toastOpacity, {
         toValue: 0,
@@ -39,11 +44,15 @@ export default function WeighingResultScreen() {
       }).start(() => setToastVisible(false));
     }, TOAST_VISIBLE_MS);
     return () => clearTimeout(timeout);
-  }, [toastOpacity]);
+  }, [fromHistory, toastOpacity]);
 
   async function handleUndo() {
     await deleteWeighing(weighingId);
     router.back();
+  }
+
+  function handleDelete() {
+    confirmDestructive("Supprimer cette pesée ?", handleUndo);
   }
 
   // La pesée a été annulée (ou n'existe plus pour une autre raison) pendant
@@ -58,6 +67,7 @@ export default function WeighingResultScreen() {
 
   return (
     <View style={styles.container}>
+      {fromHistory && <Stack.Screen options={{ title: "Détail de la pesée" }} />}
       {toastVisible && (
         <Animated.View style={[styles.toast, { opacity: toastOpacity }]} accessibilityLiveRegion="polite">
           <Ionicons name="checkmark-circle" size={20} color={colors.primaryText} />
@@ -93,22 +103,22 @@ export default function WeighingResultScreen() {
         )}
 
         <Pressable
-          onPress={handleUndo}
+          onPress={fromHistory ? handleDelete : handleUndo}
           hitSlop={10}
           style={styles.undoLink}
           accessibilityRole="button"
-          accessibilityLabel="Annuler cette pesée"
+          accessibilityLabel={fromHistory ? "Supprimer cette pesée" : "Annuler cette pesée"}
         >
-          <Text style={styles.undoLinkText}>Annuler cette pesée</Text>
+          <Text style={styles.undoLinkText}>{fromHistory ? "Supprimer cette pesée" : "Annuler cette pesée"}</Text>
         </Pressable>
 
         <Pressable
           style={styles.closeButton}
           onPress={() => router.back()}
           accessibilityRole="button"
-          accessibilityLabel="Fermer et faire une nouvelle pesée"
+          accessibilityLabel={fromHistory ? "Fermer" : "Fermer et faire une nouvelle pesée"}
         >
-          <Text style={styles.closeButtonText}>Nouvelle pesée</Text>
+          <Text style={styles.closeButtonText}>{fromHistory ? "Fermer" : "Nouvelle pesée"}</Text>
         </Pressable>
       </ScrollView>
     </View>
