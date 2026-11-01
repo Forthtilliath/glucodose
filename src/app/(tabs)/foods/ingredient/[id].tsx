@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Pressable, StyleSheet, Text, TextInput } from "react-native";
+import { Pressable, StyleSheet, Text, TextInput, type TextInputInstance } from "react-native";
 import { eq } from "drizzle-orm";
 import { useLiveQuery } from "drizzle-orm/expo-sqlite";
 import { useLocalSearchParams, useRouter } from "expo-router";
@@ -44,7 +44,7 @@ export default function IngredientFormScreen() {
   const [photoUri, setPhotoUri] = useState<string | null>(null);
   const [isCiqualPickerVisible, setIsCiqualPickerVisible] = useState(false);
   const { isSaving, guard } = useSubmitGuard();
-  const carbsInputRef = useRef<TextInput>(null);
+  const carbsInputRef = useRef<TextInputInstance>(null);
 
   function applyCiqualFood(food: CiqualFood) {
     setName(food.name);

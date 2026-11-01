@@ -1,10 +1,20 @@
 import { Ionicons } from "@expo/vector-icons";
 import { Tabs, useRouter } from "expo-router";
-import { Pressable } from "react-native";
+import type { ComponentProps } from "react";
+import { type ColorValue, Pressable } from "react-native";
 import { useCloudBackupProblem } from "@forthtilliath/expo-backup-ui";
 
 import { backup } from "@/lib/backupManager";
 import { useColors } from "@/theme/colors";
+
+// La couleur passée par la barre d'onglets est une ColorValue, qui admet un
+// nombre ou null depuis React Native 0.88 : Ionicons n'accepte que la forme
+// texte, celle des couleurs du thème.
+function tabIcon(name: ComponentProps<typeof Ionicons>["name"]) {
+  return function TabIcon({ color, size }: { color: ColorValue; size: number }) {
+    return <Ionicons name={name} size={size} color={typeof color === "number" ? undefined : (color ?? undefined)} />;
+  };
+}
 
 export default function TabsLayout() {
   const colors = useColors();
@@ -50,7 +60,7 @@ export default function TabsLayout() {
         name="index"
         options={{
           title: "Peser",
-          tabBarIcon: ({ color, size }) => <Ionicons name="scale-outline" size={size} color={color} />,
+          tabBarIcon: tabIcon("scale-outline"),
         }}
       />
       <Tabs.Screen
@@ -59,7 +69,7 @@ export default function TabsLayout() {
         options={{
           title: "Aliments",
           headerShown: false,
-          tabBarIcon: ({ color, size }) => <Ionicons name="restaurant-outline" size={size} color={color} />,
+          tabBarIcon: tabIcon("restaurant-outline"),
         }}
       />
       <Tabs.Screen
@@ -67,7 +77,7 @@ export default function TabsLayout() {
         options={{
           title: "Récipients",
           headerShown: false,
-          tabBarIcon: ({ color, size }) => <Ionicons name="cube-outline" size={size} color={color} />,
+          tabBarIcon: tabIcon("cube-outline"),
         }}
       />
       <Tabs.Screen
@@ -76,7 +86,7 @@ export default function TabsLayout() {
         options={{
           title: "Historique",
           headerShown: false,
-          tabBarIcon: ({ color, size }) => <Ionicons name="time-outline" size={size} color={color} />,
+          tabBarIcon: tabIcon("time-outline"),
         }}
       />
       <Tabs.Screen
@@ -87,7 +97,7 @@ export default function TabsLayout() {
           headerShown: false,
           tabBarBadge: backupProblem ? "!" : undefined,
           tabBarBadgeStyle: { backgroundColor: colors.danger },
-          tabBarIcon: ({ color, size }) => <Ionicons name="settings-outline" size={size} color={color} />,
+          tabBarIcon: tabIcon("settings-outline"),
         }}
       />
     </Tabs>
