@@ -6,6 +6,8 @@ Le format suit [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/), et le p
 
 ## [Unreleased]
 
+## [1.18.0] - 2026-11-01
+
 ### Ajouté
 - Recettes : un ingrédient s'ajoute directement depuis la table Ciqual (il rejoint ta liste d'aliments à l'enregistrement), ou se saisit à la main juste pour la recette (« Légumes », 6 g de glucides pour 100 g), sans devoir le créer avant dans l'onglet Aliments.
 - Recettes : champ facultatif « Poids du plat cuit ». Les glucides pour 100 g d'un plat qui perd de l'eau à la cuisson (quiche, gratin) ou en absorbe (riz, pâtes) sont calculés sur le plat cuit.
@@ -267,7 +269,8 @@ Première version suivie. L'app était déjà fonctionnelle avant cette date (hi
 ### Corrigé
 - Validation des valeurs négatives (poids, glucides, glycémie), contraintes de clé étrangère SQLite activées, permission microphone superflue retirée.
 
-[Unreleased]: https://github.com/Forthtilliath/glucodose/compare/v1.17.0...HEAD
+[Unreleased]: https://github.com/Forthtilliath/glucodose/compare/v1.18.0...HEAD
+[1.18.0]: https://github.com/Forthtilliath/glucodose/releases/tag/v1.18.0
 [1.17.0]: https://github.com/Forthtilliath/glucodose/releases/tag/v1.17.0
 [1.16.1]: https://github.com/Forthtilliath/glucodose/releases/tag/v1.16.1
 [1.16.0]: https://github.com/Forthtilliath/glucodose/releases/tag/v1.16.0
