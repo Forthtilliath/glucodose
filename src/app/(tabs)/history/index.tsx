@@ -192,9 +192,11 @@ export default function HistoryScreen() {
             deleteText="Supprimer"
             styles={{ deleteAction: { backgroundColor: colors.danger } }}
           >
-            <View
+            <Pressable
               style={styles.row}
-              accessible
+              onPress={() => router.push({ pathname: "/weighing-result/[id]", params: { id: item.id, from: "history" } })}
+              accessibilityRole="button"
+              accessibilityHint="Ouvre le détail de la pesée"
               accessibilityLabel={
                 item.ratioLabelSnapshot
                   ? `${item.foodNameSnapshot}, le ${parseDbDate(item.weighedAt).toLocaleString("fr-FR")}, dose totale ${formatInsulinUnits(item.totalInsulinUnits)} unités`
@@ -218,7 +220,7 @@ export default function HistoryScreen() {
               {item.ratioLabelSnapshot && (
                 <Text style={styles.rowValue}>{formatInsulinUnits(item.totalInsulinUnits)} U</Text>
               )}
-            </View>
+            </Pressable>
           </SwipeableRow>
         )}
       />
