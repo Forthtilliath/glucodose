@@ -37,13 +37,18 @@ export class File {
     return content;
   }
 
-  write(content: string | Uint8Array, options?: { encoding?: string }) {
+  writeSync(content: string | Uint8Array, options?: { encoding?: string }) {
     files.set(
       this.uri,
       typeof content === "string"
         ? new Uint8Array(Buffer.from(content, options?.encoding === "base64" ? "base64" : "utf8"))
         : content
     );
+  }
+
+  // Asynchrone depuis le SDK 58, comme le vrai File.write().
+  async write(content: string | Uint8Array, options?: { encoding?: string }) {
+    this.writeSync(content, options);
   }
 
   async base64() {
