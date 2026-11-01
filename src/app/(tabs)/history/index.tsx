@@ -1,21 +1,19 @@
 import { useMemo, useState } from "react";
-import { ActivityIndicator, Alert, FlatList, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
+import { FlatList, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 import { desc } from "drizzle-orm";
 import { useLiveQuery } from "drizzle-orm/expo-sqlite";
 import { useRouter } from "expo-router";
-import * as Sharing from "expo-sharing";
 import { Ionicons } from "@expo/vector-icons";
 import { confirmDestructive } from "@forthtilliath/react-native-kit/utils/helpers/confirmDestructive";
 import { normalizeForSearch } from "@forthtilliath/ts-kit/string/normalizeForSearch";
 import { getPeriodStartMs, type PeriodFilter } from "@forthtilliath/ts-kit/date/getPeriodStartMs";
 import { SwipeableRow } from "@forthtilliath/react-native-kit/components/list/SwipeableRow";
 
+import { HistoryExportButtons } from "@/components/history/HistoryExportButtons";
 import { db } from "@/db/client";
 import { deleteWeighing } from "@/db/repository";
 import { weighings } from "@/db/schema";
 import { parseDbDate } from "@/lib/dbDate";
-import { exportHistoryToCsv } from "@/lib/historyCsv";
-import { exportHistoryToPdf } from "@/lib/historyPdf";
 import { formatCarbs, formatInsulinUnits, formatWeight } from "@/lib/insulin";
 import { type ThemeColors, useColors } from "@/theme/colors";
 
@@ -34,8 +32,6 @@ export default function HistoryScreen() {
 
   const [searchQuery, setSearchQuery] = useState("");
   const [periodFilter, setPeriodFilter] = useState<PeriodFilter>("all");
-  const [isExportingPdf, setIsExportingPdf] = useState(false);
-  const [isExportingCsv, setIsExportingCsv] = useState(false);
 
   const filteredData = useMemo(() => {
     if (!data) return [];
@@ -49,56 +45,11 @@ export default function HistoryScreen() {
   }, [data, periodFilter, searchQuery]);
 
   const hasAnyHistory = (data?.length ?? 0) > 0;
+  const periodLabel = PERIOD_OPTIONS.find((option) => option.value === periodFilter)?.label;
+  const pdfTitle = periodFilter === "all" ? "Historique des pesées" : `Historique des pesées — ${periodLabel}`;
 
   function handleDelete(id: number) {
     confirmDestructive("Supprimer cette pesée ?", () => deleteWeighing(id));
-  }
-
-  async function handleExportPdf() {
-    if (filteredData.length === 0) {
-      Alert.alert("Rien à exporter", "Aucune pesée ne correspond au filtre actuel.");
-      return;
-    }
-    setIsExportingPdf(true);
-    try {
-      const periodLabel = PERIOD_OPTIONS.find((option) => option.value === periodFilter)?.label;
-      const title =
-        periodFilter === "all" ? "Historique des pesées" : `Historique des pesées — ${periodLabel}`;
-      const uri = await exportHistoryToPdf(filteredData, title);
-
-      const canShare = await Sharing.isAvailableAsync();
-      if (canShare) {
-        await Sharing.shareAsync(uri, { mimeType: "application/pdf", dialogTitle: "Partager l'historique" });
-      } else {
-        Alert.alert("Export prêt", `Fichier créé : ${uri}`);
-      }
-    } catch {
-      Alert.alert("Échec de l'export", "Une erreur est survenue pendant la création du PDF.");
-    } finally {
-      setIsExportingPdf(false);
-    }
-  }
-
-  async function handleExportCsv() {
-    if (filteredData.length === 0) {
-      Alert.alert("Rien à exporter", "Aucune pesée ne correspond au filtre actuel.");
-      return;
-    }
-    setIsExportingCsv(true);
-    try {
-      const uri = await exportHistoryToCsv(filteredData);
-
-      const canShare = await Sharing.isAvailableAsync();
-      if (canShare) {
-        await Sharing.shareAsync(uri, { mimeType: "text/csv", dialogTitle: "Partager l'historique" });
-      } else {
-        Alert.alert("Export prêt", `Fichier créé : ${uri}`);
-      }
-    } catch {
-      Alert.alert("Échec de l'export", "Une erreur est survenue pendant la création du CSV.");
-    } finally {
-      setIsExportingCsv(false);
-    }
   }
 
   return (
@@ -140,40 +91,7 @@ export default function HistoryScreen() {
           <Text style={styles.statsLinkText}>Statistiques</Text>
           <Ionicons name="chevron-forward" size={16} color={colors.textMuted} />
         </Pressable>
-        <View style={styles.exportRow}>
-          <Pressable
-            style={[styles.exportButton, isExportingPdf && styles.exportButtonDisabled]}
-            onPress={handleExportPdf}
-            disabled={isExportingPdf}
-            accessibilityRole="button"
-            accessibilityLabel="Exporter l'historique affiché en PDF"
-          >
-            {isExportingPdf ? (
-              <ActivityIndicator color={colors.primary} />
-            ) : (
-              <>
-                <Ionicons name="document-text-outline" size={18} color={colors.primary} />
-                <Text style={styles.exportButtonText}>PDF</Text>
-              </>
-            )}
-          </Pressable>
-          <Pressable
-            style={[styles.exportButton, isExportingCsv && styles.exportButtonDisabled]}
-            onPress={handleExportCsv}
-            disabled={isExportingCsv}
-            accessibilityRole="button"
-            accessibilityLabel="Exporter l'historique affiché en CSV"
-          >
-            {isExportingCsv ? (
-              <ActivityIndicator color={colors.primary} />
-            ) : (
-              <>
-                <Ionicons name="grid-outline" size={18} color={colors.primary} />
-                <Text style={styles.exportButtonText}>CSV</Text>
-              </>
-            )}
-          </Pressable>
-        </View>
+        <HistoryExportButtons rows={filteredData} pdfTitle={pdfTitle} />
       </View>
 
       <FlatList
@@ -267,20 +185,6 @@ function createStyles(colors: ThemeColors) {
       paddingHorizontal: 12,
     },
     statsLinkText: { flex: 1, color: colors.text, fontSize: 14, fontWeight: "600" },
-    exportRow: { flexDirection: "row", gap: 8 },
-    exportButton: {
-      flex: 1,
-      flexDirection: "row",
-      alignItems: "center",
-      justifyContent: "center",
-      gap: 8,
-      borderWidth: 1,
-      borderColor: colors.primary,
-      borderRadius: 10,
-      paddingVertical: 10,
-    },
-    exportButtonDisabled: { opacity: 0.6 },
-    exportButtonText: { color: colors.primary, fontSize: 14, fontWeight: "600" },
     list: { padding: 16 },
     empty: { textAlign: "center", color: colors.textMuted, marginTop: 40 },
     row: {
