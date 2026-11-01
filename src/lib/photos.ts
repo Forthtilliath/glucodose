@@ -76,7 +76,7 @@ export async function compactExistingPhoto(file: File): Promise<void> {
   if ((file.size ?? 0) <= COMPACT_PHOTO_MAX_BYTES) return;
   try {
     const compressed = new File(await compressPhoto(file.uri));
-    file.write(await compressed.bytes());
+    await file.write(await compressed.bytes());
     deleteQuietly(compressed);
   } catch {
     // Best effort : la photo d'origine reste utilisable telle quelle.

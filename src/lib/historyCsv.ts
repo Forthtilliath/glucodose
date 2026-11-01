@@ -41,6 +41,6 @@ export async function exportHistoryToCsv(rows: HistoryCsvRow[]): Promise<string>
   const file = new File(Paths.cache, buildExportFileName("historique", "csv"));
   if (file.exists) file.delete();
   file.create();
-  file.write(csv);
+  await file.write(csv);
   return file.uri;
 }

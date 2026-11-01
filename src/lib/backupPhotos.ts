@@ -60,7 +60,7 @@ export function writeBackupPhotos<C extends PhotoRow, F extends PhotoRow>(
     for (const photo of photos) {
       const name = `restored-${photo.table}-${photo.id}-${stamp}.${EXTENSIONS[photo.mimeType]}`;
       const file = new File(getPhotosDirectory(photo.table), name);
-      file.write(photo.data, { encoding: "base64" });
+      file.writeSync(photo.data, { encoding: "base64" });
       writtenUris.push(file.uri);
       uriOf.set(`${photo.table}:${photo.id}`, file.uri);
     }
