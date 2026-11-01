@@ -1,22 +1,21 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Pressable, StyleSheet, Text, TextInput, View } from "react-native";
+import { Pressable, StyleSheet, Text, TextInput } from "react-native";
 import { eq } from "drizzle-orm";
 import { useLiveQuery } from "drizzle-orm/expo-sqlite";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { Ionicons } from "@expo/vector-icons";
 import { PhotoPicker } from "@forthtilliath/react-native-kit/components/picker/PhotoPicker";
 import { PickerModal, type PickerItem } from "@forthtilliath/react-native-kit/components/picker/PickerModal";
 import { rankByNameMatch } from "@forthtilliath/ts-kit/array/rankByNameMatch";
 import { useSubmitGuard } from "@forthtilliath/react-native-kit/hooks/useSubmitGuard";
-import { VoiceSearchButton } from "@forthtilliath/react-native-kit/components/picker/VoiceSearchButton";
 
 import { FormScrollView } from "@/components/FormScrollView";
+import { IngredientNameField } from "@/components/ingredient/IngredientNameField";
 import { db } from "@/db/client";
 import { createIngredient, updateIngredient } from "@/db/repository";
 import { foods } from "@/db/schema";
-import { ALL_CIQUAL_FOODS, CIQUAL_PICKER_ITEMS, searchCiqualFoods, type CiqualFood } from "@/lib/ciqual";
+import { ALL_CIQUAL_FOODS, CIQUAL_PICKER_ITEMS, type CiqualFood } from "@/lib/ciqual";
 import { confirmDeleteOrArchiveFood } from "@/lib/confirmDelete";
-import { formatCarbs, MAX_CARBS_PER_100G } from "@/lib/insulin";
+import { MAX_CARBS_PER_100G } from "@/lib/insulin";
 import { deletePhoto, saveFoodPhoto } from "@/lib/photos";
 import { pickerModalStyles } from "@/lib/pickerModalStyles";
 import { parseDecimal } from "@/lib/parseDecimal";
@@ -44,21 +43,8 @@ export default function IngredientFormScreen() {
   const [notes, setNotes] = useState("");
   const [photoUri, setPhotoUri] = useState<string | null>(null);
   const [isCiqualPickerVisible, setIsCiqualPickerVisible] = useState(false);
-  const [isSuggestionsOpen, setIsSuggestionsOpen] = useState(false);
   const { isSaving, guard } = useSubmitGuard();
-  const nameInputRef = useRef<TextInput>(null);
   const carbsInputRef = useRef<TextInput>(null);
-
-  // Suggestions compactes affichées automatiquement pendant la frappe. La
-  // modale plein écran (icône loupe) reste dispo pour chercher plus large.
-  // L'ouverture est pilotée par un état explicite (pas dérivée du focus natif
-  // du champ) : sinon, comme le nom sélectionné correspond forcément à un
-  // résultat Ciqual, le dropdown se re-remplissait avec la nouvelle valeur
-  // avant même que le blur ait le temps de s'appliquer, et restait ouvert.
-  const suggestions = useMemo(
-    () => (isNew && isSuggestionsOpen ? searchCiqualFoods(name) : []),
-    [isNew, isSuggestionsOpen, name]
-  );
 
   function applyCiqualFood(food: CiqualFood) {
     setName(food.name);
@@ -67,7 +53,6 @@ export default function IngredientFormScreen() {
   }
 
   function handleSelectSuggestion(food: CiqualFood) {
-    setIsSuggestionsOpen(false);
     applyCiqualFood(food);
     carbsInputRef.current?.focus();
   }
@@ -153,69 +138,13 @@ export default function IngredientFormScreen() {
       />
 
       <Text style={styles.label}>Nom</Text>
-      <View style={styles.nameFieldWrapper}>
-        <View style={styles.nameFieldRow}>
-          <TextInput
-            ref={nameInputRef}
-            style={[styles.input, styles.nameInput]}
-            placeholder="ex: Nutella"
-            placeholderTextColor={colors.textMuted}
-            value={name}
-            onChangeText={setName}
-            onFocus={() => setIsSuggestionsOpen(true)}
-            onBlur={() => setTimeout(() => setIsSuggestionsOpen(false), 150)}
-            accessibilityLabel="Nom de l'ingrédient"
-          />
-          {name.length > 0 && (
-            <Pressable
-              onPress={() => setName("")}
-              hitSlop={10}
-              accessibilityRole="button"
-              accessibilityLabel="Vider le nom"
-            >
-              <Ionicons name="close-circle" size={20} color={colors.textMuted} />
-            </Pressable>
-          )}
-          {isNew && (
-            <Pressable
-              onPress={() => setIsCiqualPickerVisible(true)}
-              hitSlop={10}
-              accessibilityRole="button"
-              accessibilityLabel="Chercher un aliment dans la base Ciqual"
-            >
-              <Ionicons name="search-outline" size={20} color={colors.primary} />
-            </Pressable>
-          )}
-          {isNew && (
-            <VoiceSearchButton
-              onResult={(transcript) => {
-                setName(transcript);
-                setIsSuggestionsOpen(true);
-              }}
-              accessibilityLabel="Dicter le nom de l'aliment à chercher dans Ciqual"
-              stopAccessibilityLabel="Arrêter la recherche vocale"
-              lang="fr-FR"
-              styles={{ iconColor: colors.primary, iconColorActive: colors.danger }}
-            />
-          )}
-        </View>
-        {suggestions.length > 0 && (
-          <View style={styles.suggestionsBox}>
-            {suggestions.map((food) => (
-              <Pressable
-                key={food.name}
-                style={styles.suggestionRow}
-                onPress={() => handleSelectSuggestion(food)}
-                accessibilityRole="button"
-                accessibilityLabel={`${food.name}, ${formatCarbs(food.carbsPer100g)} pour 100 grammes, source Ciqual`}
-              >
-                <Text style={styles.suggestionName}>{food.name}</Text>
-                <Text style={styles.suggestionCarbs}>{formatCarbs(food.carbsPer100g)} / 100 g</Text>
-              </Pressable>
-            ))}
-          </View>
-        )}
-      </View>
+      <IngredientNameField
+        name={name}
+        onChangeName={setName}
+        withCiqual={isNew}
+        onSelectCiqualFood={handleSelectSuggestion}
+        onOpenCiqualPicker={() => setIsCiqualPickerVisible(true)}
+      />
 
       <Text style={styles.label}>Glucides pour 100g (g)</Text>
       <TextInput
@@ -305,31 +234,6 @@ function createStyles(colors: ThemeColors) {
       color: colors.text,
     },
     notesInput: { minHeight: 80, textAlignVertical: "top" },
-    nameFieldWrapper: { position: "relative", zIndex: 10 },
-    nameFieldRow: { flexDirection: "row", alignItems: "center", gap: 10 },
-    nameInput: { flex: 1 },
-    suggestionsBox: {
-      position: "absolute",
-      top: "100%",
-      left: 0,
-      right: 0,
-      marginTop: 4,
-      backgroundColor: colors.surface,
-      borderWidth: 1,
-      borderColor: colors.border,
-      borderRadius: 10,
-      overflow: "hidden",
-      zIndex: 20,
-      elevation: 4,
-    },
-    suggestionRow: {
-      paddingHorizontal: 12,
-      paddingVertical: 10,
-      borderBottomWidth: StyleSheet.hairlineWidth,
-      borderBottomColor: colors.border,
-    },
-    suggestionName: { fontSize: 15, color: colors.text },
-    suggestionCarbs: { fontSize: 12, color: colors.textMuted, marginTop: 2 },
     errorText: { fontSize: 12, color: colors.danger, marginTop: 4 },
     saveButton: {
       backgroundColor: colors.primary,
