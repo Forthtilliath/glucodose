@@ -46,6 +46,12 @@ export default function HelpScreen() {
         boîtes pour ne plus avoir à faire la tare. Une recette combine plusieurs aliments avec leurs
         proportions, pratique pour un plat préparé à l’avance.
       </Text>
+      <Text style={styles.paragraph}>
+        Dans une recette, un ingrédient peut venir de ta liste, de la table Ciqual, ou être saisi à la main
+        juste pour cette recette (un nom et ses glucides pour 100 g). Si le plat change de poids à la
+        cuisson, pèse-le cuit et indique ce poids : les glucides pour 100 g seront calculés sur le plat
+        cuit.
+      </Text>
 
       <Text style={styles.sectionTitle}>Ratios et correction</Text>
       <Text style={styles.paragraph}>
@@ -56,7 +62,8 @@ export default function HelpScreen() {
 
       <Text style={styles.sectionTitle}>Historique et sauvegarde</Text>
       <Text style={styles.paragraph}>
-        L’onglet Historique garde une trace de tes pesées passées, exportable en PDF ou en tableur. Dans
+        L’onglet Historique garde une trace de tes pesées passées, exportable en PDF ou en tableur : touche
+        une pesée pour revoir sa fiche. Dans
         Réglages → Sauvegarde et restauration, tu peux relier ton Google Drive pour une sauvegarde
         automatique, ou exporter toutes tes données dans un fichier chiffré, à transférer vers un autre
         téléphone.
