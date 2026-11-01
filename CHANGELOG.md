@@ -17,6 +17,7 @@ Le format suit [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/), et le p
 - L'import d'une sauvegarde est vérifié plus strictement : longueur des textes, format des dates et nombre de lignes sont bornés. Un fichier modifié ou démesuré est refusé en entier, avec un message qui dit ce qui ne va pas.
 
 ### Corrigé
+- Le clavier ne cache plus le champ en cours de saisie : l'écran défile pour le garder visible juste au-dessus (pesée, aliments, recettes, récipients, réglages de dose et ratios, ingrédient saisi à la main).
 - Recettes : un ingrédient archivé s'affichait « Aliment introuvable » en modifiant la recette, et comptait pour 0 g de glucides si on la réenregistrait (glucides pour 100 g sous-estimés). Il garde maintenant son nom et sa valeur.
 - Un nombre tapé avec une virgule (« 1,8 ») était lu sans sa partie décimale (1) : glycémie, ratio, cible, facteur de sensibilité et poids sont maintenant lus correctement, avec une virgule comme avec un point.
 - L'exemple du champ « Glycémie actuelle » correspond à l'unité choisie (il affichait « 12 » même en g/L).
