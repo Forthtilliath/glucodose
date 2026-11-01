@@ -72,7 +72,8 @@ src/
 │   ├── (tabs)/settings/        Dose et correction, ratios, sauvegarde, apparence, mises à jour,
 │   │                           aide, contact, à propos, mentions légales
 │   └── weighing-result/[id].tsx  résultat après enregistrement (« Annuler cette pesée »)
-├── components/                 bandeau et notifieur de mise à jour, alerte de sauvegarde en échec
+├── components/                 bandeau et notifieur de mise à jour, alerte de sauvegarde en échec,
+│                               morceaux d'écrans (weigh/, ingredient/, recipe/, history/)
 ├── db/                         schéma Drizzle, connexion SQLite, écritures (repository.ts)
 ├── lib/                        calculs (insulin.ts), saisie (parseDecimal.ts), Ciqual, sauvegarde,
 │                               photos, exports PDF/CSV, statistiques, mises à jour, raccourcis
