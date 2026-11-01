@@ -1,9 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
-import { Pressable, ScrollView, StyleSheet, Text, TextInput } from "react-native";
+import { Pressable, StyleSheet, Text, TextInput } from "react-native";
 import { eq } from "drizzle-orm";
 import { useLiveQuery } from "drizzle-orm/expo-sqlite";
 import { useLocalSearchParams, useRouter } from "expo-router";
 
+import { FormScrollView } from "@/components/FormScrollView";
 import { db } from "@/db/client";
 import { createRatio, deleteRatio, updateRatio } from "@/db/repository";
 import { insulinRatios } from "@/db/schema";
@@ -61,7 +62,7 @@ export default function RatioFormScreen() {
   }
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.content}>
+    <FormScrollView style={styles.container} contentContainerStyle={styles.content}>
       <Text style={styles.label}>Nom</Text>
       <TextInput
         style={styles.input}
@@ -102,7 +103,7 @@ export default function RatioFormScreen() {
           <Text style={styles.deleteButtonText}>Supprimer ce ratio</Text>
         </Pressable>
       )}
-    </ScrollView>
+    </FormScrollView>
   );
 }
 

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
+import { Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 import { eq } from "drizzle-orm";
 import { useLiveQuery } from "drizzle-orm/expo-sqlite";
 import { useLocalSearchParams, useRouter } from "expo-router";
@@ -10,6 +10,7 @@ import { rankByNameMatch } from "@forthtilliath/ts-kit/array/rankByNameMatch";
 import { useSubmitGuard } from "@forthtilliath/react-native-kit/hooks/useSubmitGuard";
 import { VoiceSearchButton } from "@forthtilliath/react-native-kit/components/picker/VoiceSearchButton";
 
+import { FormScrollView } from "@/components/FormScrollView";
 import { db } from "@/db/client";
 import { createIngredient, updateIngredient } from "@/db/repository";
 import { foods } from "@/db/schema";
@@ -136,11 +137,7 @@ export default function IngredientFormScreen() {
   }
 
   return (
-    <ScrollView
-      style={styles.container}
-      contentContainerStyle={styles.content}
-      keyboardShouldPersistTaps="handled"
-    >
+    <FormScrollView style={styles.container} contentContainerStyle={styles.content}>
       <PhotoPicker
         photoUri={photoUri}
         onChange={setPhotoUri}
@@ -288,7 +285,7 @@ export default function IngredientFormScreen() {
         emptyMessage="Aucun aliment trouvé dans Ciqual."
         styles={pickerStyles}
       />
-    </ScrollView>
+    </FormScrollView>
   );
 }
 

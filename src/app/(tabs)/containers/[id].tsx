@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Pressable, ScrollView, StyleSheet, Text, TextInput } from "react-native";
+import { Pressable, StyleSheet, Text, TextInput } from "react-native";
 import { eq } from "drizzle-orm";
 import { useLiveQuery } from "drizzle-orm/expo-sqlite";
 import { useLocalSearchParams, useRouter } from "expo-router";
@@ -7,6 +7,7 @@ import { confirmDestructive } from "@forthtilliath/react-native-kit/utils/helper
 import { PhotoPicker } from "@forthtilliath/react-native-kit/components/picker/PhotoPicker";
 import { useSubmitGuard } from "@forthtilliath/react-native-kit/hooks/useSubmitGuard";
 
+import { FormScrollView } from "@/components/FormScrollView";
 import { db } from "@/db/client";
 import { deleteContainer, createContainer, updateContainer } from "@/db/repository";
 import { containers } from "@/db/schema";
@@ -89,7 +90,7 @@ export default function ContainerFormScreen() {
   }
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.content}>
+    <FormScrollView style={styles.container} contentContainerStyle={styles.content}>
       <PhotoPicker
         photoUri={photoUri}
         onChange={setPhotoUri}
@@ -157,7 +158,7 @@ export default function ContainerFormScreen() {
           <Text style={styles.deleteButtonText}>Supprimer le récipient</Text>
         </Pressable>
       )}
-    </ScrollView>
+    </FormScrollView>
   );
 }
 

@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
-import { Pressable, ScrollView, StyleSheet, Switch, Text, TextInput, View } from "react-native";
+import { Pressable, StyleSheet, Switch, Text, TextInput, View } from "react-native";
 import { eq } from "drizzle-orm";
 import { useLiveQuery } from "drizzle-orm/expo-sqlite";
 
+import { FormScrollView } from "@/components/FormScrollView";
 import { db } from "@/db/client";
 import { updateSettings } from "@/db/repository";
 import { settings } from "@/db/schema";
@@ -70,7 +71,7 @@ export default function DoseSettingsScreen() {
   }
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.content}>
+    <FormScrollView style={styles.container} contentContainerStyle={styles.content}>
       <Text style={styles.sectionTitle}>Calcul de dose</Text>
       <View style={styles.toggleRow}>
         <View style={styles.toggleRowText}>
@@ -156,7 +157,7 @@ export default function DoseSettingsScreen() {
       >
         <Text style={styles.saveButtonText}>Enregistrer les réglages</Text>
       </Pressable>
-    </ScrollView>
+    </FormScrollView>
   );
 }
 
