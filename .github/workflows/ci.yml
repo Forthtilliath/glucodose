@@ -9,6 +9,9 @@ on:
       - "docs/**"
       - "LICENSE"
 
+permissions:
+  contents: read
+
 concurrency:
   group: ci-${{ github.event.pull_request.number }}
   cancel-in-progress: true
@@ -19,11 +22,11 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v5
         with:
-          node-version: 20
+          node-version: 24
           cache: npm
 
       # --legacy-peer-deps : @expo/require-utils (via expo-quick-actions) exige
