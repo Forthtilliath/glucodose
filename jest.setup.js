@@ -7,6 +7,8 @@
 // natif de Reanimated/Worklets n'existe pas sous Jest, on charge leurs mocks officiels.
 jest.mock("react-native-worklets", () => require("react-native-worklets/src/mock"));
 jest.mock("react-native-reanimated", () => require("react-native-reanimated/mock"));
+// Idem pour react-native-keyboard-controller (FormScrollView, KeyboardProvider).
+jest.mock("react-native-keyboard-controller", () => require("react-native-keyboard-controller/jest"));
 
 const originalConsoleError = console.error;
 console.error = (...args) => {
