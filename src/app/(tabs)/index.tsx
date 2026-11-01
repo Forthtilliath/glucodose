@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
+import { Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 import { desc, eq } from "drizzle-orm";
 import { useLiveQuery } from "drizzle-orm/expo-sqlite";
 import { useLocalSearchParams, useRouter } from "expo-router";
@@ -8,6 +8,7 @@ import { PickerModal, type PickerItem } from "@forthtilliath/react-native-kit/co
 import { getMostRecentIds } from "@forthtilliath/ts-kit/array/getMostRecentIds";
 import { rankByNameMatch } from "@forthtilliath/ts-kit/array/rankByNameMatch";
 
+import { FormScrollView } from "@/components/FormScrollView";
 import { db } from "@/db/client";
 import { createIngredient, recordWeighing } from "@/db/repository";
 import { containers, foods, insulinRatios, settings, weighings } from "@/db/schema";
@@ -237,7 +238,7 @@ export default function WeighScreen() {
   }
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.content}>
+    <FormScrollView style={styles.container} contentContainerStyle={styles.content}>
       <Text style={styles.sectionTitle}>1. Tare</Text>
       <Pressable
         style={styles.selector}
@@ -471,7 +472,7 @@ export default function WeighScreen() {
         emptyMessage="Aucun ratio enregistré."
         styles={pickerStyles}
       />
-    </ScrollView>
+    </FormScrollView>
   );
 }
 

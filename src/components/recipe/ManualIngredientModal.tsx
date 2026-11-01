@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
-import { KeyboardAvoidingView, Modal, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
+import { Modal, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
+import { KeyboardAvoidingView } from "react-native-keyboard-controller";
 
 import { MAX_CARBS_PER_100G } from "@/lib/insulin";
 import { parseDecimal } from "@/lib/parseDecimal";
@@ -36,7 +37,9 @@ export function ManualIngredientModal({ visible, onAdd, onClose }: Props) {
 
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={close}>
-      <KeyboardAvoidingView behavior="height" style={styles.backdrop}>
+      {/* Version keyboard-controller : celle de react-native ne voit pas le
+          clavier en edge-to-edge. La carte se recentre au-dessus du clavier. */}
+      <KeyboardAvoidingView behavior="padding" style={styles.backdrop}>
         <View style={styles.card}>
           <Text style={styles.title} accessibilityRole="header">
             Ingrédient pour cette recette

@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import { useEffect, useMemo } from "react";
 import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
+import { KeyboardProvider } from "react-native-keyboard-controller";
 import { DarkTheme, DefaultTheme, Stack, ThemeProvider as RouterThemeProvider, useRouter } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import * as QuickActions from "expo-quick-actions";
@@ -119,11 +120,16 @@ export default function RootLayout() {
     );
   }
 
+  // KeyboardProvider : en edge-to-edge, Android ne redimensionne plus l'écran
+  // à l'ouverture du clavier ; il fournit la hauteur du clavier aux
+  // KeyboardAwareScrollView des formulaires, qui remontent le champ actif.
   return (
     <GestureHandlerRootView style={styles.flex}>
-      <ThemePreferenceRunner>
-        <AppShell />
-      </ThemePreferenceRunner>
+      <KeyboardProvider>
+        <ThemePreferenceRunner>
+          <AppShell />
+        </ThemePreferenceRunner>
+      </KeyboardProvider>
     </GestureHandlerRootView>
   );
 }

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Pressable, ScrollView, StyleSheet, Text, TextInput } from "react-native";
+import { Pressable, StyleSheet, Text, TextInput } from "react-native";
 import { eq, ne } from "drizzle-orm";
 import { useLiveQuery } from "drizzle-orm/expo-sqlite";
 import { useLocalSearchParams, useRouter } from "expo-router";
@@ -7,6 +7,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { PhotoPicker } from "@forthtilliath/react-native-kit/components/picker/PhotoPicker";
 import { useSubmitGuard } from "@forthtilliath/react-native-kit/hooks/useSubmitGuard";
 
+import { FormScrollView } from "@/components/FormScrollView";
 import { RecipeComponentRow } from "@/components/recipe/RecipeComponentRow";
 import { type PickedIngredient, RecipeIngredientPickers } from "@/components/recipe/RecipeIngredientPickers";
 import { RecipeTotalsBox } from "@/components/recipe/RecipeTotalsBox";
@@ -159,7 +160,7 @@ export default function RecipeFormScreen() {
   }
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.content}>
+    <FormScrollView style={styles.container} contentContainerStyle={styles.content}>
       <PhotoPicker
         photoUri={photoUri}
         onChange={setPhotoUri}
@@ -251,7 +252,7 @@ export default function RecipeFormScreen() {
         foods={allFoods ?? []}
         onPick={addRow}
       />
-    </ScrollView>
+    </FormScrollView>
   );
 }
 
