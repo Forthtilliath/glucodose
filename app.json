@@ -7,9 +7,6 @@
     "icon": "./assets/images/icon.png",
     "scheme": "glucodose",
     "userInterfaceStyle": "automatic",
-    "ios": {
-      "bundleIdentifier": "com.forth.glucodose"
-    },
     "android": {
       "adaptiveIcon": {
         "backgroundColor": "#208AEF",
