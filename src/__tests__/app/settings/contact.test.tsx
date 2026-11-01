@@ -10,7 +10,7 @@ import ContactScreen from "@/app/(tabs)/settings/contact";
 
 describe("ContactScreen", () => {
   it("ouvre Buy Me a Coffee au tap sur \"M'offrir un café\"", async () => {
-    const openURLSpy = jest.spyOn(Linking, "openURL").mockResolvedValue(true);
+    const openURLSpy = jest.spyOn(Linking, "openURL").mockResolvedValue(undefined);
 
     const screen = await render(<ContactScreen />);
     await fireEvent.press(screen.getByLabelText("M'offrir un café sur Buy Me a Coffee"));

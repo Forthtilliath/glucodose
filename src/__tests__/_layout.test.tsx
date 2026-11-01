@@ -1,5 +1,4 @@
-import renderer, { act } from "react-test-renderer";
-import { GestureHandlerRootView } from "react-native-gesture-handler";
+import { render } from "@testing-library/react-native";
 
 import RootLayout from "../app/_layout";
 
@@ -17,6 +16,15 @@ import RootLayout from "../app/_layout";
 // à la racine, sans laquelle le swipe-to-delete des listes ne fonctionne pas
 // du tout (régression déjà survenue une fois : le wrapper avait été considéré
 // comme ajouté sans jamais l'être réellement).
+// Le rendu de test ne montre que les vues natives, pas les composants : le
+// GestureHandlerRootView est remplacé par une vue repérable par son testID.
+jest.mock("react-native-gesture-handler", () => {
+  const { View } = jest.requireActual("react-native");
+  return {
+    ...jest.requireActual("react-native-gesture-handler"),
+    GestureHandlerRootView: (props: object) => <View testID="gesture-handler-root" {...props} />,
+  };
+});
 jest.mock("@/db/client", () => ({
   db: { select: () => ({ from: () => ({ where: () => ({}) }) }) },
 }));
@@ -60,13 +68,10 @@ jest.mock("expo-router", () => ({
 
 describe("RootLayout", () => {
   it("est enveloppé dans un GestureHandlerRootView, requis pour le swipe-to-delete", async () => {
-    let tree: renderer.ReactTestRenderer | undefined;
-    // act asynchrone : laisse la vérification de mise à jour (UpdateNotifier)
+    // render asynchrone : laisse la vérification de mise à jour (UpdateNotifier)
     // se terminer avant la fin du test, sinon son re-rendu arrive après le
     // démontage de l'environnement Jest.
-    await act(async () => {
-      tree = renderer.create(<RootLayout />);
-    });
-    expect(() => tree?.root.findByType(GestureHandlerRootView)).not.toThrow();
+    const screen = await render(<RootLayout />);
+    expect(screen.getByTestId("gesture-handler-root")).toBeTruthy();
   });
 });
