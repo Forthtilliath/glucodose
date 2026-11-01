@@ -72,7 +72,8 @@
           "propertyPrefix": "GLUCODOSE"
         }
       ],
-      "./plugins/withAndroidAbis"
+      "./plugins/withAndroidAbis",
+      "./plugins/withWindowsNativeBuild"
     ],
     "experiments": {
       "reactCompiler": true
