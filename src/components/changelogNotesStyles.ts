@@ -11,6 +11,9 @@ export function changelogNotesStyles(colors: ThemeColors): ChangelogNotesStyles 
     bullet: { color: colors.textMuted },
     itemText: { color: colors.textMuted },
     text: { color: colors.textMuted },
+    quote: { borderLeftColor: colors.border },
+    quoteText: { color: colors.textMuted },
     bold: { color: colors.text },
+    code: { color: colors.text, backgroundColor: colors.border },
   };
 }
