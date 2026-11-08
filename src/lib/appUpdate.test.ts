@@ -4,7 +4,7 @@ import {
   fetchReleaseHistory as fetchReleaseHistoryBase,
 } from "@forthtilliath/expo-release-updates/githubReleases";
 
-import { downloadAndInstallApk, fetchLatestRelease, fetchReleaseHistory, simplifyReleaseNotes } from "./appUpdate";
+import { downloadAndInstallApk, fetchLatestRelease, fetchReleaseHistory } from "./appUpdate";
 
 jest.mock("@forthtilliath/expo-release-updates/githubReleases", () => ({
   ...jest.requireActual("@forthtilliath/expo-release-updates/githubReleases"),
@@ -16,28 +16,6 @@ jest.mock("@forthtilliath/expo-release-updates/downloadAndInstallApk", () => ({
 }));
 
 const REPO = { owner: "Forthtilliath", repo: "glucodose" };
-
-describe("simplifyReleaseNotes", () => {
-  it("retire citations, italique et code, mais garde titres, puces et gras", () => {
-    const notes = [
-      "> **Mise à jour manuelle obligatoire.** Android refuse l'installation.",
-      "> 1. Dans l'app : *Réglages → Sauvegarde*.",
-      "> 3. Installe `GlucoDose-1.15.0.apk` ci-dessous.",
-      "### Sécurité",
-      "- Un **point** et *un autre* : 2 * 3 = 6",
-    ].join("\n");
-
-    expect(simplifyReleaseNotes(notes)).toBe(
-      [
-        "**Mise à jour manuelle obligatoire.** Android refuse l'installation.",
-        "1. Dans l'app : Réglages → Sauvegarde.",
-        "3. Installe GlucoDose-1.15.0.apk ci-dessous.",
-        "### Sécurité",
-        "- Un **point** et un autre : 2 * 3 = 6",
-      ].join("\n")
-    );
-  });
-});
 
 describe("appUpdate", () => {
   beforeEach(() => {
@@ -53,12 +31,13 @@ describe("appUpdate", () => {
     expect(fetchLatestReleaseBase).toHaveBeenCalledWith({ ...REPO, requireVerifiedApk: true });
   });
 
-  it("fetchLatestRelease et fetchReleaseHistory simplifient les notes", async () => {
+  it("fetchLatestRelease et fetchReleaseHistory transmettent les notes telles quelles", async () => {
+    // ChangelogNotes (expo-release-updates-ui 0.6) rend lui-même citations, italique et code.
     (fetchLatestReleaseBase as jest.Mock).mockResolvedValueOnce({ version: "2.0.0", notes: "> *Note*", apkUrl: "" });
     (fetchReleaseHistoryBase as jest.Mock).mockResolvedValueOnce([{ version: "2.0.0", notes: "- `code`" }]);
 
-    expect((await fetchLatestRelease())?.notes).toBe("Note");
-    expect((await fetchReleaseHistory())[0].notes).toBe("- code");
+    expect((await fetchLatestRelease())?.notes).toBe("> *Note*");
+    expect((await fetchReleaseHistory())[0].notes).toBe("- `code`");
   });
 
   it("fetchReleaseHistory interroge le dépôt glucodose avec une limite par défaut de 10", async () => {

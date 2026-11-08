@@ -12,12 +12,10 @@ type Props = {
   onDismiss: () => void;
 };
 
-// Bannière "nouvelle version disponible". Remplace UpdateAvailableBanner du
-// package, qui a deux défauts ici : ses notes ne défilent pas (la carte,
-// positionnée en absolu, déborde de l'écran dès que les notes sont longues)
-// et seules `heading`/`text` de ChangelogNotes y étaient thémées — puces,
-// éléments de liste et gras gardaient leurs couleurs claires par défaut,
-// illisibles en mode sombre. Toutes les couleurs viennent donc du thème.
+// Bannière "nouvelle version disponible", à la place d'UpdateAvailableBanner
+// du package : hauteur des notes relative à l'écran (45 %), barre de défilement
+// toujours visible, libellés « Installer » / « Ignorer », et toutes les
+// couleurs du thème (illisibles en mode sombre avec les valeurs par défaut).
 export function UpdateBanner({ version, notes, onInstall, onDismiss }: Props) {
   const colors = useColors();
   const styles = useMemo(() => createStyles(colors), [colors]);
